@@ -2,8 +2,8 @@
   "schema_version": 1,
   "project": "draft-reviewer",
   "project_root": "projects/DraftReviewr",
-  "status": "onboarded",
-  "active_phase": null,
+  "status": "hardening-in-progress",
+  "active_phase": "1-mvp-hardening",
   "modules": [
     {
       "name": "app-shell",
@@ -81,6 +81,11 @@
       "phase": "0-onboarding",
       "status": "completed",
       "summary": "Mapped the existing DraftReviewr app into harness module boundaries, public contracts, integration points, and baseline handoff."
+    },
+    {
+      "phase": "1-mvp-hardening",
+      "status": "pending",
+      "summary": "Planned MVP hardening phase covering default data loading, failed review state handling, product/security copy alignment, file-support truthfulness, and verification tooling."
     }
   ],
   "current_contract_summary": {
@@ -90,5 +95,18 @@
     "ai_integration": "Browser fetch calls to OpenAI /v1/responses with model gpt-5 for review generation; legacy assistant helper functions also exist in lib/openai-client.ts.",
     "import_export": "Settings export includes document types and review items; full backup includes API key, user id, documents, and review results."
   },
-  "updated_at": "2026-05-16T00:00:00+09:00"
+  "updated_at": "2026-05-16T00:00:00+09:00",
+  "next_phase": {
+    "dir": "1-mvp-hardening",
+    "goal": "Make the existing MVP safer and more reliable before adding new product capabilities.",
+    "step_order": [
+      "hardening-contracts",
+      "default-data-loading",
+      "review-failure-state",
+      "product-contract-alignment",
+      "verification-tooling",
+      "runtime-smoke-and-phase-close"
+    ],
+    "approval_required_before_execution": true
+  }
 }

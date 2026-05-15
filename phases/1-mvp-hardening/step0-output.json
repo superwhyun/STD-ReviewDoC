@@ -1,0 +1,37 @@
+{
+    "schema_version": 1,
+    "step": 0,
+    "name": "hardening-contracts",
+    "status": "completed",
+    "summary": "Phase 1 module-map contract review and hardening scope confirmation.",
+    "completed_work": [
+        "Verified module-map covers all 5 known issues from Phase 0 baseline",
+        "Checked owned_paths conflicts: 2 sequential overlaps found (lib/storage/local-storage.ts: steps 1→2, components/documents/document-upload-section.tsx: steps 2→3), both resolved via contract-chain (step 2 reads step1-output, step 3 reads step2-output)",
+        "Updated project-manifest.json active_phase status to 'hardening-in-progress'",
+        "Ran validate_phase.py — passed",
+        "Ran placeholder marker check — no matches",
+        "Confirmed no implementation files were modified"
+    ],
+    "files_changed": [
+        "projects/DraftReviewr/phases/project-manifest.json"
+    ],
+    "decisions": [
+        "Owned_paths overlaps between steps 1-2 and 2-3 are accepted as sequential dependencies. Each downstream step reads the upstream step's output as contract before modifying shared files.",
+        "Issue #1 (claude.md stale) is a documentation artifact not blocking MVP hardening; deferred to backlog."
+    ],
+    "verification": [
+        "python3 scripts/validate_phase.py 1-mvp-hardening --root projects/DraftReviewr → passed",
+        "rg 'replace[-]with' projects/DraftReviewr/phases/1-mvp-hardening → no matches",
+        "git status — only phases/ files modified; app/, components/, lib/ untouched"
+    ],
+    "known_issues": [
+        "Steps 1 and 2 both modify lib/storage/local-storage.ts — step 2 must read step1-output.json before applying changes",
+        "Steps 2 and 3 both modify components/documents/document-upload-section.tsx — step 3 must read step2-output.json before applying changes"
+    ],
+    "next_actions": [
+        "Run Step 1 (default-data-loading): fix initializeDefaultData to serve from public/default-data.json"
+    ],
+    "blockers": [],
+    "resume_hint": "Step 0 complete. Phase 1 contracts confirmed. Proceed to step 1: default-data-loading.",
+    "written_at": "2026-05-16T01:04:00+09:00"
+}

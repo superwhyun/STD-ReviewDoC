@@ -1,0 +1,42 @@
+{
+  "schema_version": 2,
+  "project": "draft-reviewer",
+  "phase": "mvp-hardening",
+  "execution_policy": {
+    "context_mode": "contract-first",
+    "blocking_fix_priority": true,
+    "append_only_steps": true
+  },
+  "steps": [
+    {
+      "step": 0,
+      "name": "hardening-contracts",
+      "status": "completed"
+    },
+    {
+      "step": 1,
+      "name": "default-data-loading",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "review-failure-state",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "product-contract-alignment",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "verification-tooling",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "runtime-smoke-and-phase-close",
+      "status": "pending"
+    }
+  ]
+}
