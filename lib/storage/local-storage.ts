@@ -402,7 +402,7 @@ export async function initializeDefaultData() {
 
   try {
     // Load default data from JSON file
-    const response = await fetch("/lib/storage/default-data.json")
+    const response = await fetch("/default-data.json")
     if (!response.ok) {
       console.error("Failed to load default data")
       return

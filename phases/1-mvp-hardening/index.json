@@ -11,12 +11,14 @@
     {
       "step": 0,
       "name": "hardening-contracts",
-      "status": "completed"
+      "status": "completed",
+      "summary": "Phase scope confirmed; all known issues mapped; owned_paths conflicts resolved via contract-chain."
     },
     {
       "step": 1,
       "name": "default-data-loading",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Fixed initializeDefaultData fetch path from /lib/storage/default-data.json to /default-data.json; copied default data to public/."
     },
     {
       "step": 2,

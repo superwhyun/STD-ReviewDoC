@@ -1,0 +1,39 @@
+{
+    "schema_version": 1,
+    "step": 1,
+    "name": "default-data-loading",
+    "status": "completed",
+    "summary": "Fixed initializeDefaultData fetch path from /lib/storage/default-data.json to /default-data.json, and copied default data to public/ so Next.js serves it as a static asset.",
+    "completed_work": [
+        "Analyzed the root cause: Next.js only serves files under public/ as static assets. The fetch('/lib/storage/default-data.json') call would fail in browser because lib/ is not a public route.",
+        "Copied lib/storage/default-data.json to public/default-data.json preserving exact JSON shape.",
+        "Changed fetch path in initializeDefaultData() from '/lib/storage/default-data.json' to '/default-data.json'.",
+        "Existing guard logic (checks documentTypeStorage and commonReviewItemStorage length > 0) unchanged — prevents overwriting existing user data.",
+        "Fallback error handling (console.error + early return) unchanged — empty state avoided on fetch failure."
+    ],
+    "files_changed": [
+        "projects/DraftReviewr/lib/storage/local-storage.ts",
+        "projects/DraftReviewr/public/default-data.json"
+    ],
+    "decisions": [
+        "Kept default-data.json in lib/storage/ as well (not deleted) to avoid breaking any other potential references. Only the public/ copy is the active serving path now.",
+        "Did not inline the JSON data into the TypeScript source — kept the fetch approach for consistency with the existing data-loading pattern."
+    ],
+    "contract_surface_for_step2": {
+        "initializeDefaultData": "Fetches /default-data.json. Guards against re-initialization if data already exists in localStorage. Exported from lib/storage/local-storage.ts.",
+        "documentTypeStorage": "CRUD for DocumentType[] in localStorage key draftreviewr:document-types. getAll() returns []. Used by app/page.tsx and admin page.",
+        "commonReviewItemStorage": "CRUD for CommonReviewItem[] in localStorage key draftreviewr:common-review-items. getAll() returns []. Used by admin pages.",
+        "default-data shape": "public/default-data.json contains document_types (1 item: 표준초안), common_review_items (3 items: 문서 형식 검토, 맞춤법 및 문법, 용어 일관성), review_items (empty)."
+    },
+    "verification": [
+        "python3 scripts/validate_phase.py 1-mvp-hardening --root projects/DraftReviewr → passed",
+        "npm run build --prefix projects/DraftReviewr → passed (Next.js 15.2.4, all routes static)"
+    ],
+    "known_issues": [],
+    "next_actions": [
+        "Run Step 2 (review-failure-state): add failed status update in DocumentUploadSection when OpenAI processing throws."
+    ],
+    "blockers": [],
+    "resume_hint": "Step 1 complete. Default data now served from public/default-data.json. Proceed to step 2: review-failure-state.",
+    "written_at": "2026-05-16T01:07:00+09:00"
+}
