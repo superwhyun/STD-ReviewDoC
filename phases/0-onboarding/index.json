@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "project": "draft-reviewer",
+  "phase": "onboarding",
+  "execution_policy": {
+    "context_mode": "contract-first",
+    "blocking_fix_priority": true,
+    "append_only_steps": true
+  },
+  "steps": [
+    {
+      "step": 0,
+      "name": "project-state-map",
+      "status": "completed",
+      "summary": "Mapped the existing DraftReviewr app into module boundaries, shared contracts, integration points, project manifest, and baseline handoff.",
+      "completed_at": "2026-05-16T00:00:00+09:00"
+    }
+  ]
+}

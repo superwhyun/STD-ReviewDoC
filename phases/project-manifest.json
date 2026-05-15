@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "project": "draft-reviewer",
+  "project_root": "projects/DraftReviewr",
+  "status": "onboarded",
+  "active_phase": null,
+  "modules": [
+    {
+      "name": "app-shell",
+      "summary": "Next.js App Router root layout, global styles, Korean metadata, Vercel analytics, and app-wide toaster."
+    },
+    {
+      "name": "document-review",
+      "summary": "Home route for document type selection, file upload, OpenAI review execution, local review result persistence, document history, and markdown result viewing."
+    },
+    {
+      "name": "admin-config",
+      "summary": "Admin route for document types, common review items, and type-specific review item management."
+    },
+    {
+      "name": "settings-api-key",
+      "summary": "Settings route for storing, masking, replacing, and deleting the browser-held OpenAI API key."
+    },
+    {
+      "name": "client-storage",
+      "summary": "localStorage repositories for document types, review items, common items, documents, review results, API key, user id, defaults, import, and export."
+    },
+    {
+      "name": "openai-review-client",
+      "summary": "Browser-side OpenAI integration using file text extraction, GPT review calls, response parsing, and API key validation helpers."
+    },
+    {
+      "name": "export-import",
+      "summary": "JSON settings export/import and full backup/restore UI backed by localStorage serialization."
+    },
+    {
+      "name": "ui-foundation",
+      "summary": "shadcn/Radix UI component layer, hooks, and shared utility functions."
+    }
+  ],
+  "routes": [
+    {
+      "path": "/",
+      "source": "app/page.tsx",
+      "summary": "Document upload, review initiation, and review history surface."
+    },
+    {
+      "path": "/admin",
+      "source": "app/admin/page.tsx",
+      "summary": "Document type and review item administration surface."
+    },
+    {
+      "path": "/settings",
+      "source": "app/settings/page.tsx",
+      "summary": "OpenAI API key and client-side settings surface."
+    }
+  ],
+  "shared_contracts": [
+    "README.md",
+    "package.json",
+    "lib/types.ts",
+    "lib/storage/default-data.json",
+    "lib/storage/local-storage.ts",
+    "lib/openai-client.ts",
+    "components.json"
+  ],
+  "integration_points": [
+    "app/layout.tsx",
+    "lib/openai-client.ts",
+    "lib/storage/local-storage.ts",
+    "components/export-import-dialog.tsx"
+  ],
+  "known_issues": [
+    "claude.md appears to describe an older Supabase/API-route architecture and must not be treated as authoritative without verification.",
+    "README and UI copy mention GPT-4o and encrypted API-key storage, but the current implementation uses model gpt-5 and stores the API key directly in localStorage.",
+    "initializeDefaultData fetches /lib/storage/default-data.json; verify first-run default data loading in a browser because Next normally serves static files from public/.",
+    "There is no dedicated test script in package.json; current AC relies on phase validation and Next production build."
+  ],
+  "history": [
+    {
+      "phase": "0-onboarding",
+      "status": "completed",
+      "summary": "Mapped the existing DraftReviewr app into harness module boundaries, public contracts, integration points, and baseline handoff."
+    }
+  ],
+  "current_contract_summary": {
+    "runtime": "Next.js 15 App Router with React 19 and TypeScript, implemented as client-heavy pages without project-local API routes.",
+    "data_model": "DocumentType, ReviewItem, CommonReviewItem, UserApiKey, Document, ReviewResult, and ApiKeyInfo in lib/types.ts.",
+    "storage": "Browser localStorage keys under draftreviewr:* for document types, review items, common review items, documents, review results, API key, and user id.",
+    "ai_integration": "Browser fetch calls to OpenAI /v1/responses with model gpt-5 for review generation; legacy assistant helper functions also exist in lib/openai-client.ts.",
+    "import_export": "Settings export includes document types and review items; full backup includes API key, user id, documents, and review results."
+  },
+  "updated_at": "2026-05-16T00:00:00+09:00"
+}

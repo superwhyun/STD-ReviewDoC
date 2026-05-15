@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "phase": "0-onboarding",
+  "baseline": "phases/baselines/0-onboarding.json",
+  "policy": {
+    "context_mode": "contract-first",
+    "frozen_after_completion": true,
+    "default_read_order": [
+      "baseline",
+      "module-map",
+      "public-contracts",
+      "current-step",
+      "targeted-implementation-only-if-needed"
+    ]
+  },
+  "modules": [
+    {
+      "name": "app-shell",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "app/layout.tsx",
+        "app/globals.css",
+        "styles/globals.css",
+        "components/theme-provider.tsx"
+      ],
+      "contracts": [
+        "app/layout.tsx",
+        "package.json"
+      ],
+      "dependencies": [],
+      "status": "mapped"
+    },
+    {
+      "name": "document-review",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "app/page.tsx",
+        "components/documents/document-upload-section.tsx",
+        "components/documents/documents-list.tsx",
+        "components/documents/document-review-dialog.tsx"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts",
+        "lib/openai-client.ts"
+      ],
+      "dependencies": [
+        "client-storage",
+        "openai-review-client",
+        "ui-foundation"
+      ],
+      "status": "mapped"
+    },
+    {
+      "name": "admin-config",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "app/admin/page.tsx",
+        "components/admin/common-review-item-card.tsx",
+        "components/admin/common-review-item-dialog.tsx",
+        "components/admin/common-review-items-list.tsx",
+        "components/admin/document-type-card.tsx",
+        "components/admin/document-type-dialog.tsx",
+        "components/admin/document-types-list.tsx",
+        "components/admin/review-item-card.tsx",
+        "components/admin/review-item-form.tsx",
+        "components/admin/review-items-dialog.tsx"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts",
+        "lib/storage/default-data.json"
+      ],
+      "dependencies": [
+        "client-storage",
+        "export-import",
+        "ui-foundation"
+      ],
+      "status": "mapped"
+    },
+    {
+      "name": "settings-api-key",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "app/settings/page.tsx",
+        "components/settings/api-key-settings.tsx"
+      ],
+      "contracts": [
+        "lib/storage/local-storage.ts",
+        "lib/openai-client.ts"
+      ],
+      "dependencies": [
+        "client-storage",
+        "ui-foundation"
+      ],
+      "status": "mapped"
+    },
+    {
+      "name": "client-storage",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "lib/storage/local-storage.ts",
+        "lib/storage/default-data.json",
+        "lib/types.ts"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/default-data.json",
+        "lib/storage/local-storage.ts"
+      ],
+      "dependencies": [],
+      "status": "mapped"
+    },
+    {
+      "name": "openai-review-client",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "lib/openai-client.ts"
+      ],
+      "contracts": [
+        "lib/openai-client.ts",
+        "lib/storage/local-storage.ts"
+      ],
+      "dependencies": [
+        "client-storage"
+      ],
+      "status": "mapped"
+    },
+    {
+      "name": "export-import",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "components/export-import-dialog.tsx",
+        "lib/storage/local-storage.ts"
+      ],
+      "contracts": [
+        "lib/storage/local-storage.ts",
+        "lib/types.ts"
+      ],
+      "dependencies": [
+        "client-storage",
+        "ui-foundation"
+      ],
+      "status": "mapped"
+    },
+    {
+      "name": "ui-foundation",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "components/ui/**",
+        "hooks/use-mobile.ts",
+        "hooks/use-toast.ts",
+        "lib/utils.ts",
+        "components.json"
+      ],
+      "contracts": [
+        "components.json",
+        "lib/utils.ts"
+      ],
+      "dependencies": [],
+      "status": "mapped"
+    },
+    {
+      "name": "harness-state",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "phases/index.json",
+        "phases/project-manifest.json",
+        "phases/0-onboarding/index.json",
+        "phases/0-onboarding/module-map.json",
+        "phases/0-onboarding/step0.md",
+        "phases/0-onboarding/step0-output.json",
+        "phases/baselines/0-onboarding.json"
+      ],
+      "contracts": [
+        "phases/index.json",
+        "phases/0-onboarding/index.json",
+        "phases/0-onboarding/step0.md"
+      ],
+      "dependencies": [],
+      "status": "mapped"
+    }
+  ],
+  "shared_contracts": [
+    "README.md",
+    "package.json",
+    "lib/types.ts",
+    "lib/storage/default-data.json",
+    "lib/storage/local-storage.ts",
+    "lib/openai-client.ts"
+  ],
+  "integration_points": [
+    "app/layout.tsx",
+    "app/page.tsx",
+    "app/admin/page.tsx",
+    "app/settings/page.tsx",
+    "lib/openai-client.ts",
+    "lib/storage/local-storage.ts",
+    "components/export-import-dialog.tsx"
+  ],
+  "deferred_backlog": [
+    {
+      "type": "contract-drift",
+      "summary": "README and settings copy reference GPT-4o or encrypted API-key storage while lib/openai-client.ts uses model gpt-5 and localStorage stores the API key as plain text.",
+      "suggested_phase": "docs-and-security-alignment"
+    },
+    {
+      "type": "runtime-risk",
+      "summary": "initializeDefaultData fetches /lib/storage/default-data.json, but Next static assets are normally served from public/; verify whether first-run defaults load in the browser.",
+      "suggested_phase": "client-runtime-hardening"
+    },
+    {
+      "type": "code-quality",
+      "summary": "local-storage helpers mutate arrays in place before persisting; future feature work should prefer immutable updates to match project coding policy.",
+      "suggested_phase": "client-storage-hardening"
+    }
+  ],
+  "completed_at": "2026-05-16T00:00:00+09:00"
+}

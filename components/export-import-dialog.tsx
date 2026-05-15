@@ -1,0 +1,211 @@
+"use client"
+
+import { useState } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Download, Upload, Package, Database, AlertCircle } from "lucide-react"
+import { exportImportStorage } from "@/lib/storage/local-storage"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+
+export function ExportImportDialog() {
+  const [open, setOpen] = useState(false)
+  const [importData, setImportData] = useState("")
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+
+  const handleExportSettings = () => {
+    const json = exportImportStorage.exportSettings()
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `draftreviewr-settings-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    setSuccess("설정이 성공적으로 내보내졌습니다!")
+  }
+
+  const handleExportFullBackup = () => {
+    const json = exportImportStorage.exportFullBackup()
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `draftreviewr-backup-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    setSuccess("전체 백업이 성공적으로 내보내졌습니다!")
+  }
+
+  const handleImportSettings = (merge: boolean) => {
+    try {
+      setError("")
+      setSuccess("")
+
+      if (!importData.trim()) {
+        setError("가져올 데이터를 입력해주세요.")
+        return
+      }
+
+      exportImportStorage.importSettings(importData, merge)
+      setSuccess(merge ? "설정이 병합되었습니다!" : "설정을 가져왔습니다!")
+      setImportData("")
+      setTimeout(() => window.location.reload(), 1500)
+    } catch (err) {
+      setError("잘못된 JSON 형식입니다. 파일 내용을 확인해주세요.")
+    }
+  }
+
+  const handleImportFullBackup = () => {
+    try {
+      setError("")
+      setSuccess("")
+
+      if (!importData.trim()) {
+        setError("가져올 데이터를 입력해주세요.")
+        return
+      }
+
+      if (!confirm("전체 백업을 복원하면 현재 모든 데이터가 대체됩니다. 계속하시겠습니까?")) {
+        return
+      }
+
+      exportImportStorage.importFullBackup(importData)
+      setSuccess("백업이 복원되었습니다!")
+      setImportData("")
+      setTimeout(() => window.location.reload(), 1500)
+    } catch (err) {
+      setError("잘못된 JSON 형식입니다. 파일 내용을 확인해주세요.")
+    }
+  }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setImportData(event.target?.result as string)
+    }
+    reader.readAsText(file)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <Package className="mr-2 h-4 w-4" />
+          내보내기 / 가져오기
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>설정 내보내기 / 가져오기</DialogTitle>
+          <DialogDescription>검토 설정을 파일로 내보내거나 가져올 수 있습니다.</DialogDescription>
+        </DialogHeader>
+
+        <Tabs defaultValue="export" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="export">
+              <Download className="mr-2 h-4 w-4" />
+              내보내기
+            </TabsTrigger>
+            <TabsTrigger value="import">
+              <Upload className="mr-2 h-4 w-4" />
+              가져오기
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="export" className="space-y-4">
+            <Alert>
+              <Package className="h-4 w-4" />
+              <AlertDescription>
+                <strong>설정 파일</strong>: 문서 유형과 검토 항목만 포함 (판매/공유용)
+                <br />
+                <strong>전체 백업</strong>: API 키와 검토 이력 포함 (개인 백업용)
+              </AlertDescription>
+            </Alert>
+
+            <div className="space-y-3">
+              <Button onClick={handleExportSettings} className="w-full" variant="default">
+                <Package className="mr-2 h-4 w-4" />
+                설정 파일 내보내기 (판매/공유용)
+              </Button>
+
+              <Button onClick={handleExportFullBackup} className="w-full" variant="secondary">
+                <Database className="mr-2 h-4 w-4" />
+                전체 백업 파일 내보내기 (개인 백업용)
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="import" className="space-y-4">
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                JSON 파일을 선택하거나 내용을 직접 붙여넣으세요.
+                <br />
+                <strong>병합</strong>: 기존 설정과 합침 / <strong>교체</strong>: 기존 설정을 덮어씀
+              </AlertDescription>
+            </Alert>
+
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="file-upload">파일 선택</Label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileUpload}
+                  className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="import-textarea">또는 JSON 내용 붙여넣기</Label>
+                <Textarea
+                  id="import-textarea"
+                  value={importData}
+                  onChange={(e) => setImportData(e.target.value)}
+                  placeholder="JSON 파일 내용을 붙여넣으세요..."
+                  rows={8}
+                  className="mt-2 font-mono text-xs"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={() => handleImportSettings(false)} className="flex-1" variant="default">
+                  설정 교체하기
+                </Button>
+                <Button onClick={() => handleImportSettings(true)} className="flex-1" variant="secondary">
+                  설정 병합하기
+                </Button>
+              </div>
+
+              <Button onClick={handleImportFullBackup} className="w-full" variant="destructive">
+                <Database className="mr-2 h-4 w-4" />
+                전체 백업 복원 (모든 데이터 대체)
+              </Button>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert>
+                <AlertDescription className="text-green-600">{success}</AlertDescription>
+              </Alert>
+            )}
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  )
+}

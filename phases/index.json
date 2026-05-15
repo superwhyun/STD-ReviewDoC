@@ -1,0 +1,9 @@
+{
+  "phases": [
+    {
+      "dir": "0-onboarding",
+      "status": "completed",
+      "summary": "Mapped the existing DraftReviewr app into harness module boundaries and baseline artifacts."
+    }
+  ]
+}

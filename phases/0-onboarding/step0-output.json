@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "project": "draft-reviewer",
+  "phase": "0-onboarding",
+  "step": 0,
+  "step_name": "project-state-map",
+  "status": "completed",
+  "summary": "Mapped the existing DraftReviewr app into harness module boundaries, shared public contracts, integration points, a project manifest, and a phase baseline.",
+  "completed_work": [
+    "Confirmed the current app is a client-heavy Next.js 15 App Router project with React 19 and TypeScript.",
+    "Confirmed the authoritative runtime contracts are README.md, package.json, lib/types.ts, lib/storage/local-storage.ts, lib/storage/default-data.json, and lib/openai-client.ts.",
+    "Mapped routes /, /admin, and /settings to the document review, admin configuration, and API-key settings surfaces.",
+    "Expanded phases/0-onboarding/module-map.json from a placeholder into concrete module boundaries.",
+    "Updated phases/project-manifest.json with modules, routes, shared contracts, integration points, current contract summary, and known issues.",
+    "Created phases/baselines/0-onboarding.json for future phases to read before targeted implementation.",
+    "Marked the onboarding phase and step completed after validation and build checks."
+  ],
+  "files_changed": [
+    "phases/index.json",
+    "phases/project-manifest.json",
+    "phases/0-onboarding/index.json",
+    "phases/0-onboarding/module-map.json",
+    "phases/0-onboarding/step0-output.json",
+    "phases/baselines/0-onboarding.json"
+  ],
+  "decisions": [
+    "Treat README.md as product-level context, but do not treat claude.md as authoritative because it describes a stale Supabase/API-route architecture.",
+    "Treat lib/storage/local-storage.ts as the central persistence boundary for future work.",
+    "Treat lib/openai-client.ts as the AI integration boundary for future review behavior work.",
+    "Keep Step 0 read-only for app implementation files; functional changes should be introduced through a new phase."
+  ],
+  "verification": [
+    {
+      "command": "python3 scripts/validate_phase.py 0-onboarding --root projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "README and settings UI mention GPT-4o or encrypted API-key storage, while current code uses gpt-5 and stores the API key directly in localStorage.",
+    "initializeDefaultData fetches /lib/storage/default-data.json; verify browser first-run default loading because the file is not under public/.",
+    "DocumentUploadSection does not mark a created document as failed when review processing throws.",
+    "package.json does not define a test script."
+  ],
+  "next_actions": [
+    "Design the next phase based on the user's first product change request.",
+    "Prefer a docs-and-security-alignment or client-runtime-hardening phase before larger feature work if the user asks for stabilization.",
+    "Future phases should read phases/baselines/0-onboarding.json and phases/project-manifest.json before targeted source reads."
+  ],
+  "blockers": [],
+  "resume_hint": "Start by reading phases/project-manifest.json and phases/baselines/0-onboarding.json. Since all current phases are completed, design a new phase and get user approval before implementing the next feature request.",
+  "completed_at": "2026-05-16T00:00:00+09:00"
+}

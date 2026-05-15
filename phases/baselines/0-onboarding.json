@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "phase": "0-onboarding",
+  "tag": "draft-reviewer-phase0-done",
+  "source_module_map": "phases/0-onboarding/module-map.json",
+  "project_state": {
+    "name": "DraftReviewr",
+    "root": "projects/DraftReviewr",
+    "summary": "AI-assisted Korean standard draft document review app. The current implementation is a client-heavy Next.js app that stores configuration and results in browser localStorage and calls OpenAI directly from the browser.",
+    "runtime": "Next.js 15.2.4 App Router, React 19, TypeScript, Tailwind CSS 4, shadcn/Radix UI."
+  },
+  "modules": [
+    {
+      "name": "app-shell",
+      "public_surface": [
+        "app/layout.tsx",
+        "app/globals.css",
+        "styles/globals.css",
+        "components/theme-provider.tsx"
+      ],
+      "summary": "Root HTML language is Korean; app metadata names the document review system; Toaster and Vercel Analytics are app-wide."
+    },
+    {
+      "name": "document-review",
+      "public_surface": [
+        "app/page.tsx",
+        "components/documents/document-upload-section.tsx",
+        "components/documents/documents-list.tsx",
+        "components/documents/document-review-dialog.tsx"
+      ],
+      "summary": "Home page initializes default data, loads document types and documents, uploads user-selected PDF/DOC/DOCX/TXT files, invokes OpenAI review, persists results locally, and displays markdown results."
+    },
+    {
+      "name": "admin-config",
+      "public_surface": [
+        "app/admin/page.tsx",
+        "components/admin/**"
+      ],
+      "summary": "Admin page manages document types, common review items, and type-specific review criteria using localStorage repositories."
+    },
+    {
+      "name": "settings-api-key",
+      "public_surface": [
+        "app/settings/page.tsx",
+        "components/settings/api-key-settings.tsx"
+      ],
+      "summary": "Settings page stores an OpenAI API key in localStorage, masks an existing key, and supports replacement and deletion."
+    },
+    {
+      "name": "client-storage",
+      "public_surface": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts",
+        "lib/storage/default-data.json"
+      ],
+      "summary": "Defines storage repositories and serialized JSON contracts for document types, review items, documents, results, API key, user id, import/export, and first-run defaults."
+    },
+    {
+      "name": "openai-review-client",
+      "public_surface": [
+        "lib/openai-client.ts"
+      ],
+      "summary": "Extracts DOCX text with mammoth or text via FileReader, submits review prompts to OpenAI Responses API with model gpt-5, parses markdown-like sectioned responses, and returns per-review-item results."
+    },
+    {
+      "name": "export-import",
+      "public_surface": [
+        "components/export-import-dialog.tsx",
+        "lib/storage/local-storage.ts"
+      ],
+      "summary": "Exports shareable review settings or full personal backups and imports JSON via replace, merge, or full-restore flows."
+    },
+    {
+      "name": "ui-foundation",
+      "public_surface": [
+        "components/ui/**",
+        "hooks/use-mobile.ts",
+        "hooks/use-toast.ts",
+        "lib/utils.ts",
+        "components.json"
+      ],
+      "summary": "Reusable shadcn/Radix component wrappers, hooks, and className utilities."
+    }
+  ],
+  "routes": [
+    {
+      "path": "/",
+      "source": "app/page.tsx",
+      "summary": "Document upload and review history."
+    },
+    {
+      "path": "/admin",
+      "source": "app/admin/page.tsx",
+      "summary": "Review configuration management."
+    },
+    {
+      "path": "/settings",
+      "source": "app/settings/page.tsx",
+      "summary": "OpenAI API key management."
+    }
+  ],
+  "shared_contracts": [
+    {
+      "path": "README.md",
+      "summary": "Human-facing product and setup overview; some implementation details need reconciliation with current code."
+    },
+    {
+      "path": "package.json",
+      "summary": "Next build/dev/start scripts and dependency set. No test script currently exists."
+    },
+    {
+      "path": "lib/types.ts",
+      "summary": "Core TypeScript data interfaces."
+    },
+    {
+      "path": "lib/storage/default-data.json",
+      "summary": "Initial Korean standard draft document type and common review criteria seed."
+    },
+    {
+      "path": "lib/storage/local-storage.ts",
+      "summary": "Storage repository APIs and import/export serialization contracts."
+    },
+    {
+      "path": "lib/openai-client.ts",
+      "summary": "OpenAI request, file text extraction, response parsing, and API key validation contracts."
+    }
+  ],
+  "integration_points": [
+    "app/page.tsx initializes default data and connects storage to document UI.",
+    "components/documents/document-upload-section.tsx connects File input, review criteria storage, OpenAI review, and review result persistence.",
+    "components/export-import-dialog.tsx serializes and restores storage state.",
+    "components/settings/api-key-settings.tsx manages the API key consumed by lib/openai-client.ts.",
+    "lib/storage/local-storage.ts is the central persistence boundary for all app state."
+  ],
+  "known_issues": [
+    "claude.md is stale relative to the current app and still references Supabase/API routes.",
+    "README and settings UI say GPT-4o or encrypted API-key storage, while code uses gpt-5 and stores the API key directly in localStorage.",
+    "initializeDefaultData fetches /lib/storage/default-data.json; verify first-run default loading at runtime because files under lib are not automatically public static assets.",
+    "DocumentUploadSection creates a document before review but does not update it to failed if OpenAI processing throws.",
+    "package.json has no test script; AC currently uses build verification only."
+  ],
+  "verification": [
+    {
+      "command": "python3 scripts/validate_phase.py 0-onboarding --root projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    }
+  ],
+  "written_at": "2026-05-16T00:00:00+09:00"
+}
