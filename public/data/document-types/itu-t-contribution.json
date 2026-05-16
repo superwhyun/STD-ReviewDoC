@@ -1,0 +1,67 @@
+{
+  "id": "itu-t-contribution",
+  "name": "ITU-T 기고서",
+  "description": "ITU-T Study Group 회의에 제출하는 기고서(Contribution/Temporary Document). 회의 문서 서식 및 SG 편집 지침을 기준으로 검토한다.",
+  "review_items": [
+    {
+      "id": "itu-t-con-01",
+      "name": "표지 완성도",
+      "prompt": "표지에 회의 정보(SG 번호, 회의 일시·장소), 문서 번호, 출처(기관명·국가), 제목, 의제 항목(Agenda Item), 연락처(Contact)가 모두 기재되어 있는지 확인하라.",
+      "order_index": 1
+    },
+    {
+      "id": "itu-t-con-02",
+      "name": "목적 구분 명시",
+      "prompt": "기고서의 목적이 Discussion, Decision, Information, Approval 중 하나로 명확히 표시되어 있는지 확인하라. 목적에 맞는 내용 구성인지 평가하라.",
+      "order_index": 2
+    },
+    {
+      "id": "itu-t-con-03",
+      "name": "배경 및 맥락 섹션",
+      "prompt": "기고서 배경과 관련 히스토리가 설명되어 있는지 확인하라. 관련 이전 문서(TD 번호, Contribution 번호 등)가 올바르게 인용되어 있는지 확인하라.",
+      "order_index": 3
+    },
+    {
+      "id": "itu-t-con-04",
+      "name": "기술적 근거 명확성",
+      "prompt": "제안하는 내용의 기술적 근거가 충분히 설명되어 있는지 확인하라. 주장만 있고 근거가 없는 경우, 또는 주장과 근거가 논리적으로 연결되지 않는 경우를 지적하라.",
+      "order_index": 4
+    },
+    {
+      "id": "itu-t-con-05",
+      "name": "제안 변경사항 명확성",
+      "prompt": "Text-based 기고서의 경우, 제안하는 변경사항이 변경 추적(track changes) 또는 명확한 '기존 텍스트 → 변경 텍스트' 형식으로 기술되어 있는지 확인하라.",
+      "order_index": 5
+    },
+    {
+      "id": "itu-t-con-06",
+      "name": "요청 액션 명시",
+      "prompt": "회의에서 요청하는 액션(예: 'The meeting is invited to...', 'The editor is requested to...')이 구체적으로 명시되어 있는지 확인하라.",
+      "order_index": 6
+    },
+    {
+      "id": "itu-t-con-07",
+      "name": "의제 항목 정합성",
+      "prompt": "기고서가 신청된 의제 항목의 범위 내 내용을 다루고 있는지 확인하라. 의제 범위를 벗어난 내용이 포함된 경우 지적하라.",
+      "order_index": 7
+    },
+    {
+      "id": "itu-t-con-08",
+      "name": "관련 문서 최신성",
+      "prompt": "참조하는 기존 Recommendation, TD, Contribution이 최신 승인 버전을 참조하고 있는지 확인하라. 이미 폐지되거나 개정된 문서를 참조하는 경우 지적하라.",
+      "order_index": 8
+    },
+    {
+      "id": "itu-t-con-09",
+      "name": "분량 적절성",
+      "prompt": "기고서의 길이가 목적에 비례하는지 평가하라. Information 기고서가 지나치게 길거나, Decision을 요청하는 기고서에 핵심 근거가 빈약하면 지적하라.",
+      "order_index": 9
+    },
+    {
+      "id": "itu-t-con-10",
+      "name": "영어 표현 명확성",
+      "prompt": "비영어권 저자가 작성한 경우 문법 오류, 어색한 표현, 다의적 해석이 가능한 문장이 없는지 확인하라. 특히 shall/should/may 오용에 주의하라.",
+      "order_index": 10
+    }
+  ]
+}

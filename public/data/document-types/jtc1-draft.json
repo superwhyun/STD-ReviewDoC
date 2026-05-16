@@ -1,0 +1,109 @@
+{
+  "id": "jtc1-draft",
+  "name": "JTC 1 표준초안",
+  "description": "ISO/IEC JTC 1 국제표준 초안 (CD/DIS/FDIS). ISO/IEC Directives Part 2 기준으로 검토한다.",
+  "review_items": [
+    {
+      "id": "jtc1-draft-01",
+      "name": "조항 구조 준수 (ISO Directives Part 2)",
+      "prompt": "문서 조항이 ISO/IEC Directives Part 2의 필수 구조(Foreword, Introduction 선택, 1-Scope, 2-Normative references, 3-Terms and definitions, 이하 본론)를 준수하는지 확인하라. 조항 순서 오류나 누락을 지적하라.",
+      "order_index": 1
+    },
+    {
+      "id": "jtc1-draft-02",
+      "name": "전문 (Foreword) 요건",
+      "prompt": "Foreword에 발행 기관(ISO/IEC JTC 1 및 해당 SC), 문서 번호, 파트 구성(있는 경우), 이전 판과의 차이점, 투표 정보가 포함되어 있는지 확인하라.",
+      "order_index": 2
+    },
+    {
+      "id": "jtc1-draft-03",
+      "name": "범위 (Scope) 정밀성",
+      "prompt": "Scope 절이 표준이 다루는 것과 다루지 않는 것을 명확히 구분하여 기술하고 있는지 확인하라. 지나치게 광범위하거나 내용과 불일치하는 Scope를 지적하라.",
+      "order_index": 3
+    },
+    {
+      "id": "jtc1-draft-04",
+      "name": "규범적 참고문헌 형식",
+      "prompt": "Normative references의 각 항목이 '[ISO xxxx:yyyy, Title]' 형식을 따르는지, dated/undated reference 처리가 적절한지 확인하라. 본문에서 참조하지 않는 항목을 지적하라.",
+      "order_index": 4
+    },
+    {
+      "id": "jtc1-draft-05",
+      "name": "용어 및 정의 형식",
+      "prompt": "Terms and definitions 절의 각 항목이 ISO 형식(용어번호, preferred term, definition, Note, Example 순)을 따르는지 확인하라. 순환 정의, 불완전한 정의, 조항 번호 오류를 지적하라.",
+      "order_index": 5
+    },
+    {
+      "id": "jtc1-draft-06",
+      "name": "Modal verb 사용 (ISO 규칙)",
+      "prompt": "shall(요구사항), should(권고사항), may(허용), need not(불필요), can(가능성), cannot(불가능) 여섯 가지 modal verb가 ISO/IEC Directives Part 2 규칙에 따라 정확하게 사용되는지 확인하라.",
+      "order_index": 6
+    },
+    {
+      "id": "jtc1-draft-07",
+      "name": "Annex 분류 및 표시",
+      "prompt": "각 Annex에 '(normative)' 또는 '(informative)' 표시가 있는지, 본문에서 요구사항으로 참조하는 Annex가 normative로 분류되어 있는지 확인하라.",
+      "order_index": 7
+    },
+    {
+      "id": "jtc1-draft-08",
+      "name": "그림·표·수식 번호 체계",
+      "prompt": "그림, 표, 수식의 번호가 조항 번호를 접두사로 사용하거나(예: Figure 4.1) 전체 일련번호 방식으로 일관되게 사용되는지 확인하라. 캡션 위치(표는 위, 그림은 아래)도 확인하라.",
+      "order_index": 8
+    },
+    {
+      "id": "jtc1-draft-09",
+      "name": "적합성 조항 (Conformance clause)",
+      "prompt": "적합성 조항이 명확히 정의되어 있는지 확인하라. 구현이 full conformance/partial conformance/profile conformance 중 무엇을 달성할 수 있는지 기술되어야 한다.",
+      "order_index": 9
+    },
+    {
+      "id": "jtc1-draft-10",
+      "name": "참고문헌 (Bibliography) 형식",
+      "prompt": "Bibliography의 각 항목이 ISO 스타일(문서 번호, 제목, 발행 연도)을 따르는지 확인하라. Normative references와 Bibliography 간 항목 중복을 지적하라.",
+      "order_index": 10
+    },
+    {
+      "id": "jtc1-draft-11",
+      "name": "특허 선언 (Patent declarations)",
+      "prompt": "특허 정책 관련 ISO/IEC 표준 보일러플레이트 문구가 포함되어 있는지 확인하라. 특허 실시 선언(PSDO)이 필요한 기술이 포함된 경우를 식별하라.",
+      "order_index": 11
+    },
+    {
+      "id": "jtc1-draft-12",
+      "name": "언어 일관성 (British English)",
+      "prompt": "ISO 표준은 British English를 사용한다. American English 철자(color→colour, organize→organise 등)가 혼용된 경우를 지적하라.",
+      "order_index": 12
+    },
+    {
+      "id": "jtc1-draft-13",
+      "name": "측정 단위 (SI 단위)",
+      "prompt": "측정값 표기에 SI 단위(미터, 킬로그램, 초 등)가 사용되는지 확인하라. 비SI 단위 사용 시 병기가 필요하다.",
+      "order_index": 13
+    },
+    {
+      "id": "jtc1-draft-14",
+      "name": "Notes·Examples 형식",
+      "prompt": "NOTE와 EXAMPLE이 규범적 요구사항을 포함하지 않는지 확인하라. NOTE에 shall이 포함된 경우 본문으로 이동해야 한다.",
+      "order_index": 14
+    },
+    {
+      "id": "jtc1-draft-15",
+      "name": "교차 참조 정확성",
+      "prompt": "조항, 그림, 표, 수식 교차 참조가 정확한지 확인하라. 참조 번호와 실제 항목 번호가 일치하지 않는 경우를 모두 지적하라.",
+      "order_index": 15
+    },
+    {
+      "id": "jtc1-draft-16",
+      "name": "시리즈 표준 일관성",
+      "prompt": "같은 시리즈(파트 구성) 표준이 있는 경우 용어 정의, 약어, 구조가 다른 파트와 일관되는지 확인하라.",
+      "order_index": 16
+    },
+    {
+      "id": "jtc1-draft-17",
+      "name": "NB 코멘트 반영 여부",
+      "prompt": "이전 투표에서 제기된 National Body 코멘트에 대한 처리 결과(Accept/Reject/Modify)가 적절히 반영되어 있는지, 반영 내역을 추적할 수 있는지 확인하라.",
+      "order_index": 17
+    }
+  ]
+}

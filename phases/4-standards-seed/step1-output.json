@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "project": "draft-reviewer",
+  "phase": "4-standards-seed",
+  "step": 1,
+  "name": "seed-json-files",
+  "status": "completed",
+  "summary": "Created five standards seed JSON files under public/data without changing runtime loading or storage logic.",
+  "completed_work": [
+    "Read Step 1 instructions, Step 0 handoff, and Phase 4 module map.",
+    "Created public/data/document-types/itu-t-draft.json with 17 ITU-T draft review items.",
+    "Created public/data/document-types/itu-t-contribution.json with 10 ITU-T contribution review items.",
+    "Created public/data/document-types/jtc1-draft.json with 17 JTC 1 draft review items.",
+    "Created public/data/document-types/jtc1-contribution.json with 10 JTC 1 contribution review items.",
+    "Created public/data/common-review-items.json with 8 common review items.",
+    "Did not modify app, components, or lib implementation files; seed loading remains deferred to Step 2."
+  ],
+  "files_changed": [
+    "public/data/document-types/itu-t-draft.json",
+    "public/data/document-types/itu-t-contribution.json",
+    "public/data/document-types/jtc1-draft.json",
+    "public/data/document-types/jtc1-contribution.json",
+    "public/data/common-review-items.json",
+    "phases/4-standards-seed/index.json",
+    "phases/4-standards-seed/step1-output.json"
+  ],
+  "decisions": [
+    "Kept the seed files in the Step 0 nested schema: each document type owns its review_items array, and common review items are wrapped in an items array.",
+    "Preserved all review item prompts from Step 1 and did not reduce item counts.",
+    "Left transformation into existing localStorage flat arrays for Step 2 seed-loader."
+  ],
+  "verification": [
+    {
+      "command": "ls projects/DraftReviewr/public/data/document-types/itu-t-draft.json projects/DraftReviewr/public/data/document-types/itu-t-contribution.json projects/DraftReviewr/public/data/document-types/jtc1-draft.json projects/DraftReviewr/public/data/document-types/jtc1-contribution.json projects/DraftReviewr/public/data/common-review-items.json",
+      "status": "passed"
+    },
+    {
+      "command": "node -e \"require('./projects/DraftReviewr/public/data/document-types/itu-t-draft.json'); require('./projects/DraftReviewr/public/data/document-types/itu-t-contribution.json'); require('./projects/DraftReviewr/public/data/document-types/jtc1-draft.json'); require('./projects/DraftReviewr/public/data/document-types/jtc1-contribution.json'); require('./projects/DraftReviewr/public/data/common-review-items.json'); console.log('json-ok')\"",
+      "status": "passed"
+    },
+    {
+      "command": "node -e \"const a=require('./public/data/document-types/itu-t-draft.json'); const b=require('./public/data/document-types/itu-t-contribution.json'); const c=require('./public/data/document-types/jtc1-draft.json'); const d=require('./public/data/document-types/jtc1-contribution.json'); const e=require('./public/data/common-review-items.json'); console.log(JSON.stringify({ituTDraft:a.review_items.length, ituTContribution:b.review_items.length, jtc1Draft:c.review_items.length, jtc1Contribution:d.review_items.length, common:e.items.length}))\"",
+      "status": "passed",
+      "notes": "Counts: ITU-T draft 17, ITU-T contribution 10, JTC 1 draft 17, JTC 1 contribution 10, common 8."
+    },
+    {
+      "command": "npm run typecheck --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "The new seed JSON files are not loaded by the app until Step 2 implements seed-loader and wiring.",
+    "Existing /default-data.json remains in place and is not replaced by this step."
+  ],
+  "blockers": [],
+  "next_actions": [
+    "Start Step 2 seed-loader.",
+    "Implement conversion from nested public/data document type seed files into existing DocumentType and ReviewItem localStorage arrays.",
+    "Wire first-run initialization and admin reset behavior to the new seed loader."
+  ],
+  "resume_hint": "Resume with phases/4-standards-seed/step2.md. The seed files exist and parse cleanly; Step 2 should load public/data/document-types/*.json and public/data/common-review-items.json."
+}

@@ -1,0 +1,67 @@
+{
+  "id": "jtc1-contribution",
+  "name": "JTC 1 기고서",
+  "description": "ISO/IEC JTC 1 국가 기관 기고서 (N-document / NB Contribution). SC 및 WG 문서 서식과 투표 코멘트 응답 지침을 기준으로 검토한다.",
+  "review_items": [
+    {
+      "id": "jtc1-con-01",
+      "name": "문서 헤더 완성도",
+      "prompt": "문서 헤더에 출처(NB 또는 Liaison 기관), 회의 정보(SC/WG 번호, 회의 일시·장소), 문서 번호(N-번호), 프로젝트 번호, 제목이 모두 기재되어 있는지 확인하라.",
+      "order_index": 1
+    },
+    {
+      "id": "jtc1-con-02",
+      "name": "문서 카테고리 명시",
+      "prompt": "기고서 카테고리(NP, Amendment, Corrigendum, Ballot Comment Response, Liaison Statement 등)가 명확히 표시되어 있는지 확인하라.",
+      "order_index": 2
+    },
+    {
+      "id": "jtc1-con-03",
+      "name": "제안 변경사항 요약",
+      "prompt": "기고서 서두에 제안하는 변경사항 또는 요청사항의 요약이 있는지, 본문 내용과 일치하는지 확인하라.",
+      "order_index": 3
+    },
+    {
+      "id": "jtc1-con-04",
+      "name": "변경 추적 형식",
+      "prompt": "기존 문서 텍스트를 변경하는 기고서의 경우 추가(밑줄/녹색), 삭제(취소선/빨간색) 등 변경 추적이 일관되게 적용되어 있는지 확인하라.",
+      "order_index": 4
+    },
+    {
+      "id": "jtc1-con-05",
+      "name": "투표 코멘트 응답 형식",
+      "prompt": "Ballot comment response인 경우, 각 코멘트에 대해 처리 의견(Accept/Accept in principle/Reject/Noted), 근거, 수정 텍스트가 모두 포함되어 있는지 확인하라.",
+      "order_index": 5
+    },
+    {
+      "id": "jtc1-con-06",
+      "name": "처리 의견 (Proposed disposition)",
+      "prompt": "각 제안에 대해 Accept, Reject 또는 Modify 중 하나의 처리 의견이 명시되어 있는지, 그 근거가 충분한지 확인하라.",
+      "order_index": 6
+    },
+    {
+      "id": "jtc1-con-07",
+      "name": "변경 근거 (Rationale)",
+      "prompt": "제안하는 변경사항 또는 처리 의견에 대한 기술적·편집적 근거가 명확히 기술되어 있는지 확인하라. 근거 없이 Accept/Reject만 표시된 경우를 지적하라.",
+      "order_index": 7
+    },
+    {
+      "id": "jtc1-con-08",
+      "name": "프로젝트 범위 정합성",
+      "prompt": "기고서의 내용이 해당 프로젝트(표준 문서)의 Scope 범위 내에 있는지 확인하라. Scope를 벗어난 내용이 포함된 경우 지적하라.",
+      "order_index": 8
+    },
+    {
+      "id": "jtc1-con-09",
+      "name": "기준 문서 버전 참조",
+      "prompt": "변경 대상 표준 문서의 버전(예: ISO/IEC xxxxx:yyyy, edition N)이 명확히 명시되어 있는지 확인하라. 투표 대상 버전과 참조 버전이 일치하는지 확인하라.",
+      "order_index": 9
+    },
+    {
+      "id": "jtc1-con-10",
+      "name": "IPR 공시",
+      "prompt": "기고서가 새로운 지식재산권(특허, 저작권)을 도입하는 경우 해당 IP 보유자의 라이선싱 의향 선언이 첨부되어 있는지 확인하라.",
+      "order_index": 10
+    }
+  ]
+}

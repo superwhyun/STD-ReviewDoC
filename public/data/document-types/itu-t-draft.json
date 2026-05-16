@@ -1,0 +1,109 @@
+{
+  "id": "itu-t-draft",
+  "name": "ITU-T 표준초안",
+  "description": "ITU-T Recommendation 표준초안 (Draft Recommendation). TSB 편집 지침 및 ITU-T 스타일 가이드 기준으로 검토한다.",
+  "review_items": [
+    {
+      "id": "itu-t-draft-01",
+      "name": "절 번호 체계",
+      "prompt": "ITU-T 스타일의 계층형 절 번호(1, 1.1, 1.1.1)가 일관되게 적용되어 있는지 확인하라. 번호가 누락되거나 순서가 어긋난 부분을 지적하라.",
+      "order_index": 1
+    },
+    {
+      "id": "itu-t-draft-02",
+      "name": "문서 구조 완성도",
+      "prompt": "Scope, References, Definitions and abbreviations, Main body, Annex 순의 ITU-T 표준 구조가 갖춰져 있는지 확인하라. 누락된 필수 절이 있으면 지적하라.",
+      "order_index": 2
+    },
+    {
+      "id": "itu-t-draft-03",
+      "name": "Modal verb 일관성",
+      "prompt": "shall(필수), should(권고), may(허용), can(가능성) 네 가지 modal verb가 ISO/IEC Directives 및 ITU-T 편집 지침에 따라 올바르게 사용되었는지 확인하라. 혼용 또는 오용된 사례를 지적하라.",
+      "order_index": 3
+    },
+    {
+      "id": "itu-t-draft-04",
+      "name": "용어 및 정의 형식",
+      "prompt": "Terms and definitions 절의 각 항목이 '용어: 정의문' 형식을 따르고 있는지, 순환 정의나 부적절한 표현이 없는지 확인하라.",
+      "order_index": 4
+    },
+    {
+      "id": "itu-t-draft-05",
+      "name": "규범적 참조 형식",
+      "prompt": "References 절의 인용 형식이 '[ITU-T G.xxx]' 또는 '[ISO/IEC xxxxx]' 등 ITU-T 편집 지침에 맞는지 확인하라. 본문에서 참조하지 않는 항목이나 참조는 있으나 목록에 없는 항목을 지적하라.",
+      "order_index": 5
+    },
+    {
+      "id": "itu-t-draft-06",
+      "name": "그림·표 번호 및 캡션",
+      "prompt": "그림과 표에 일련번호와 캡션이 있고, 본문에서 정확히 참조되는지 확인하라. ITU-T 스타일에서 그림 캡션은 아래, 표 캡션은 위에 위치한다.",
+      "order_index": 6
+    },
+    {
+      "id": "itu-t-draft-07",
+      "name": "Annex 규범성 분류",
+      "prompt": "각 Annex가 normative(규범적) 또는 informative(참고용)으로 명확히 표시되어 있는지 확인하라. 본문에서 shall/must로 참조하는 Annex가 informative로 표시된 경우를 지적하라.",
+      "order_index": 7
+    },
+    {
+      "id": "itu-t-draft-08",
+      "name": "보안 고려사항",
+      "prompt": "보안에 영향을 미치는 Recommendation이라면 Security considerations 절이 있어야 한다. 해당 절이 없거나 내용이 지나치게 단순한 경우 지적하라.",
+      "order_index": 8
+    },
+    {
+      "id": "itu-t-draft-09",
+      "name": "IPR 선언",
+      "prompt": "ITU-T 특허 정책에 따른 IPR 선언(Patent Statement and Licensing Declaration) 포함 여부를 확인하라. 표준 구현에 특허가 필요한 경우 적절한 선언이 있어야 한다.",
+      "order_index": 9
+    },
+    {
+      "id": "itu-t-draft-10",
+      "name": "Scope·Abstract 정합성",
+      "prompt": "Abstract 또는 Summary에 기술된 내용이 Scope 절과 일치하는지 확인하라. 범위를 벗어난 내용이 본문에 포함되어 있으면 지적하라.",
+      "order_index": 10
+    },
+    {
+      "id": "itu-t-draft-11",
+      "name": "교차 참조 정확성",
+      "prompt": "본문의 절·그림·표·수식 교차 참조 번호가 실제로 존재하는지 확인하라. 잘못된 번호나 누락된 참조를 지적하라.",
+      "order_index": 11
+    },
+    {
+      "id": "itu-t-draft-12",
+      "name": "약어 정의 완성도",
+      "prompt": "본문에 등장하는 모든 약어가 Abbreviations 절 또는 처음 등장 시 정의되어 있는지 확인하라. 미정의 약어나 정의 후 사용되지 않는 약어를 지적하라.",
+      "order_index": 12
+    },
+    {
+      "id": "itu-t-draft-13",
+      "name": "정의 용어 사용 일관성",
+      "prompt": "Definitions 절에서 정의한 용어가 본문 전체에서 동일한 표현으로 일관되게 사용되고 있는지 확인하라. 유사한 다른 표현을 혼용하는 경우를 지적하라.",
+      "order_index": 13
+    },
+    {
+      "id": "itu-t-draft-14",
+      "name": "적합성 명시",
+      "prompt": "구현 요구사항(conformance requirements)이 shall을 사용하여 명확히 기술되어 있는지 확인하라. 적합성 기준이 불명확하거나 검증 불가능한 표현을 지적하라.",
+      "order_index": 14
+    },
+    {
+      "id": "itu-t-draft-15",
+      "name": "ASN.1/메시지 형식 일관성",
+      "prompt": "ASN.1 모듈이나 메시지 형식이 포함된 경우, 문법 오류·미사용 타입·본문 설명과의 불일치를 확인하라.",
+      "order_index": 15
+    },
+    {
+      "id": "itu-t-draft-16",
+      "name": "편집 일관성",
+      "prompt": "문서 전체에서 용어 표기(대소문자, 하이픈 유무), 날짜 형식, 숫자 표기 방식이 일관되게 사용되는지 확인하라.",
+      "order_index": 16
+    },
+    {
+      "id": "itu-t-draft-17",
+      "name": "언어 명확성",
+      "prompt": "모호한 표현('it is recommended that', 'as appropriate', 'etc.' 남용 등)이 있는지 확인하라. 구현자가 다르게 해석할 수 있는 문장을 지적하라.",
+      "order_index": 17
+    }
+  ]
+}

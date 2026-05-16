@@ -17,7 +17,8 @@
     {
       "step": 1,
       "name": "seed-json-files",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Created ITU-T/JTC 1 document type seed JSON files and common review items under public/data."
     },
     {
       "step": 2,
