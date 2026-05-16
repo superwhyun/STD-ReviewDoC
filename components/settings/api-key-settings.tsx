@@ -81,7 +81,7 @@ export function ApiKeySettings({ userId, hasExistingKey }: ApiKeySettingsProps) 
           OpenAI API 키
         </CardTitle>
         <CardDescription>
-          문서 검토를 위해 OpenAI API 키를 등록하세요. API 키는 암호화되어 안전하게 저장됩니다.
+          문서 검토를 위해 OpenAI API 키를 등록하세요. API 키는 브라우저 localStorage에 저장됩니다.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -152,13 +152,13 @@ export function ApiKeySettings({ userId, hasExistingKey }: ApiKeySettingsProps) 
 
         <div className="pt-4 border-t border-border">
           <h3 className="text-sm font-semibold mb-2">사용 모델</h3>
-          <p className="text-sm text-muted-foreground">GPT-4o (OpenAI)</p>
+          <p className="text-sm text-muted-foreground">GPT-5 (OpenAI)</p>
         </div>
 
         <div className="pt-4 border-t border-border">
           <h3 className="text-sm font-semibold mb-2">보안 정보</h3>
           <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-            <li>API 키는 암호화되어 데이터베이스에 저장됩니다</li>
+            <li>API 키는 브라우저 localStorage에 저장됩니다 (full backup 시 포함될 수 있음)</li>
             <li>API 키는 문서 검토 시에만 사용됩니다</li>
             <li>언제든지 API 키를 삭제할 수 있습니다</li>
           </ul>

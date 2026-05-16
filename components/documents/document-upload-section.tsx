@@ -52,8 +52,6 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0]
       const allowedTypes = [
-        "application/pdf",
-        "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "text/plain",
       ]
@@ -188,7 +186,7 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
               type="file"
               onChange={handleFileChange}
               className="hidden"
-              accept=".pdf,.doc,.docx,.txt"
+              accept=".docx,.txt"
             />
             <div
               onClick={() => document.getElementById("file-upload")?.click()}
@@ -204,7 +202,7 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
                 <>
                   <Upload className="h-10 w-10 text-muted-foreground" />
                   <p className="text-sm font-medium">파일을 드래그하거나 클릭하여 선택</p>
-                  <p className="text-xs text-muted-foreground">지원 형식: PDF, DOC, DOCX, TXT</p>
+                  <p className="text-xs text-muted-foreground">지원 형식: DOCX, TXT</p>
                 </>
               )}
             </div>

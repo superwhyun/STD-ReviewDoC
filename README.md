@@ -16,7 +16,7 @@ AI 기반 한국 표준 초안 문서 자동 검토 시스템 - **완전한 클�
 - **Next.js 15** (App Router, 클라이언트 사이드만 사용)
 - **React 19**
 - **TypeScript**
-- **OpenAI GPT-4o** (직접 API 호출)
+- **OpenAI GPT-5** (직접 API 호출)
 - **localStorage** (데이터 저장)
 - **Tailwind CSS + shadcn/ui**
 
@@ -50,7 +50,7 @@ npm run dev
 
 ### 1. 📝 문서 검토
 
-- PDF, DOC, DOCX, TXT 파일 지원
+- DOCX, TXT 파일 지원 (브라우저에서 직접 텍스트 추출)
 - 브라우저에서 직접 OpenAI에 업로드
 - 커스터마이징 가능한 검토 항목
 - 실시간 진행 상황 표시
@@ -197,7 +197,7 @@ draftreviewr:user-id                # 사용자 ID (자동 생성)
 ### 비용
 
 - 파일 업로드: 무료
-- GPT-4o 사용: 토큰당 과금
+- GPT-5 사용: 토큰당 과금
 - 평균 문서 검토 (5개 항목): 약 $0.50-1.00
 
 ### API 키 발급

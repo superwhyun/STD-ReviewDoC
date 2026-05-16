@@ -29,7 +29,8 @@
     {
       "step": 3,
       "name": "product-contract-alignment",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Aligned README, settings UI, upload UI: GPT-5 model, localStorage storage, DOCX/TXT-only file support."
     },
     {
       "step": 4,

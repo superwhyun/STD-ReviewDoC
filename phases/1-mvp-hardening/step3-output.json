@@ -1,0 +1,43 @@
+{
+    "schema_version": 1,
+    "step": 3,
+    "name": "product-contract-alignment",
+    "status": "completed",
+    "summary": "Aligned README, settings UI, and upload UI copy with actual implementation: GPT-5 model, localStorage storage, DOCX/TXT-only file support.",
+    "completed_work": [
+        "README.md: Changed GPT-4o → GPT-5 (lines 19, 200), removed PDF/DOC from supported formats (line 53 → DOCX, TXT only)",
+        "api-key-settings.tsx: Changed '암호화되어 안전하게 저장' → '브라우저 localStorage에 저장' (line 84), changed GPT-4o → GPT-5 (line 155), changed '암호화되어 데이터베이스에 저장' → '브라우저 localStorage에 저장 (full backup 시 포함될 수 있음)' (line 161)",
+        "document-upload-section.tsx: Removed 'application/pdf' and 'application/msword' from allowedTypes in handleDrop (line 54), changed accept attribute '.pdf,.doc,.docx,.txt' → '.docx,.txt' (line 182), changed UI text 'PDF, DOC, DOCX, TXT' → 'DOCX, TXT' (line 198)",
+        "lib/openai-client.ts: No changes needed — the code uses gpt-5 model and already documents Responses API path. Comment structure is adequate."
+    ],
+    "files_changed": [
+        "projects/DraftReviewr/README.md",
+        "projects/DraftReviewr/components/settings/api-key-settings.tsx",
+        "projects/DraftReviewr/components/documents/document-upload-section.tsx"
+    ],
+    "decisions": [
+        "Removed PDF and DOC from accept list and UI text because extractTextFromFile() only handles .docx (via mammoth) and .txt (via FileReader). PDF has no text extraction logic.",
+        "Kept DOCX support — mammoth library handles .docx extraction correctly.",
+        "Explicitly noted in settings UI that API key is included in full backup, warning users about export sensitivity.",
+        "Did NOT add PDF text extraction (e.g., pdf.js) — deferred to backlog as noted in module-map."
+    ],
+    "contract_surface_for_step4": {
+        "README.md": "Now accurately describes GPT-5 model, DOCX/TXT-only file support, and localStorage-based API key storage.",
+        "api-key-settings.tsx": "Security description now reflects actual localStorage storage. Model listed as GPT-5.",
+        "document-upload-section.tsx": "File accept and allowedTypes now match actual text extraction capability (DOCX, TXT)."
+    },
+    "verification": [
+        "python3 scripts/validate_phase.py 1-mvp-hardening --root projects/DraftReviewr → passed",
+        "npm run build --prefix projects/DraftReviewr → passed (Next.js 15.2.4, all routes static)"
+    ],
+    "known_issues": [
+        "PDF support is removed from the UI; if PDF support is needed, a separate phase for pdf.js integration should be created (deferred_backlog in module-map).",
+        "DOC files (.doc, application/msword) are not supported by mammoth — only .docx is. Removed from accept list."
+    ],
+    "next_actions": [
+        "Run Step 4 (verification-tooling): add test script to package.json, verify tsconfig and next config."
+    ],
+    "blockers": [],
+    "resume_hint": "Step 3 complete. Product copy now matches implementation: GPT-5, localStorage, DOCX/TXT. Proceed to step 4: verification-tooling.",
+    "written_at": "2026-05-16T09:02:00+09:00"
+}
