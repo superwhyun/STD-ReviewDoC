@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import type { DocumentType } from "@/lib/types"
-import { documentStorage, reviewItemStorage, commonReviewItemStorage, reviewResultStorage } from "@/lib/storage/local-storage"
+import { useState, useEffect } from "react"
+import type { DocumentType, LLMProviderType, LLMProviderConfig } from "@/lib/types"
+import { documentStorage, reviewItemStorage, commonReviewItemStorage, reviewResultStorage, llmProviderStorage } from "@/lib/storage/local-storage"
 import { processDocumentReview } from "@/lib/openai-client"
 import { createProvider } from "@/lib/llm-provider"
 import { OpenAIProvider } from "@/lib/providers/openai"
@@ -26,10 +26,19 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
   const router = useRouter()
   const [selectedType, setSelectedType] = useState<string>("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedProvider, setSelectedProvider] = useState<LLMProviderType>("openai")
+  const [availableProviders, setAvailableProviders] = useState<LLMProviderConfig[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [progress, setProgress] = useState(0)
   const [progressText, setProgressText] = useState("")
+
+  useEffect(() => {
+    const configs = llmProviderStorage.getAll()
+    setAvailableProviders(configs)
+    const active = llmProviderStorage.getActive()
+    if (configs.some(c => c.provider === active)) setSelectedProvider(active)
+  }, [])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -101,7 +110,7 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
           ...typeItems.map((item) => ({ name: item.name, prompt: item.prompt })),
         ]
 
-        const provider = await createProvider()
+        const provider = await createProvider(selectedProvider)
         const providerResults = await provider.review({
           fileContent,
           prompts,
@@ -195,6 +204,24 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
         <CardDescription>검토할 표준초안 문서를 업로드하고 타입을 선택하세요</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {availableProviders.length > 1 && (
+          <div className="space-y-2">
+            <Label>AI 제공자</Label>
+            <Select value={selectedProvider} onValueChange={(v) => setSelectedProvider(v as LLMProviderType)}>
+              <SelectTrigger>
+                <SelectValue placeholder="제공자 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableProviders.map((c) => (
+                  <SelectItem key={c.provider} value={c.provider}>
+                    {c.provider === "openai" ? "OpenAI" : c.provider === "grok" ? "Grok (xAI)" : c.provider === "openrouter" ? "OpenRouter" : "Kimi"} ({c.model})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="document-type">문서 타입</Label>
           <Select value={selectedType} onValueChange={setSelectedType}>
