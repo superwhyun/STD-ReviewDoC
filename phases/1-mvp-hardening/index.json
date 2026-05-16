@@ -23,7 +23,8 @@
     {
       "step": 2,
       "name": "review-failure-state",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Added failed status update in DocumentUploadSection catch block; notify parent list on failure."
     },
     {
       "step": 3,

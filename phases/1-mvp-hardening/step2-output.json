@@ -1,0 +1,39 @@
+{
+    "schema_version": 1,
+    "step": 2,
+    "name": "review-failure-state",
+    "status": "completed",
+    "summary": "Added failed status update in DocumentUploadSection catch block; moved newDocument variable outside try scope so catch can access it; notify parent list on failure.",
+    "completed_work": [
+        "Moved newDocument declaration from const inside try block to let outside try block so the catch handler can reference it.",
+        "Added documentStorage.updateStatus(newDocument.id, 'failed') in the catch block when newDocument was successfully created before the error.",
+        "Added onDocumentAdded() call in the catch block so the parent DocumentsList re-renders and shows the failed badge.",
+        "Used non-null assertion (!) for newDocument references inside the try block since it's guaranteed to be assigned after create().",
+        "Existing DocumentsList getStatusBadge() already renders failed status with destructive variant + '실패' label — no UI changes needed."
+    ],
+    "files_changed": [
+        "projects/DraftReviewr/components/documents/document-upload-section.tsx"
+    ],
+    "decisions": [
+        "Did not add a separate onDocumentFailed callback — reused existing onDocumentAdded to trigger list refresh. The DocumentsList already re-fetches from storage and renders the failed badge.",
+        "Did not modify lib/types.ts — the Document.status union type already includes 'failed'.",
+        "Did not modify lib/storage/local-storage.ts — documentStorage.updateStatus() already handles any valid status string including 'failed'."
+    ],
+    "contract_surface_for_step3": {
+        "DocumentUploadSection": "handleUpload creates a document, calls processDocumentReview, and on success sets status=completed + stores results. On any error after document creation, sets status=failed and notifies parent via onDocumentAdded.",
+        "DocumentsList": "Renders failed documents with destructive badge '실패'. '결과 보기' button disabled for non-completed statuses."
+    },
+    "verification": [
+        "python3 scripts/validate_phase.py 1-mvp-hardening --root projects/DraftReviewr → passed",
+        "npm run build --prefix projects/DraftReviewr → passed (Next.js 15.2.4, all routes static)"
+    ],
+    "known_issues": [
+        "If documentStorage.create() itself throws (e.g., localStorage quota exceeded), no document is created and no failed status is set — this is correct behavior (nothing to mark as failed)."
+    ],
+    "next_actions": [
+        "Run Step 3 (product-contract-alignment): align README, API key settings UI copy, and supported file format claims with actual implementation."
+    ],
+    "blockers": [],
+    "resume_hint": "Step 2 complete. Document failure state is now properly handled. Proceed to step 3: product-contract-alignment.",
+    "written_at": "2026-05-16T09:00:00+09:00"
+}

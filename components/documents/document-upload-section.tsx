@@ -71,10 +71,12 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
     setProgress(0)
     setProgressText("문서 업로드 중...")
 
+    let newDocument: ReturnType<typeof documentStorage.create> | null = null
+
     try {
       // Create document entry with file data URL (for small files) or file name
       const fileUrl = selectedFile.name // In a real app, you might store the file content as data URL
-      const newDocument = documentStorage.create({
+      newDocument = documentStorage.create({
         document_type_id: selectedType,
         file_name: selectedFile.name,
         file_url: fileUrl,
@@ -104,7 +106,7 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
       // Save review results
       results.forEach((result) => {
         reviewResultStorage.create({
-          document_id: newDocument.id,
+          document_id: newDocument!.id,
           review_item_id: result.review_item_id,
           common_review_item_id: result.common_review_item_id,
           result: result.result,
@@ -112,7 +114,7 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
       })
 
       // Update status to completed
-      documentStorage.updateStatus(newDocument.id, "completed")
+      documentStorage.updateStatus(newDocument!.id, "completed")
 
       setProgressText("검토 완료!")
       setProgress(100)
@@ -132,7 +134,15 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
     } catch (error) {
       console.error("Error uploading document:", error)
       setProgressText("검토 실패: " + (error instanceof Error ? error.message : "알 수 없는 오류"))
-      // Note: We should update document status to "failed" here if we created it
+
+      // Update document status to failed if it was created before the error
+      if (newDocument) {
+        documentStorage.updateStatus(newDocument.id, "failed")
+        // Notify parent so the list refreshes and shows the failed status
+        if (onDocumentAdded) {
+          onDocumentAdded()
+        }
+      }
     } finally {
       setIsUploading(false)
     }
@@ -170,9 +180,8 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`relative rounded-lg border-2 border-dashed transition-colors ${
-              isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
-            }`}
+            className={`relative rounded-lg border-2 border-dashed transition-colors ${isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
+              }`}
           >
             <input
               id="file-upload"
