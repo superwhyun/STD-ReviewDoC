@@ -61,7 +61,7 @@ export class GrokProvider implements LLMProvider {
 
         const r = await fetch(`${GROK_API_BASE}/responses`, {
             method: "POST", headers: { Authorization: `Bearer ${this.apiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: this.model, input: fullPrompt, max_output_tokens: 16000 }),
+            body: JSON.stringify({ model: this.model, input: fullPrompt, ...(this.reasoning ? { reasoning: this.reasoning } : {}), max_output_tokens: 16000 }),
         })
         if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || "Failed to review with Grok") }
         const data: GrokResponse = await r.json()
@@ -79,7 +79,7 @@ export class GrokProvider implements LLMProvider {
 
         const r = await fetch(`${GROK_API_BASE}/responses`, {
             method: "POST", headers: { Authorization: `Bearer ${this.apiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: this.model, input: fullPrompt, stream: true, max_output_tokens: 16000 }),
+            body: JSON.stringify({ model: this.model, input: fullPrompt, stream: true, ...(this.reasoning ? { reasoning: this.reasoning } : {}), max_output_tokens: 16000 }),
         })
         if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || "Failed to stream with Grok") }
         if (!r.body) throw new Error("No response body for streaming")

@@ -4,6 +4,7 @@
  */
 
 import { DocumentType, ReviewItem, CommonReviewItem, Document, ReviewResult } from "@/lib/types"
+import type { LLMProviderConfig, LLMProviderType } from "@/lib/types"
 
 const KEYS = {
   DOCUMENT_TYPES: "draftreviewr:document-types",
@@ -308,8 +309,6 @@ export const apiKeyStorage = {
 }
 
 // LLM Provider Configs
-import type { LLMProviderConfig, LLMProviderType } from "@/lib/types"
-
 export const llmProviderStorage = {
   getAll(): LLMProviderConfig[] {
     return getItem(KEYS.LLM_CONFIGS, [] as LLMProviderConfig[])
@@ -393,6 +392,8 @@ export const exportImportStorage = {
       review_results: reviewResultStorage.getAll(),
       api_key: apiKeyStorage.get(),
       user_id: getUserId(),
+      llm_configs: llmProviderStorage.getAll(),
+      active_provider: llmProviderStorage.getActive(),
     }
     return JSON.stringify(data, null, 2)
   },
@@ -434,6 +435,12 @@ export const exportImportStorage = {
     }
     if (data.user_id) {
       setItem(KEYS.USER_ID, data.user_id)
+    }
+    if (data.llm_configs) {
+      setItem(KEYS.LLM_CONFIGS, data.llm_configs)
+    }
+    if (data.active_provider) {
+      setItem(KEYS.ACTIVE_PROVIDER, data.active_provider)
     }
   },
 

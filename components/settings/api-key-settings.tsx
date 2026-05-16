@@ -76,7 +76,7 @@ export function ApiKeySettings() {
     setIsLoading(true); setMessage(null)
     try {
       const cfg: LLMProviderConfig = { provider: selectedProvider, apiKey, model: model || "" }
-      if (reasoning && SHOW_REASONING_FOR.includes(selectedProvider)) {
+      if (reasoning && reasoning !== "__none__" && SHOW_REASONING_FOR.includes(selectedProvider)) {
         cfg.reasoning = { effort: reasoning as "minimal" | "low" | "medium" | "high" }
       }
       llmProviderStorage.save(cfg)
