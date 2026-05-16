@@ -1,0 +1,67 @@
+{
+    "schema_version": 1,
+    "phase": "3-provider-model-ui",
+    "tag": "draft-reviewer-phase3-done",
+    "source_module_map": "phases/3-provider-model-ui/module-map.json",
+    "project_state": {
+        "name": "DraftReviewr",
+        "root": "projects/DraftReviewr",
+        "summary": "Provider selection on upload page + model list dropdown fetched from API + reasoning support for OpenAI/Grok.",
+        "runtime": "Next.js 15.2.4 App Router, React 19, TypeScript, Tailwind CSS 4."
+    },
+    "modules": [
+        {
+            "name": "llm-provider",
+            "changes": "LLMProvider.listModels(), ReviewRequest.providerType, LLMProviderConfig.reasoning"
+        },
+        {
+            "name": "openai-provider",
+            "changes": "listModels() fetches GPT models; reasoning effort from config"
+        },
+        {
+            "name": "grok-provider",
+            "changes": "listModels() fetches grok models; reasoning effort from config"
+        },
+        {
+            "name": "openrouter-provider",
+            "changes": "listModels() fetches all models with name display"
+        },
+        {
+            "name": "kimi-provider",
+            "changes": "listModels() fetches moonshot models"
+        },
+        {
+            "name": "settings-ui",
+            "changes": "Model fetch dropdown + refresh button + reasoning toggle"
+        },
+        {
+            "name": "document-review",
+            "changes": "Provider selection dropdown on upload page"
+        }
+    ],
+    "routes": [
+        {
+            "path": "/",
+            "build_status": "prerendered as static content"
+        },
+        {
+            "path": "/admin",
+            "build_status": "prerendered as static content"
+        },
+        {
+            "path": "/settings",
+            "build_status": "prerendered as static content"
+        }
+    ],
+    "verification": [
+        {
+            "command": "npm run typecheck --prefix projects/DraftReviewr",
+            "status": "passed"
+        },
+        {
+            "command": "npm run build --prefix projects/DraftReviewr",
+            "status": "passed"
+        }
+    ],
+    "written_at": "2026-05-16T12:23:00+09:00"
+}

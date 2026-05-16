@@ -17,8 +17,8 @@
     },
     {
       "dir": "3-provider-model-ui",
-      "status": "pending",
-      "summary": "Provider selection on upload page + model list dropdown fetched from API."
+      "status": "completed",
+      "summary": "Provider selection on upload + model dropdown from API + reasoning toggle for OpenAI/Grok."
     }
   ]
 }

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "draft-reviewer",
   "project_root": "projects/DraftReviewr",
-  "status": "provider-ui-in-progress",
+  "status": "provider-ui-completed",
   "active_phase": "3-provider-model-ui",
   "modules": [
     {
