@@ -12,24 +12,25 @@
       "step": 0,
       "name": "multi-llm-contracts",
       "status": "completed",
-      "summary": "Phase 2 contracts designed: LLMProvider interface, 8-module map."
+      "summary": "Contracts designed."
     },
     {
       "step": 1,
       "name": "storage-migration",
       "status": "completed",
-      "summary": "LLMProviderType/config types; llm-configs storage with legacy migration."
+      "summary": "Types + llm-configs storage."
     },
     {
       "step": 2,
       "name": "llm-client-abstraction",
       "status": "completed",
-      "summary": "LLMProvider interface, ProviderFactory, OpenAI provider, stub providers."
+      "summary": "LLMProvider + OpenAI."
     },
     {
       "step": 3,
       "name": "grok-openrouter-kimi",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Grok/OpenRouter/Kimi full impl."
     },
     {
       "step": 4,

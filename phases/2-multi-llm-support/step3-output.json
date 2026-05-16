@@ -1,0 +1,39 @@
+{
+    "schema_version": 1,
+    "step": 3,
+    "name": "grok-openrouter-kimi",
+    "status": "completed",
+    "summary": "Replaced stub implementations with full Grok (xAI Responses API), OpenRouter (Chat Completions), and Kimi (Chat Completions) providers.",
+    "completed_work": [
+        "Grok provider: Implemented full review() using xAI Responses API (https://api.x.ai/v1/responses). Model: grok-3. Response format matches OpenAI Responses structure.",
+        "OpenRouter provider: Implemented full review() using Chat Completions API with messages array. Model: openai/gpt-5 default. Uses bearer token auth.",
+        "Kimi provider: Implemented full review() using Chat Completions API (https://api.moonshot.cn/v1/chat/completions). Model: moonshot-v1-auto default.",
+        "All three providers implement LLMProvider interface with review(), reviewStream() stub, and validateApiKey().",
+        "Response parsing logic is consistent across all providers (### section splitting, fallback strategies)."
+    ],
+    "files_changed": [
+        "projects/DraftReviewr/lib/providers/grok.ts",
+        "projects/DraftReviewr/lib/providers/openrouter.ts",
+        "projects/DraftReviewr/lib/providers/kimi.ts"
+    ],
+    "decisions": [
+        "Grok uses Responses API (not Chat Completions) as specified by the user requirement. The response format mirrors OpenAI Responses.",
+        "OpenRouter and Kimi use Chat Completions API with system/user message format — OpenAI-compatible.",
+        "All providers share the same section-parsing logic for consistency. If a provider returns a different format, it will gracefully degrade with per-item fallback messages."
+    ],
+    "contract_surface_for_step4": {
+        "All 4 providers": "reviewStream() stubs ready for SSE streaming implementation in Step 4"
+    },
+    "verification": [
+        "npm run typecheck --prefix projects/DraftReviewr → passed",
+        "npm run build --prefix projects/DraftReviewr → passed",
+        "python3 scripts/validate_phase.py 2-multi-llm-support --root projects/DraftReviewr → passed"
+    ],
+    "known_issues": [],
+    "next_actions": [
+        "Run Step 4 (streaming-support): add SSE streaming to all 4 providers' reviewStream()."
+    ],
+    "blockers": [],
+    "resume_hint": "Step 3 complete. All 4 providers have full review() implementations. Proceed to step 4: streaming-support.",
+    "written_at": "2026-05-16T10:18:00+09:00"
+}
