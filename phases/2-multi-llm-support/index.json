@@ -12,18 +12,19 @@
       "step": 0,
       "name": "multi-llm-contracts",
       "status": "completed",
-      "summary": "Phase 2 contracts designed: LLMProvider interface, 8-module map, project-manifest updated."
+      "summary": "Phase 2 contracts designed: LLMProvider interface, 8-module map."
     },
     {
       "step": 1,
       "name": "storage-migration",
       "status": "completed",
-      "summary": "Added LLMProviderType/config types; llm-configs storage with legacy key migration."
+      "summary": "LLMProviderType/config types; llm-configs storage with legacy migration."
     },
     {
       "step": 2,
       "name": "llm-client-abstraction",
-      "status": "pending"
+      "status": "completed",
+      "summary": "LLMProvider interface, ProviderFactory, OpenAI provider, stub providers."
     },
     {
       "step": 3,
