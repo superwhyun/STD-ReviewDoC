@@ -37,6 +37,7 @@ export interface ResponsesAPIResponse {
       text: string
     }>
   }>
+  output_text?: string
   usage: {
     input_tokens: number
     output_tokens: number

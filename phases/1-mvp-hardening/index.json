@@ -35,12 +35,19 @@
     {
       "step": 4,
       "name": "verification-tooling",
-      "status": "pending"
+      "status": "pending",
+      "summary": "Added typecheck script; previously blocked by pre-existing type error — now resolved by step 6."
     },
     {
       "step": 5,
       "name": "runtime-smoke-and-phase-close",
       "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "blocking-fix-openai-response-type",
+      "status": "completed",
+      "summary": "Added output_text?: string to ResponsesAPIResponse; typecheck passes; unblocks step 4."
     }
   ]
 }
