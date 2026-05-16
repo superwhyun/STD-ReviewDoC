@@ -1,0 +1,57 @@
+{
+    "schema_version": 1,
+    "step": 0,
+    "name": "multi-llm-contracts",
+    "status": "completed",
+    "summary": "Phase 2 contract design confirmed. LLMProvider interface defined, 8-module map created, project-manifest updated.",
+    "completed_work": [
+        "Analyzed lib/openai-client.ts to identify abstraction points: processDocumentReview(), reviewDocumentWithOpenAI(), extractTextFromFile()",
+        "Designed LLMProvider contract interface with review(), reviewStream(), validateApiKey() methods",
+        "Designed ProviderFactory (createProvider) for multi-backend instantiation",
+        "Defined storage migration plan: draftreviewr:api-key → draftreviewr:llm-configs + draftreviewr:active-provider",
+        "Created module-map.json with 8 modules covering contracts, storage, abstraction, 3 providers, streaming, UI, integration, and close",
+        "Updated project-manifest.json: status → multi-llm-planned, active_phase → 2-multi-llm-support",
+        "Updated phases/index.json with phase 2 summary",
+        "Created step1-7.md with complete module assignments, AC, and forbidden paths",
+        "Created DESIGN.md as contract reference document"
+    ],
+    "files_changed": [
+        "projects/DraftReviewr/phases/index.json",
+        "projects/DraftReviewr/phases/project-manifest.json",
+        "projects/DraftReviewr/phases/2-multi-llm-support/index.json",
+        "projects/DraftReviewr/phases/2-multi-llm-support/module-map.json",
+        "projects/DraftReviewr/phases/2-multi-llm-support/step0.md",
+        "projects/DraftReviewr/phases/2-multi-llm-support/step1.md",
+        "projects/DraftReviewr/phases/2-multi-llm-support/step2.md",
+        "projects/DraftReviewr/phases/2-multi-llm-support/step3.md",
+        "projects/DraftReviewr/phases/2-multi-llm-support/step4.md",
+        "projects/DraftReviewr/phases/2-multi-llm-support/step5.md",
+        "projects/DraftReviewr/phases/2-multi-llm-support/step6.md",
+        "projects/DraftReviewr/phases/2-multi-llm-support/step7.md",
+        "projects/DraftReviewr/phases/2-multi-llm-support/DESIGN.md"
+    ],
+    "decisions": [
+        "Provider Interface: LLMProvider with type, review(), reviewStream(), validateApiKey(). All 4 providers must implement.",
+        "Grok: xAI Responses API (NOT Chat Completions). URL: https://api.x.ai/v1/responses",
+        "OpenRouter/Kimi: OpenAI-compatible Chat Completions API. SSE streaming via choices[0].delta.content.",
+        "Storage: draftreviewr:llm-configs stores LLMProviderConfig[]. draftreviewr:active-provider stores selected provider type. draftreviewr:api-key preserved for backward compat.",
+        "Migration: First load auto-converts existing draftreviewr:api-key into OpenAI LLMProviderConfig entry.",
+        "Streaming: All providers implement reviewStream() as AsyncGenerator<string> using ReadableStream + SSE parsing."
+    ],
+    "contract_surface_for_step1": {
+        "LLMProviderType": "'openai' | 'grok' | 'openrouter' | 'kimi'",
+        "LLMProviderConfig": "{ provider, apiKey, model, baseUrl? }",
+        "Storage keys": "draftreviewr:llm-configs, draftreviewr:active-provider",
+        "Migration": "draftreviewr:api-key → draftreviewr:llm-configs"
+    },
+    "verification": [
+        "python3 scripts/validate_phase.py 2-multi-llm-support --root projects/DraftReviewr → passed"
+    ],
+    "known_issues": [],
+    "next_actions": [
+        "Run Step 1 (storage-migration): add LLMProviderType, LLMProviderConfig types and storage migration functions."
+    ],
+    "blockers": [],
+    "resume_hint": "Step 0 complete. Contracts defined. Proceed to step 1: storage-migration — add LLMProviderType/types and llm-configs storage.",
+    "written_at": "2026-05-16T10:11:00+09:00"
+}

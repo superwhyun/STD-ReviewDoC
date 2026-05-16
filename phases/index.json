@@ -9,6 +9,11 @@
       "dir": "1-mvp-hardening",
       "status": "completed",
       "summary": "MVP hardened: default data loading fixed, review failure state handled, product copy aligned with implementation, verification tooling added (typecheck + build)."
+    },
+    {
+      "dir": "2-multi-llm-support",
+      "status": "pending",
+      "summary": "Add OpenRouter, Grok (xAI Responses API), Kimi LLM backends with streaming support for all providers."
     }
   ]
 }

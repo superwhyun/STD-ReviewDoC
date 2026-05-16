@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "phase": "2-multi-llm-support",
+  "baseline": "phases/baselines/1-mvp-hardening.json",
+  "policy": {
+    "context_mode": "contract-first",
+    "frozen_after_completion": true,
+    "default_read_order": [
+      "baseline",
+      "module-map",
+      "public-contracts",
+      "current-step",
+      "targeted-implementation-only-if-needed"
+    ]
+  },
+  "modules": [
+    {
+      "name": "multi-llm-contracts",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "phases/2-multi-llm-support/module-map.json",
+        "phases/2-multi-llm-support/step0-output.json",
+        "phases/project-manifest.json"
+      ],
+      "contracts": [
+        "phases/baselines/1-mvp-hardening.json",
+        "phases/project-manifest.json",
+        "phases/2-multi-llm-support/index.json"
+      ],
+      "dependencies": [],
+      "status": "planned"
+    },
+    {
+      "name": "storage-migration",
+      "owner_steps": [
+        1
+      ],
+      "owned_paths": [
+        "lib/storage/local-storage.ts",
+        "lib/types.ts",
+        "phases/2-multi-llm-support/step1-output.json"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts",
+        "phases/baselines/1-mvp-hardening.json",
+        "phases/2-multi-llm-support/step0-output.json"
+      ],
+      "dependencies": [
+        "client-storage",
+        "multi-llm-contracts"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "llm-client-abstraction",
+      "owner_steps": [
+        2
+      ],
+      "owned_paths": [
+        "lib/llm-provider.ts",
+        "lib/providers/openai.ts",
+        "phases/2-multi-llm-support/step2-output.json"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts",
+        "lib/openai-client.ts",
+        "phases/2-multi-llm-support/step1-output.json"
+      ],
+      "dependencies": [
+        "storage-migration",
+        "openai-review-client"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "grok-openrouter-kimi",
+      "owner_steps": [
+        3
+      ],
+      "owned_paths": [
+        "lib/providers/grok.ts",
+        "lib/providers/openrouter.ts",
+        "lib/providers/kimi.ts",
+        "phases/2-multi-llm-support/step3-output.json"
+      ],
+      "contracts": [
+        "lib/llm-provider.ts",
+        "lib/providers/openai.ts",
+        "phases/2-multi-llm-support/step2-output.json"
+      ],
+      "dependencies": [
+        "llm-client-abstraction"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "streaming-support",
+      "owner_steps": [
+        4
+      ],
+      "owned_paths": [
+        "lib/llm-provider.ts",
+        "lib/providers/openai.ts",
+        "lib/providers/grok.ts",
+        "lib/providers/openrouter.ts",
+        "lib/providers/kimi.ts",
+        "phases/2-multi-llm-support/step4-output.json"
+      ],
+      "contracts": [
+        "lib/llm-provider.ts",
+        "phases/2-multi-llm-support/step3-output.json"
+      ],
+      "dependencies": [
+        "grok-openrouter-kimi"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "settings-ui",
+      "owner_steps": [
+        5
+      ],
+      "owned_paths": [
+        "components/settings/api-key-settings.tsx",
+        "phases/2-multi-llm-support/step5-output.json"
+      ],
+      "contracts": [
+        "lib/llm-provider.ts",
+        "lib/storage/local-storage.ts",
+        "lib/types.ts",
+        "phases/2-multi-llm-support/step4-output.json"
+      ],
+      "dependencies": [
+        "streaming-support",
+        "settings-api-key"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "integration",
+      "owner_steps": [
+        6
+      ],
+      "owned_paths": [
+        "components/documents/document-upload-section.tsx",
+        "lib/storage/local-storage.ts",
+        "phases/2-multi-llm-support/step6-output.json"
+      ],
+      "contracts": [
+        "lib/llm-provider.ts",
+        "phases/2-multi-llm-support/step5-output.json"
+      ],
+      "dependencies": [
+        "settings-ui",
+        "document-review"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "runtime-smoke-and-phase-close",
+      "owner_steps": [
+        7
+      ],
+      "owned_paths": [
+        "phases/index.json",
+        "phases/project-manifest.json",
+        "phases/baselines/2-multi-llm-support.json",
+        "phases/2-multi-llm-support/index.json",
+        "phases/2-multi-llm-support/step7-output.json"
+      ],
+      "contracts": [
+        "phases/2-multi-llm-support/step1-output.json",
+        "phases/2-multi-llm-support/step2-output.json",
+        "phases/2-multi-llm-support/step3-output.json",
+        "phases/2-multi-llm-support/step4-output.json",
+        "phases/2-multi-llm-support/step5-output.json",
+        "phases/2-multi-llm-support/step6-output.json",
+        "package.json"
+      ],
+      "dependencies": [
+        "storage-migration",
+        "llm-client-abstraction",
+        "grok-openrouter-kimi",
+        "streaming-support",
+        "settings-ui",
+        "integration"
+      ],
+      "status": "planned"
+    }
+  ],
+  "shared_contracts": [
+    "README.md",
+    "package.json",
+    "lib/types.ts",
+    "lib/storage/local-storage.ts",
+    "lib/openai-client.ts",
+    "components/documents/document-upload-section.tsx",
+    "components/settings/api-key-settings.tsx"
+  ],
+  "integration_points": [
+    "lib/llm-provider.ts (new public contract)",
+    "lib/storage/local-storage.ts (storage migration boundary)",
+    "components/settings/api-key-settings.tsx (multi-provider UI)",
+    "components/documents/document-upload-section.tsx (provider wiring)"
+  ],
+  "deferred_backlog": [
+    {
+      "type": "feature",
+      "summary": "The PDF text extraction was already deferred from phase 1. It remains out of scope for this phase.",
+      "suggested_phase": "pdf-extraction-support"
+    },
+    {
+      "type": "feature",
+      "summary": "The server-side AI proxy to protect API keys was deferred from phase 1. It remains out of scope.",
+      "suggested_phase": "server-side-ai-proxy"
+    },
+    {
+      "type": "testing",
+      "summary": "The E2E test coverage was deferred from phase 1. Add after multi-LLM integration stabilizes.",
+      "suggested_phase": "e2e-coverage"
+    }
+  ]
+}

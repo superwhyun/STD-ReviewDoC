@@ -2,8 +2,8 @@
   "schema_version": 1,
   "project": "draft-reviewer",
   "project_root": "projects/DraftReviewr",
-  "status": "hardening-completed",
-  "active_phase": "1-mvp-hardening",
+  "status": "multi-llm-planned",
+  "active_phase": "2-multi-llm-support",
   "modules": [
     {
       "name": "app-shell",
@@ -84,8 +84,13 @@
     },
     {
       "phase": "1-mvp-hardening",
-      "status": "pending",
-      "summary": "Planned MVP hardening phase covering default data loading, failed review state handling, product/security copy alignment, file-support truthfulness, and verification tooling."
+      "status": "completed",
+      "summary": "MVP hardened: default data loading fixed, review failure state handled, product copy aligned with implementation, verification tooling added (typecheck + build)."
+    },
+    {
+      "phase": "2-multi-llm-support",
+      "status": "in-progress",
+      "summary": "Add OpenRouter, Grok (xAI Responses API), Kimi LLM backends with streaming support for all providers."
     }
   ],
   "current_contract_summary": {
@@ -95,17 +100,19 @@
     "ai_integration": "Browser fetch calls to OpenAI /v1/responses with model gpt-5 for review generation; legacy assistant helper functions also exist in lib/openai-client.ts.",
     "import_export": "Settings export includes document types and review items; full backup includes API key, user id, documents, and review results."
   },
-  "updated_at": "2026-05-16T00:00:00+09:00",
+  "updated_at": "2026-05-16T01:06:00+09:00",
   "next_phase": {
-    "dir": "1-mvp-hardening",
-    "goal": "Make the existing MVP safer and more reliable before adding new product capabilities.",
+    "dir": "2-multi-llm-support",
+    "goal": "Add OpenRouter, Grok (xAI Responses API), and Kimi LLM backends with streaming support for all providers.",
     "step_order": [
-      "hardening-contracts",
-      "default-data-loading",
-      "review-failure-state",
-      "product-contract-alignment",
-      "verification-tooling",
-      "runtime-smoke-and-phase-close"
+      "multi-llm-contracts",
+      "storage-migration",
+      "llm-client-abstraction",
+      "grok-openrouter-kimi",
+      "streaming-support",
+      "settings-ui",
+      "integration",
+      "phase-close"
     ],
     "approval_required_before_execution": true
   }

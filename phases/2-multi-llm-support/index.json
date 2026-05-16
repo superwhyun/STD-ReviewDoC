@@ -1,0 +1,53 @@
+{
+  "schema_version": 2,
+  "project": "draft-reviewer",
+  "phase": "multi-llm-support",
+  "execution_policy": {
+    "context_mode": "contract-first",
+    "blocking_fix_priority": true,
+    "append_only_steps": true
+  },
+  "steps": [
+    {
+      "step": 0,
+      "name": "multi-llm-contracts",
+      "status": "completed",
+      "summary": "Phase 2 contracts designed: LLMProvider interface, 8-module map, project-manifest updated."
+    },
+    {
+      "step": 1,
+      "name": "storage-migration",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "llm-client-abstraction",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "grok-openrouter-kimi",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "streaming-support",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "settings-ui",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "integration",
+      "status": "pending"
+    },
+    {
+      "step": 7,
+      "name": "phase-close",
+      "status": "pending"
+    }
+  ]
+}
