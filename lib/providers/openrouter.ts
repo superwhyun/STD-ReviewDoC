@@ -88,4 +88,11 @@ export class OpenRouterProvider implements LLMProvider {
     async validateApiKey(): Promise<boolean> {
         try { const r = await fetch(`${this.baseUrl}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } }); return r.ok } catch { return false }
     }
+
+    async listModels(): Promise<Array<{ id: string; name: string }>> {
+        const r = await fetch(`${this.baseUrl}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
+        if (!r.ok) throw new Error("Failed to list OpenRouter models")
+        const data = await r.json()
+        return (data.data || []).map((m: any) => ({ id: m.id, name: `${m.id}${m.name ? ` - ${m.name}` : ""}` }))
+    }
 }

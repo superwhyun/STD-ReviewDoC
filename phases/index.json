@@ -8,12 +8,17 @@
     {
       "dir": "1-mvp-hardening",
       "status": "completed",
-      "summary": "MVP hardened: default data loading fixed, review failure state handled, product copy aligned with implementation, verification tooling added (typecheck + build)."
+      "summary": "MVP hardened: default data loading fixed, review failure state handled, product copy aligned, verification tooling added."
     },
     {
       "dir": "2-multi-llm-support",
       "status": "completed",
-      "summary": "Multi-LLM backends added: OpenAI, Grok (xAI Responses API), OpenRouter, Kimi — all with SSE streaming."
+      "summary": "Multi-LLM backends: OpenAI, Grok (xAI Responses API), OpenRouter, Kimi — all with SSE streaming."
+    },
+    {
+      "dir": "3-provider-model-ui",
+      "status": "pending",
+      "summary": "Provider selection on upload page + model list dropdown fetched from API."
     }
   ]
 }

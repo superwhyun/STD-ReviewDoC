@@ -2,8 +2,8 @@
   "schema_version": 1,
   "project": "draft-reviewer",
   "project_root": "projects/DraftReviewr",
-  "status": "multi-llm-completed",
-  "active_phase": "2-multi-llm-support",
+  "status": "provider-ui-in-progress",
+  "active_phase": "3-provider-model-ui",
   "modules": [
     {
       "name": "app-shell",

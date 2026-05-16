@@ -72,10 +72,12 @@ export class OpenAIProvider implements LLMProvider {
     readonly type = "openai" as const
     private apiKey: string
     private model: string
+    private reasoning?: { effort: string }
 
     constructor(config: LLMProviderConfig) {
         this.apiKey = config.apiKey
         this.model = config.model || "gpt-5"
+        this.reasoning = config.reasoning ? { effort: config.reasoning.effort } : undefined
     }
 
     async review(request: ReviewRequest): Promise<ReviewResult[]> {
@@ -86,7 +88,7 @@ export class OpenAIProvider implements LLMProvider {
         const response = await fetch(`${OPENAI_API_BASE}/responses`, {
             method: "POST",
             headers: { Authorization: `Bearer ${this.apiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: this.model, input: fullPrompt, reasoning: { effort: "medium" }, text: { verbosity: "high" }, max_output_tokens: 16000 }),
+            body: JSON.stringify({ model: this.model, input: fullPrompt, ...(this.reasoning ? { reasoning: this.reasoning } : {}), text: { verbosity: "high" }, max_output_tokens: 16000 }),
         })
 
         if (!response.ok) { const error = await response.json(); throw new Error(error.error?.message || "Failed to review document") }
@@ -109,7 +111,7 @@ export class OpenAIProvider implements LLMProvider {
         const response = await fetch(`${OPENAI_API_BASE}/responses`, {
             method: "POST",
             headers: { Authorization: `Bearer ${this.apiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: this.model, input: fullPrompt, stream: true, reasoning: { effort: "medium" }, max_output_tokens: 16000 }),
+            body: JSON.stringify({ model: this.model, input: fullPrompt, stream: true, ...(this.reasoning ? { reasoning: this.reasoning } : {}), max_output_tokens: 16000 }),
         })
 
         if (!response.ok) { const error = await response.json(); throw new Error(error.error?.message || "Failed to stream review") }
@@ -153,6 +155,15 @@ export class OpenAIProvider implements LLMProvider {
 
     async validateApiKey(): Promise<boolean> {
         try { const r = await fetch(`${OPENAI_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } }); return r.ok } catch { return false }
+    }
+
+    async listModels(): Promise<Array<{ id: string; name: string }>> {
+        const r = await fetch(`${OPENAI_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
+        if (!r.ok) throw new Error("Failed to list OpenAI models")
+        const data = await r.json()
+        return (data.data || [])
+            .filter((m: any) => m.id.includes("gpt"))
+            .map((m: any) => ({ id: m.id, name: m.id }))
     }
 
     static async extractText(file: File): Promise<string> { return extractTextFromFile(file) }

@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "phase": "3-provider-model-ui",
+  "baseline": "phases/baselines/2-multi-llm-support.json",
+  "policy": {
+    "context_mode": "contract-first",
+    "frozen_after_completion": true
+  },
+  "modules": [
+    {
+      "name": "contracts",
+      "owner_steps": [
+        0
+      ],
+      "owned_paths": [
+        "phases/3-provider-model-ui/*"
+      ],
+      "contracts": [
+        "phases/baselines/2-multi-llm-support.json"
+      ],
+      "dependencies": [],
+      "status": "planned"
+    },
+    {
+      "name": "list-models",
+      "owner_steps": [
+        1
+      ],
+      "owned_paths": [
+        "lib/providers/*.ts",
+        "lib/llm-provider.ts",
+        "lib/types.ts"
+      ],
+      "contracts": [
+        "lib/llm-provider.ts"
+      ],
+      "dependencies": [
+        "contracts"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "model-dropdown",
+      "owner_steps": [
+        2
+      ],
+      "owned_paths": [
+        "components/settings/api-key-settings.tsx"
+      ],
+      "contracts": [
+        "lib/llm-provider.ts"
+      ],
+      "dependencies": [
+        "list-models"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "provider-select",
+      "owner_steps": [
+        3
+      ],
+      "owned_paths": [
+        "components/documents/document-upload-section.tsx"
+      ],
+      "contracts": [
+        "lib/llm-provider.ts"
+      ],
+      "dependencies": [
+        "model-dropdown"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "phase-close",
+      "owner_steps": [
+        4
+      ],
+      "owned_paths": [
+        "phases/index.json",
+        "phases/baselines/3-provider-model-ui.json"
+      ],
+      "contracts": [],
+      "dependencies": [
+        "provider-select"
+      ],
+      "status": "planned"
+    }
+  ],
+  "shared_contracts": [
+    "lib/llm-provider.ts",
+    "lib/storage/local-storage.ts"
+  ],
+  "integration_points": [
+    "components/settings/api-key-settings.tsx",
+    "components/documents/document-upload-section.tsx"
+  ]
+}

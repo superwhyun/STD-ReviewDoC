@@ -46,8 +46,13 @@ export class GrokProvider implements LLMProvider {
     readonly type = "grok" as const
     private apiKey: string
     private model: string
+    private reasoning?: { effort: string }
 
-    constructor(config: LLMProviderConfig) { this.apiKey = config.apiKey; this.model = config.model || "grok-3" }
+    constructor(config: LLMProviderConfig) {
+        this.apiKey = config.apiKey
+        this.model = config.model || "grok-3"
+        this.reasoning = config.reasoning ? { effort: config.reasoning.effort } : undefined
+    }
 
     async review(request: ReviewRequest): Promise<ReviewResult[]> {
         const allItems = request.prompts.map((p, i) => ({ ...p, index: i }))
@@ -103,5 +108,14 @@ export class GrokProvider implements LLMProvider {
 
     async validateApiKey(): Promise<boolean> {
         try { const r = await fetch(`${GROK_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } }); return r.ok } catch { return false }
+    }
+
+    async listModels(): Promise<Array<{ id: string; name: string }>> {
+        const r = await fetch(`${GROK_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
+        if (!r.ok) throw new Error("Failed to list Grok models")
+        const data = await r.json()
+        return (data.data || [])
+            .filter((m: any) => m.id.includes("grok"))
+            .map((m: any) => ({ id: m.id, name: m.id }))
     }
 }

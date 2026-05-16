@@ -3,12 +3,13 @@
  * Defines the common interface for all LLM backends (OpenAI, Grok, OpenRouter, Kimi)
  */
 
-import type { LLMProviderType, LLMProviderConfig } from "@/lib/types"
+import type { LLMProviderType, LLMProviderConfig, LLMModel } from "@/lib/types"
 import { llmProviderStorage } from "@/lib/storage/local-storage"
 
 export interface ReviewRequest {
     fileContent: string
     prompts: Array<{ name: string; prompt: string }>
+    providerType?: LLMProviderType
     onProgress?: (current: number, total: number, itemName: string) => void
     onToken?: (token: string) => void
 }
@@ -21,44 +22,29 @@ export interface ReviewResult {
 export interface LLMProvider {
     readonly type: LLMProviderType
 
-    /**
-     * Execute a document review with all prompts.
-     * Returns one ReviewResult per prompt.
-     */
+    /** Execute a document review with all prompts. Returns one ReviewResult per prompt. */
     review(request: ReviewRequest): Promise<ReviewResult[]>
 
-    /**
-     * Execute a document review with streaming token output.
-     * Yields tokens as they arrive from the LLM.
-     */
+    /** Execute a document review with streaming token output. */
     reviewStream(request: ReviewRequest): AsyncGenerator<string>
 
-    /**
-     * Validate the configured API key against the provider's endpoint.
-     */
+    /** Validate the configured API key against the provider's endpoint. */
     validateApiKey(): Promise<boolean>
+
+    /** List available models from this provider. */
+    listModels(): Promise<LLMModel[]>
 }
 
-// Dynamic import to avoid circular dependency
 const loadProvider = async (type: LLMProviderType): Promise<new (config: LLMProviderConfig) => LLMProvider> => {
     switch (type) {
-        case "openai":
-            return (await import("@/lib/providers/openai")).OpenAIProvider
-        case "grok":
-            return (await import("@/lib/providers/grok")).GrokProvider
-        case "openrouter":
-            return (await import("@/lib/providers/openrouter")).OpenRouterProvider
-        case "kimi":
-            return (await import("@/lib/providers/kimi")).KimiProvider
-        default:
-            throw new Error(`Unknown provider type: ${type}`)
+        case "openai": return (await import("@/lib/providers/openai")).OpenAIProvider
+        case "grok": return (await import("@/lib/providers/grok")).GrokProvider
+        case "openrouter": return (await import("@/lib/providers/openrouter")).OpenRouterProvider
+        case "kimi": return (await import("@/lib/providers/kimi")).KimiProvider
+        default: throw new Error(`Unknown provider type: ${type}`)
     }
 }
 
-/**
- * Create an LLM provider instance from its stored configuration.
- * Falls back to active provider if no config is specified.
- */
 export async function createProvider(configOrType?: LLMProviderConfig | LLMProviderType): Promise<LLMProvider> {
     let config: LLMProviderConfig
 
@@ -79,9 +65,6 @@ export async function createProvider(configOrType?: LLMProviderConfig | LLMProvi
     return new Provider(config)
 }
 
-/**
- * Get the active provider instance based on user selection.
- */
 export async function getActiveProvider(): Promise<LLMProvider> {
     return createProvider()
 }

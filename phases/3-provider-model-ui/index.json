@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "project": "draft-reviewer",
+  "phase": "provider-model-ui",
+  "execution_policy": {
+    "context_mode": "contract-first",
+    "blocking_fix_priority": true,
+    "append_only_steps": true
+  },
+  "steps": [
+    {
+      "step": 0,
+      "name": "contracts",
+      "status": "pending"
+    },
+    {
+      "step": 1,
+      "name": "list-models",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "model-dropdown",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "provider-select",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "phase-close",
+      "status": "pending"
+    }
+  ]
+}

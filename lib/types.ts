@@ -67,4 +67,10 @@ export interface LLMProviderConfig {
   apiKey: string
   model: string
   baseUrl?: string
+  reasoning?: { effort: "minimal" | "low" | "medium" | "high" }
+}
+
+export interface LLMModel {
+  id: string
+  name: string
 }

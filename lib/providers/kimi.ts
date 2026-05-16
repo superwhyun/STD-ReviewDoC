@@ -87,4 +87,13 @@ export class KimiProvider implements LLMProvider {
     async validateApiKey(): Promise<boolean> {
         try { const r = await fetch(`${KIMI_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } }); return r.ok } catch { return false }
     }
+
+    async listModels(): Promise<Array<{ id: string; name: string }>> {
+        const r = await fetch(`${KIMI_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
+        if (!r.ok) throw new Error("Failed to list Kimi models")
+        const data = await r.json()
+        return (data.data || [])
+            .filter((m: any) => m.id.includes("moonshot"))
+            .map((m: any) => ({ id: m.id, name: m.id }))
+    }
 }
