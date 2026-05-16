@@ -59,3 +59,12 @@ export interface ApiKeyInfo {
   masked?: string
   provider?: string
 }
+
+export type LLMProviderType = "openai" | "grok" | "openrouter" | "kimi"
+
+export interface LLMProviderConfig {
+  provider: LLMProviderType
+  apiKey: string
+  model: string
+  baseUrl?: string
+}

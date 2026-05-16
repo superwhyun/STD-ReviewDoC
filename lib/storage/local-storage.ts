@@ -13,6 +13,8 @@ const KEYS = {
   REVIEW_RESULTS: "draftreviewr:review-results",
   API_KEY: "draftreviewr:api-key",
   USER_ID: "draftreviewr:user-id",
+  LLM_CONFIGS: "draftreviewr:llm-configs",
+  ACTIVE_PROVIDER: "draftreviewr:active-provider",
 }
 
 // Utility functions
@@ -303,6 +305,56 @@ export const apiKeyStorage = {
     if (!key) return null
     return `${key.slice(0, 7)}...${key.slice(-4)}`
   },
+}
+
+// LLM Provider Configs
+import type { LLMProviderConfig, LLMProviderType } from "@/lib/types"
+
+export const llmProviderStorage = {
+  getAll(): LLMProviderConfig[] {
+    return getItem(KEYS.LLM_CONFIGS, [] as LLMProviderConfig[])
+  },
+
+  get(provider: LLMProviderType): LLMProviderConfig | undefined {
+    return this.getAll().find((c) => c.provider === provider)
+  },
+
+  save(config: LLMProviderConfig): void {
+    const configs = this.getAll().filter((c) => c.provider !== config.provider)
+    configs.push(config)
+    setItem(KEYS.LLM_CONFIGS, configs)
+  },
+
+  delete(provider: LLMProviderType): void {
+    const configs = this.getAll().filter((c) => c.provider !== provider)
+    setItem(KEYS.LLM_CONFIGS, configs)
+  },
+
+  getActive(): LLMProviderType {
+    return getItem(KEYS.ACTIVE_PROVIDER, "openai" as LLMProviderType)
+  },
+
+  setActive(provider: LLMProviderType): void {
+    setItem(KEYS.ACTIVE_PROVIDER, provider)
+  },
+}
+
+/**
+ * Migrate legacy draftreviewr:api-key to draftreviewr:llm-configs format.
+ * Safe to call multiple times — only migrates if legacy key exists and no OpenAI config exists.
+ */
+export function migrateLegacyApiKey(): void {
+  const existingConfigs = llmProviderStorage.getAll()
+  if (existingConfigs.some((c) => c.provider === "openai")) return
+
+  const legacyKey = apiKeyStorage.get()
+  if (!legacyKey) return
+
+  llmProviderStorage.save({
+    provider: "openai",
+    apiKey: legacyKey,
+    model: "gpt-5",
+  })
 }
 
 // User ID

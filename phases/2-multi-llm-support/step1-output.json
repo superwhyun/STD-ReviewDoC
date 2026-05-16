@@ -1,0 +1,42 @@
+{
+    "schema_version": 1,
+    "step": 1,
+    "name": "storage-migration",
+    "status": "completed",
+    "summary": "Added LLMProviderType, LLMProviderConfig to types.ts; added llm-configs storage with migration from legacy API key.",
+    "completed_work": [
+        "Added LLMProviderType ('openai' | 'grok' | 'openrouter' | 'kimi') and LLMProviderConfig to lib/types.ts",
+        "Added KEYS.LLM_CONFIGS and KEYS.ACTIVE_PROVIDER to lib/storage/local-storage.ts",
+        "Added llmProviderStorage with getAll, get, save, delete, getActive, setActive methods",
+        "Added migrateLegacyApiKey() function that auto-converts draftreviewr:api-key to LLMProviderConfig entry",
+        "Existing apiKeyStorage preserved for backward compatibility"
+    ],
+    "files_changed": [
+        "projects/DraftReviewr/lib/types.ts",
+        "projects/DraftReviewr/lib/storage/local-storage.ts"
+    ],
+    "decisions": [
+        "llmProviderStorage.getAll() returns LLMProviderConfig[] — defaults to empty array",
+        "getActive() defaults to 'openai' if no active provider is set",
+        "migrateLegacyApiKey() is idempotent — checks for existing OpenAI config before migrating",
+        "import of LLMProviderConfig/LVMProviderType is done inside local-storage.ts (not re-exported) to keep the dependency local"
+    ],
+    "contract_surface_for_step2": {
+        "LLMProviderType": "'openai' | 'grok' | 'openrouter' | 'kimi'",
+        "LLMProviderConfig": "{ provider, apiKey, model, baseUrl? }",
+        "llmProviderStorage": "CRUD for provider configs in localStorage key draftreviewr:llm-configs",
+        "migrateLegacyApiKey": "Auto-converts legacy draftreviewr:api-key into OpenAI config"
+    },
+    "verification": [
+        "npm run typecheck --prefix projects/DraftReviewr → passed",
+        "npm run build --prefix projects/DraftReviewr → passed",
+        "python3 scripts/validate_phase.py 2-multi-llm-support --root projects/DraftReviewr → passed"
+    ],
+    "known_issues": [],
+    "next_actions": [
+        "Run Step 2 (llm-client-abstraction): create LLMProvider interface, ProviderFactory, and OpenAI provider implementation."
+    ],
+    "blockers": [],
+    "resume_hint": "Step 1 complete. Types and storage ready. Proceed to step 2: llm-client-abstraction.",
+    "written_at": "2026-05-16T10:13:00+09:00"
+}

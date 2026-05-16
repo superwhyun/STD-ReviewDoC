@@ -17,7 +17,8 @@
     {
       "step": 1,
       "name": "storage-migration",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Added LLMProviderType/config types; llm-configs storage with legacy key migration."
     },
     {
       "step": 2,
