@@ -67,7 +67,7 @@ export interface LLMProviderConfig {
   apiKey: string
   model: string
   baseUrl?: string
-  reasoning?: { effort: "minimal" | "low" | "medium" | "high" }
+  reasoning?: { effort: "none" | "minimal" | "low" | "medium" | "high" }
 }
 
 export interface LLMModel {

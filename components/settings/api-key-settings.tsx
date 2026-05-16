@@ -76,8 +76,8 @@ export function ApiKeySettings() {
     setIsLoading(true); setMessage(null)
     try {
       const cfg: LLMProviderConfig = { provider: selectedProvider, apiKey, model: model || "" }
-      if (reasoning && reasoning !== "__none__" && SHOW_REASONING_FOR.includes(selectedProvider)) {
-        cfg.reasoning = { effort: reasoning as "minimal" | "low" | "medium" | "high" }
+      if (reasoning && SHOW_REASONING_FOR.includes(selectedProvider)) {
+        cfg.reasoning = { effort: reasoning as LLMProviderConfig["reasoning"] extends { effort: infer E } ? E : never }
       }
       llmProviderStorage.save(cfg)
       setMessage({ type: "success", text: `${PROVIDERS.find(p => p.type === selectedProvider)?.label} API 키 저장됨` })
@@ -152,7 +152,7 @@ export function ApiKeySettings() {
               <Select value={reasoning} onValueChange={setReasoning}>
                 <SelectTrigger id="reasoning"><SelectValue placeholder="선택 안 함" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">사용 안 함</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   <SelectItem value="minimal">Minimal</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
