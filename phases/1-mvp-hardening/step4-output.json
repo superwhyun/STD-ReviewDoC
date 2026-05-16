@@ -1,0 +1,42 @@
+{
+    "schema_version": 1,
+    "step": 4,
+    "name": "verification-tooling",
+    "status": "completed",
+    "summary": "Added typecheck script to package.json. Resolved pre-existing type error via blocking-fix step 6. All verification commands pass.",
+    "completed_work": [
+        "Added 'typecheck': 'tsc --noEmit' to package.json scripts",
+        "npm run build passes (unchanged from before)",
+        "npm run typecheck passes (after step 6 fix)",
+        "validate_phase.py passes",
+        "Existing scripts (dev, dev:simple, lint, start, build) unchanged"
+    ],
+    "files_changed": [
+        "projects/DraftReviewr/package.json"
+    ],
+    "decisions": [
+        "Used tsc --noEmit for typecheck since Next.js build intentionally skips type checking (typescript.ignoreBuildErrors: true in next.config.mjs).",
+        "Pre-existing type error in lib/openai-client.ts was resolved via blocking-fix step 6 instead of inline fix, following contract-first discipline.",
+        "Did not add a lint script — next lint already exists.",
+        "Did not add E2E testing — deferred to backlog (module-map references 'e2e-coverage' as a future phase)."
+    ],
+    "contract_surface_for_step5": {
+        "verification_commands": {
+            "typecheck": "tsc --noEmit — verifies TypeScript types compile (covers what next build skips)",
+            "build": "next build — verifies production build compiles and static pages generate",
+            "validate_phase": "python3 scripts/validate_phase.py 1-mvp-hardening --root projects/DraftReviewr"
+        }
+    },
+    "verification": [
+        "npm run typecheck --prefix projects/DraftReviewr → passed",
+        "npm run build --prefix projects/DraftReviewr → passed",
+        "python3 scripts/validate_phase.py 1-mvp-hardening --root projects/DraftReviewr → passed"
+    ],
+    "known_issues": [],
+    "next_actions": [
+        "Run Step 5 (runtime-smoke-and-phase-close): final build verification, baseline creation, phase close, and git tag."
+    ],
+    "blockers": [],
+    "resume_hint": "Step 4 complete. typecheck, build, and validate all pass. Proceed to step 5: runtime-smoke-and-phase-close for final phase wrap-up.",
+    "written_at": "2026-05-16T09:06:00+09:00"
+}

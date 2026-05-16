@@ -35,8 +35,8 @@
     {
       "step": 4,
       "name": "verification-tooling",
-      "status": "pending",
-      "summary": "Added typecheck script; previously blocked by pre-existing type error — now resolved by step 6."
+      "status": "completed",
+      "summary": "Added typecheck script (tsc --noEmit); type error resolved via step 6; all verifications pass."
     },
     {
       "step": 5,
