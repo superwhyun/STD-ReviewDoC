@@ -6,6 +6,8 @@ import { useState } from "react"
 import type { DocumentType } from "@/lib/types"
 import { documentStorage, reviewItemStorage, commonReviewItemStorage, reviewResultStorage } from "@/lib/storage/local-storage"
 import { processDocumentReview } from "@/lib/openai-client"
+import { createProvider } from "@/lib/llm-provider"
+import { OpenAIProvider } from "@/lib/providers/openai"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -89,17 +91,54 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
 
       setProgressText("AI 검토 시작...")
 
-      // Process review with OpenAI
-      const results = await processDocumentReview(
-        selectedFile,
-        commonItems,
-        typeItems,
-        (current, total, itemName) => {
-          const progressPercent = (current / total) * 100
-          setProgress(progressPercent)
-          setProgressText(`검토 중: ${itemName} (${current}/${total})`)
-        }
-      )
+      let results: Array<{ review_item_id?: string; common_review_item_id?: string; result: string }>
+
+      try {
+        // Try the new multi-provider system first
+        const fileContent = await OpenAIProvider.extractText(selectedFile)
+        const prompts = [
+          ...commonItems.map((item) => ({ name: item.name, prompt: item.prompt })),
+          ...typeItems.map((item) => ({ name: item.name, prompt: item.prompt })),
+        ]
+
+        const provider = await createProvider()
+        const providerResults = await provider.review({
+          fileContent,
+          prompts,
+          onProgress: (current, total, itemName) => {
+            const progressPercent = (current / total) * 100
+            setProgress(progressPercent)
+            setProgressText(`검토 중: ${itemName} (${current}/${total})`)
+          },
+          onToken: (token) => {
+            // Append streaming tokens to progress text
+            setProgressText((prev) => prev + token)
+          },
+        })
+
+        // Map provider results back to storage format
+        results = providerResults.map((pr, i) => {
+          const isCommon = i < commonItems.length
+          return {
+            review_item_id: isCommon ? undefined : typeItems[i - commonItems.length]?.id,
+            common_review_item_id: isCommon ? commonItems[i]?.id : undefined,
+            result: pr.result,
+          }
+        })
+      } catch (providerError) {
+        // Fallback to legacy processDocumentReview
+        console.warn("Provider review failed, falling back to legacy OpenAI client:", providerError)
+        results = await processDocumentReview(
+          selectedFile,
+          commonItems,
+          typeItems,
+          (current, total, itemName) => {
+            const progressPercent = (current / total) * 100
+            setProgress(progressPercent)
+            setProgressText(`검토 중: ${itemName} (${current}/${total})`)
+          }
+        )
+      }
 
       // Save review results
       results.forEach((result) => {
