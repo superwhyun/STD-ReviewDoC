@@ -2,8 +2,8 @@
   "schema_version": 1,
   "project": "draft-reviewer",
   "project_root": "projects/DraftReviewr",
-  "status": "provider-ui-completed",
-  "active_phase": "3-provider-model-ui",
+  "status": "standards-seed-in-progress",
+  "active_phase": "4-standards-seed",
   "modules": [
     {
       "name": "app-shell",
@@ -31,7 +31,7 @@
     },
     {
       "name": "export-import",
-      "summary": "JSON settings export/import and full backup/restore UI backed by localStorage serialization."
+      "summary": "JSON settings export/import and full backup/restore UI backed by localStorage serialization. Phase 4 will add a single settings JSON serializer with language and nested document review items."
     },
     {
       "name": "ui-foundation",
@@ -60,21 +60,33 @@
     "package.json",
     "lib/types.ts",
     "lib/storage/default-data.json",
+    "public/default-data.json",
+    "public/data/document-types/*.json",
+    "public/data/common-review-items.json",
     "lib/storage/local-storage.ts",
+    "lib/storage/seed-loader.ts",
+    "lib/storage/language-storage.ts",
+    "lib/storage/settings-serializer.ts",
     "lib/openai-client.ts",
+    "lib/llm-provider.ts",
+    "lib/providers/*.ts",
     "components.json"
   ],
   "integration_points": [
     "app/layout.tsx",
     "lib/openai-client.ts",
+    "lib/llm-provider.ts",
+    "lib/providers/*.ts",
     "lib/storage/local-storage.ts",
+    "lib/storage/seed-loader.ts",
+    "lib/storage/settings-serializer.ts",
     "components/export-import-dialog.tsx"
   ],
   "known_issues": [
     "claude.md appears to describe an older Supabase/API-route architecture and must not be treated as authoritative without verification.",
     "README and UI copy mention GPT-4o and encrypted API-key storage, but the current implementation uses model gpt-5 and stores the API key directly in localStorage.",
-    "initializeDefaultData fetches /lib/storage/default-data.json; verify first-run default data loading in a browser because Next normally serves static files from public/.",
-    "There is no dedicated test script in package.json; current AC relies on phase validation and Next production build."
+    "There is no dedicated test script in package.json; current AC relies on phase validation, typecheck, and Next production build.",
+    "phases/3-provider-model-ui/index.json still lists its steps as pending even though the top-level phase status, baseline, tag, and git history show phase 3 completed. Treat the phase 3 baseline and tag as authoritative unless a dedicated state-sync step is added."
   ],
   "history": [
     {
@@ -89,31 +101,41 @@
     },
     {
       "phase": "2-multi-llm-support",
-      "status": "in-progress",
+      "status": "completed",
       "summary": "Add OpenRouter, Grok (xAI Responses API), Kimi LLM backends with streaming support for all providers."
+    },
+    {
+      "phase": "3-provider-model-ui",
+      "status": "completed",
+      "summary": "Provider selection on upload, model dropdown from provider APIs, and reasoning toggle for OpenAI/Grok."
+    },
+    {
+      "phase": "4-standards-seed",
+      "status": "in-progress",
+      "summary": "Add ITU-T/JTC 1 seed document types, language setting, single settings export/import JSON, and wider review result dialog."
     }
   ],
   "current_contract_summary": {
     "runtime": "Next.js 15 App Router with React 19 and TypeScript, implemented as client-heavy pages without project-local API routes.",
-    "data_model": "DocumentType, ReviewItem, CommonReviewItem, UserApiKey, Document, ReviewResult, and ApiKeyInfo in lib/types.ts.",
-    "storage": "Browser localStorage keys under draftreviewr:* for document types, review items, common review items, documents, review results, API key, and user id.",
-    "ai_integration": "Browser fetch calls to OpenAI /v1/responses with model gpt-5 for review generation; legacy assistant helper functions also exist in lib/openai-client.ts.",
-    "import_export": "Settings export includes document types and review items; full backup includes API key, user id, documents, and review results."
+    "data_model": "DocumentType, ReviewItem, CommonReviewItem, UserApiKey, Document, ReviewResult, ApiKeyInfo, LLMProviderConfig, and LLMModel in lib/types.ts.",
+    "storage": "Browser localStorage keys under draftreviewr:* for document types, review items, common review items, documents, review results, legacy API key, user id, LLM configs, active provider, and planned language setting.",
+    "ai_integration": "Browser fetch calls through lib/providers/*.ts for OpenAI, Grok, OpenRouter, and Kimi; legacy lib/openai-client.ts remains as fallback.",
+    "import_export": "Current settings export uses flat document_types/review_items/common_review_items arrays; phase 4 will add a versioned single settings JSON with language and nested document review items."
   },
-  "updated_at": "2026-05-16T01:06:00+09:00",
-  "next_phase": {
-    "dir": "2-multi-llm-support",
-    "goal": "Add OpenRouter, Grok (xAI Responses API), and Kimi LLM backends with streaming support for all providers.",
+  "updated_at": "2026-05-17T00:00:00+09:00",
+  "current_phase": {
+    "dir": "4-standards-seed",
+    "goal": "Add ITU-T/JTC 1 standards seed document types, language setting, single settings export/import JSON, and wider review result dialog.",
     "step_order": [
-      "multi-llm-contracts",
-      "storage-migration",
-      "llm-client-abstraction",
-      "grok-openrouter-kimi",
-      "streaming-support",
-      "settings-ui",
-      "integration",
+      "contracts",
+      "seed-json-files",
+      "seed-loader",
+      "language-setting",
+      "export",
+      "import",
+      "review-result-width",
       "phase-close"
     ],
-    "approval_required_before_execution": true
+    "approval_required_before_execution": false
   }
 }

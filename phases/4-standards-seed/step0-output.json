@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "project": "draft-reviewer",
+  "phase": "4-standards-seed",
+  "step": 0,
+  "name": "contracts",
+  "status": "completed",
+  "summary": "Confirmed Phase 4 contracts against the current DraftReviewr implementation and updated module-map/project-manifest for standards seed work.",
+  "completed_work": [
+    "Read phase 3 baseline, project manifest, phase 4 module map, phase index, and Step 0 instructions.",
+    "Read current contracts in lib/types.ts, lib/storage/local-storage.ts, lib/storage/default-data.json, public/default-data.json, components/export-import-dialog.tsx, lib/openai-client.ts, lib/llm-provider.ts, lib/providers/*.ts, app/layout.tsx, app/admin/page.tsx, app/page.tsx, app/settings/page.tsx, and components/documents/document-review-dialog.tsx.",
+    "Confirmed that seed document type JSON must be transformed from nested review_items into the existing flat localStorage model with document_type_id and timestamp fields.",
+    "Confirmed that language settings must be applied to both the multi-provider path and the legacy OpenAI fallback path.",
+    "Confirmed that the review result dialog implementation path is components/documents/document-review-dialog.tsx.",
+    "Updated phases/4-standards-seed/module-map.json with contract findings, concrete review dialog path, provider prompt ownership for language setting, and serializer contracts.",
+    "Updated phases/project-manifest.json to mark active_phase as 4-standards-seed and status as standards-seed-in-progress."
+  ],
+  "files_changed": [
+    "phases/4-standards-seed/module-map.json",
+    "phases/4-standards-seed/index.json",
+    "phases/4-standards-seed/step0-output.json",
+    "phases/project-manifest.json"
+  ],
+  "decisions": [
+    "Step 1 will create public/data seed JSON files only; it will not modify runtime loading code.",
+    "Step 2 seed-loader will convert seed JSON into existing DocumentType, ReviewItem, and CommonReviewItem objects by adding created_at, updated_at, and document_type_id fields.",
+    "Step 2 will replace first-run and admin default reset behavior with public/data seed loading rather than relying on the legacy /default-data.json flat file.",
+    "Step 3 must inject language instructions into lib/providers/openai.ts, lib/providers/grok.ts, lib/providers/openrouter.ts, lib/providers/kimi.ts, and lib/openai-client.ts because the current app uses multi-provider review first and legacy OpenAI only as fallback.",
+    "Step 4 and Step 5 will introduce lib/storage/settings-serializer.ts as the single settings JSON conversion layer and wire ExportImportDialog to it.",
+    "Step 6 will modify only components/documents/document-review-dialog.tsx for review result width."
+  ],
+  "verification": [
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed",
+      "notes": "Passed after module-map, project-manifest, phase index, and step0-output updates."
+    },
+    {
+      "command": "git status --short",
+      "status": "passed",
+      "notes": "Changed files are limited to phase state and manifest files; no app, components, lib, or public implementation files were modified in Step 0."
+    }
+  ],
+  "known_issues": [
+    "phases/3-provider-model-ui/index.json still lists phase 3 steps as pending even though top-level phase status, baseline, tag, and git history show phase 3 completed. This is recorded in project-manifest and does not block Phase 4 Step 0.",
+    "Existing exportImportStorage uses a flat settings format and version 1.0.0; the Phase 4 single settings format is a new contract and needs serializer migration in later steps.",
+    "Existing provider prompts are Korean-only; language setting requires changes in all provider prompt builders, not only the legacy OpenAI client."
+  ],
+  "blockers": [],
+  "next_actions": [
+    "Run final phase validation after this handoff file and completed step summary are written.",
+    "Start Step 1 seed-json-files by creating the five public/data JSON files defined in step1.md.",
+    "After Step 1, run JSON parse checks and npm run typecheck --prefix projects/DraftReviewr."
+  ],
+  "resume_hint": "Resume with phases/4-standards-seed/step1.md. Step 0 found no blocking contract conflict; use module-map contract_findings as the source of truth for transformations in later steps."
+}

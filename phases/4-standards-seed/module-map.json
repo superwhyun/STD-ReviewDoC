@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "phase": "4-standards-seed",
+  "baseline": "phases/baselines/3-provider-model-ui.json",
+  "policy": {
+    "context_mode": "contract-first",
+    "frozen_after_completion": true,
+    "default_read_order": [
+      "baseline",
+      "module-map",
+      "public-contracts",
+      "current-step",
+      "targeted-implementation-only-if-needed"
+    ]
+  },
+  "modules": [
+    {
+      "name": "contracts",
+      "owner_steps": [0],
+      "owned_paths": [
+        "phases/4-standards-seed/*",
+        "phases/project-manifest.json"
+      ],
+      "contracts": [
+        "phases/4-standards-seed/module-map.json"
+      ],
+      "dependencies": [],
+      "status": "planned"
+    },
+    {
+      "name": "seed-json-files",
+      "owner_steps": [1],
+      "owned_paths": [
+        "public/data/document-types/itu-t-draft.json",
+        "public/data/document-types/itu-t-contribution.json",
+        "public/data/document-types/jtc1-draft.json",
+        "public/data/document-types/jtc1-contribution.json",
+        "public/data/common-review-items.json"
+      ],
+      "contracts": [
+        "public/data/document-types/itu-t-draft.json",
+        "public/data/document-types/itu-t-contribution.json",
+        "public/data/document-types/jtc1-draft.json",
+        "public/data/document-types/jtc1-contribution.json",
+        "public/data/common-review-items.json"
+      ],
+      "dependencies": ["contracts"],
+      "status": "planned"
+    },
+    {
+      "name": "seed-loader",
+      "owner_steps": [2],
+      "owned_paths": [
+        "lib/storage/seed-loader.ts",
+        "components/seed-initializer.tsx",
+        "app/layout.tsx",
+        "app/admin/page.tsx"
+      ],
+      "contracts": [
+        "lib/storage/seed-loader.ts",
+        "components/seed-initializer.tsx",
+        "public/data/document-types/*.json",
+        "public/data/common-review-items.json"
+      ],
+      "dependencies": ["seed-json-files"],
+      "status": "planned"
+    },
+    {
+      "name": "language-setting",
+      "owner_steps": [3],
+      "owned_paths": [
+        "lib/storage/language-storage.ts",
+        "app/settings/page.tsx",
+        "lib/openai-client.ts",
+        "lib/llm-provider.ts",
+        "lib/providers/openai.ts",
+        "lib/providers/grok.ts",
+        "lib/providers/openrouter.ts",
+        "lib/providers/kimi.ts"
+      ],
+      "contracts": [
+        "lib/storage/language-storage.ts",
+        "lib/llm-provider.ts",
+        "lib/providers/*.ts",
+        "lib/openai-client.ts"
+      ],
+      "dependencies": ["contracts"],
+      "status": "planned"
+    },
+    {
+      "name": "export",
+      "owner_steps": [4],
+      "owned_paths": [
+        "lib/storage/settings-serializer.ts",
+        "components/export-import-dialog.tsx"
+      ],
+      "contracts": [
+        "lib/storage/settings-serializer.ts",
+        "components/export-import-dialog.tsx"
+      ],
+      "dependencies": ["seed-json-files", "language-setting"],
+      "status": "planned"
+    },
+    {
+      "name": "import",
+      "owner_steps": [5],
+      "owned_paths": [
+        "lib/storage/settings-serializer.ts",
+        "components/export-import-dialog.tsx"
+      ],
+      "contracts": [
+        "lib/storage/settings-serializer.ts",
+        "components/export-import-dialog.tsx"
+      ],
+      "dependencies": ["export"],
+      "status": "planned"
+    },
+    {
+      "name": "review-result-width",
+      "owner_steps": [6],
+      "owned_paths": [
+        "components/documents/document-review-dialog.tsx"
+      ],
+      "contracts": [],
+      "dependencies": [],
+      "status": "planned",
+      "note": "검토 결과 모달의 실제 구현 파일은 components/documents/document-review-dialog.tsx이며 현재 DialogContent는 max-w-4xl이다."
+    },
+    {
+      "name": "phase-close",
+      "owner_steps": [7],
+      "owned_paths": [
+        "phases/index.json",
+        "phases/project-manifest.json",
+        "phases/baselines/4-standards-seed.json",
+        "phases/4-standards-seed/index.json"
+      ],
+      "contracts": [
+        "phases/baselines/4-standards-seed.json"
+      ],
+      "dependencies": ["seed-loader", "language-setting", "export", "import", "review-result-width"],
+      "status": "planned"
+    }
+  ],
+  "shared_contracts": [
+    "lib/types.ts",
+    "lib/storage/local-storage.ts",
+    "public/default-data.json",
+    "public/data/document-types/*.json",
+    "public/data/common-review-items.json",
+    "lib/storage/seed-loader.ts",
+    "lib/storage/language-storage.ts",
+    "lib/storage/settings-serializer.ts"
+  ],
+  "integration_points": [
+    "app/layout.tsx (SeedInitializer 마운트)",
+    "app/admin/page.tsx (기본값 초기화, Export, Import 버튼)",
+    "app/settings/page.tsx (언어 선택 UI)",
+    "lib/openai-client.ts (언어 지시 주입)",
+    "components/export-import-dialog.tsx (포맷 통합)"
+  ],
+  "contract_findings": [
+    {
+      "area": "seed-json-schema",
+      "finding": "Seed JSON 문서타입은 review_items를 문서타입 내부에 중첩하지만 현재 localStorage 모델은 document_types와 review_items를 별도 배열로 저장한다.",
+      "decision": "Step 1은 외부 seed 스키마 그대로 JSON만 생성하고, Step 2 seed-loader가 created_at, updated_at, document_type_id를 보강해 기존 storage 배열로 변환한다.",
+      "blocking": false
+    },
+    {
+      "area": "default-data",
+      "finding": "현재 initializeDefaultData는 /default-data.json을 fetch하고 exportImportStorage.importSettings()의 flat 포맷을 사용한다. lib/storage/default-data.json도 동일한 레거시 데이터가 있지만 런타임 fetch 대상은 public/default-data.json이다.",
+      "decision": "Step 2는 새 public/data seed 파일을 fetch하는 seed-loader를 추가하고, 빈 localStorage 초기화와 관리자 기본값 초기화 모두 이 loader를 사용하도록 교체한다. 기존 default-data 파일은 phase 4 완료 전까지 삭제하지 않는다.",
+      "blocking": false
+    },
+    {
+      "area": "export-import",
+      "finding": "현재 exportImportStorage.exportSettings()는 version 1.0.0, document_types, review_items, common_review_items flat 배열을 내보내며 API 키 포함 전체 백업도 별도로 제공한다.",
+      "decision": "Step 4와 Step 5는 settings-serializer.ts를 새 단일 설정 포맷(version, exported_at, language, document_types[].review_items, common_review_items)에 맞춘 변환 계층으로 추가하고, ExportImportDialog는 설정 export/import만 이 포맷으로 통합한다. 전체 백업 기능은 이번 phase의 단일 설정 포맷 범위 밖이다.",
+      "blocking": false
+    },
+    {
+      "area": "language-setting",
+      "finding": "현재 실제 리뷰 경로는 multi-provider lib/providers/*.ts를 우선 사용하고 실패 시 lib/openai-client.ts로 fallback한다. 모든 provider prompt는 한국어 고정 문구를 포함한다.",
+      "decision": "Step 3은 draftreviewr:language storage와 settings UI를 추가하고, legacy openai-client뿐 아니라 OpenAI/Grok/OpenRouter/Kimi provider prompt에도 ko/en 언어 지시를 주입한다.",
+      "blocking": false
+    },
+    {
+      "area": "review-result-width",
+      "finding": "검토 결과 화면은 components/documents/document-review-dialog.tsx 하나이며 DialogContent className은 max-w-4xl max-h-[80vh] overflow-y-auto이다.",
+      "decision": "Step 6은 이 파일만 수정해 결과 모달 너비와 markdown content width를 넓힌다.",
+      "blocking": false
+    }
+  ],
+  "deferred_backlog": []
+}

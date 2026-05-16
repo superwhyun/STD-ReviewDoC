@@ -1,0 +1,53 @@
+{
+  "schema_version": 2,
+  "project": "draft-reviewer",
+  "phase": "4-standards-seed",
+  "execution_policy": {
+    "context_mode": "contract-first",
+    "blocking_fix_priority": true,
+    "append_only_steps": true
+  },
+  "steps": [
+    {
+      "step": 0,
+      "name": "contracts",
+      "status": "completed",
+      "summary": "Confirmed seed, language, export/import, and review-result-width contracts against current implementation."
+    },
+    {
+      "step": 1,
+      "name": "seed-json-files",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "seed-loader",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "language-setting",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "export",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "import",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "review-result-width",
+      "status": "pending"
+    },
+    {
+      "step": 7,
+      "name": "phase-close",
+      "status": "pending"
+    }
+  ]
+}
