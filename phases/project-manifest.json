@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "draft-reviewer",
   "project_root": "projects/DraftReviewr",
-  "status": "hardening-in-progress",
+  "status": "hardening-completed",
   "active_phase": "1-mvp-hardening",
   "modules": [
     {

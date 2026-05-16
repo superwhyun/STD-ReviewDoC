@@ -1,0 +1,159 @@
+{
+    "schema_version": 1,
+    "phase": "1-mvp-hardening",
+    "tag": "draft-reviewer-phase1-done",
+    "source_module_map": "phases/1-mvp-hardening/module-map.json",
+    "project_state": {
+        "name": "DraftReviewr",
+        "root": "projects/DraftReviewr",
+        "summary": "MVP-hardened client-side Next.js document review app. Default data loading fixed, review failure state handled, product copy aligned with implementation, and verification tooling added.",
+        "runtime": "Next.js 15.2.4 App Router, React 19, TypeScript, Tailwind CSS 4, shadcn/Radix UI."
+    },
+    "modules": [
+        {
+            "name": "app-shell",
+            "public_surface": [
+                "app/layout.tsx",
+                "app/globals.css",
+                "styles/globals.css",
+                "components/theme-provider.tsx"
+            ],
+            "changes": "No changes — baseline preserved from phase 0."
+        },
+        {
+            "name": "document-review",
+            "public_surface": [
+                "app/page.tsx",
+                "components/documents/document-upload-section.tsx",
+                "components/documents/documents-list.tsx",
+                "components/documents/document-review-dialog.tsx"
+            ],
+            "changes": "DocumentUploadSection now sets status='failed' on OpenAI error and notifies parent for list refresh. File accept list updated to DOCX/TXT only."
+        },
+        {
+            "name": "admin-config",
+            "public_surface": [
+                "app/admin/page.tsx",
+                "components/admin/**"
+            ],
+            "changes": "No changes — baseline preserved from phase 0."
+        },
+        {
+            "name": "settings-api-key",
+            "public_surface": [
+                "app/settings/page.tsx",
+                "components/settings/api-key-settings.tsx"
+            ],
+            "changes": "API key storage description updated: '암호화 저장' → 'localStorage 저장'. Model name updated: GPT-4o → GPT-5."
+        },
+        {
+            "name": "client-storage",
+            "public_surface": [
+                "lib/types.ts",
+                "lib/storage/local-storage.ts",
+                "lib/storage/default-data.json",
+                "public/default-data.json"
+            ],
+            "changes": "initializeDefaultData() fetch path changed from /lib/storage/default-data.json to /default-data.json. Default data copied to public/ for Next.js static serving."
+        },
+        {
+            "name": "openai-review-client",
+            "public_surface": [
+                "lib/openai-client.ts"
+            ],
+            "changes": "ResponsesAPIResponse interface now includes optional output_text property for type-safety."
+        },
+        {
+            "name": "export-import",
+            "public_surface": [
+                "components/export-import-dialog.tsx",
+                "lib/storage/local-storage.ts"
+            ],
+            "changes": "No changes — baseline preserved from phase 0."
+        },
+        {
+            "name": "ui-foundation",
+            "public_surface": [
+                "components/ui/**",
+                "hooks/use-mobile.ts",
+                "hooks/use-toast.ts",
+                "lib/utils.ts",
+                "components.json"
+            ],
+            "changes": "No changes — baseline preserved from phase 0."
+        }
+    ],
+    "routes": [
+        {
+            "path": "/",
+            "source": "app/page.tsx",
+            "summary": "Document upload and review history.",
+            "build_status": "prerendered as static content"
+        },
+        {
+            "path": "/admin",
+            "source": "app/admin/page.tsx",
+            "summary": "Review configuration management.",
+            "build_status": "prerendered as static content"
+        },
+        {
+            "path": "/settings",
+            "source": "app/settings/page.tsx",
+            "summary": "OpenAI API key management.",
+            "build_status": "prerendered as static content"
+        }
+    ],
+    "shared_contracts": [
+        {
+            "path": "README.md",
+            "summary": "Updated: GPT-5 model, DOCX/TXT file support, localStorage API key storage."
+        },
+        {
+            "path": "package.json",
+            "summary": "Added typecheck script (tsc --noEmit)."
+        },
+        {
+            "path": "lib/types.ts",
+            "summary": "Core TypeScript data interfaces — unchanged."
+        },
+        {
+            "path": "lib/storage/local-storage.ts",
+            "summary": "initializeDefaultData fetches /default-data.json from public/."
+        },
+        {
+            "path": "public/default-data.json",
+            "summary": "Default document types and common review items for first-run initialization."
+        },
+        {
+            "path": "lib/openai-client.ts",
+            "summary": "ResponsesAPIResponse includes output_text. File extraction: DOCX (mammoth), TXT (FileReader)."
+        }
+    ],
+    "integration_points": [
+        "app/page.tsx calls initializeDefaultData on mount and refreshes document list after upload/failure.",
+        "components/documents/document-upload-section.tsx creates document, invokes OpenAI review, sets completed/failed status, and notifies parent.",
+        "components/settings/api-key-settings.tsx stores API key in localStorage (not encrypted); key included in full backup export.",
+        "lib/storage/local-storage.ts is the central persistence boundary for all app state."
+    ],
+    "known_issues": [
+        "API key stored in localStorage as plaintext — acceptable for client-side app but noted for future server-proxy phase.",
+        "PDF and legacy DOC (.doc) files not supported for text extraction; only DOCX and TXT are supported.",
+        "No browser E2E tests; verification relies on typecheck + build + harness phase validation.",
+        "claude.md is stale and references outdated Supabase/API-route architecture."
+    ],
+    "verification": [
+        {
+            "command": "python3 scripts/validate_phase.py 1-mvp-hardening --root projects/DraftReviewr",
+            "status": "passed"
+        },
+        {
+            "command": "npm run build --prefix projects/DraftReviewr",
+            "status": "passed"
+        },
+        {
+            "command": "npm run typecheck --prefix projects/DraftReviewr",
+            "status": "passed"
+        }
+    ],
+    "written_at": "2026-05-16T09:07:00+09:00"
+}

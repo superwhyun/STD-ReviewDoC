@@ -41,7 +41,8 @@
     {
       "step": 5,
       "name": "runtime-smoke-and-phase-close",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Phase closed: baseline written, phase statuses synced, tag draft-reviewer-phase1-done created."
     },
     {
       "step": 6,

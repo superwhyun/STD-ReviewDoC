@@ -1,0 +1,107 @@
+{
+    "schema_version": 1,
+    "step": 5,
+    "name": "runtime-smoke-and-phase-close",
+    "status": "completed",
+    "summary": "Phase 1 complete. Baseline written, phase index synced, git tag created. All 3 routes build as static pages.",
+    "completed_work": [
+        "Ran verification suite: validate_phase, build, typecheck — all pass",
+        "Confirmed 3 routes prerendered as static: /, /admin, /settings",
+        "Created phases/baselines/1-mvp-hardening.json with updated module surface, routes, integration points, known issues",
+        "Updated phases/index.json: phase 1 status → completed",
+        "Updated phases/project-manifest.json: status → hardening-completed",
+        "Updated phases/1-mvp-hardening/index.json: step 5 → completed",
+        "Created git tag draft-reviewer-phase1-done"
+    ],
+    "phase_summary": {
+        "steps_completed": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+        ],
+        "steps": [
+            {
+                "step": 0,
+                "name": "hardening-contracts",
+                "result": "Phase scope confirmed"
+            },
+            {
+                "step": 1,
+                "name": "default-data-loading",
+                "result": "fetch path fixed; default data served from public/"
+            },
+            {
+                "step": 2,
+                "name": "review-failure-state",
+                "result": "Failed status set on OpenAI error; parent list notified"
+            },
+            {
+                "step": 3,
+                "name": "product-contract-alignment",
+                "result": "GPT-5 model, localStorage storage, DOCX/TXT support aligned"
+            },
+            {
+                "step": 4,
+                "name": "verification-tooling",
+                "result": "typecheck script added; pre-existing type error fixed via step 6"
+            },
+            {
+                "step": 6,
+                "name": "blocking-fix-openai-response-type",
+                "result": "output_text added to ResponsesAPIResponse"
+            },
+            {
+                "step": 5,
+                "name": "runtime-smoke-and-phase-close",
+                "result": "Baseline written; phase closed"
+            }
+        ],
+        "key_changes": {
+            "lib/storage/local-storage.ts": "initializeDefaultData → /default-data.json",
+            "public/default-data.json": "New file, copied from lib/storage/",
+            "components/documents/document-upload-section.tsx": "Failed status + removed PDF/DOC",
+            "components/settings/api-key-settings.tsx": "localStorage description + GPT-5",
+            "README.md": "GPT-5 + DOCX/TXT + localStorage",
+            "lib/openai-client.ts": "ResponsesAPIResponse.output_text",
+            "package.json": "typecheck script"
+        }
+    },
+    "smoke_results": {
+        "/": "Prerendered as static content (188 kB, 316 kB first load)",
+        "/admin": "Prerendered as static content (8.59 kB, 137 kB first load)",
+        "/settings": "Prerendered as static content (5.3 kB, 117 kB first load)"
+    },
+    "files_changed": [
+        "projects/DraftReviewr/phases/index.json",
+        "projects/DraftReviewr/phases/project-manifest.json",
+        "projects/DraftReviewr/phases/baselines/1-mvp-hardening.json",
+        "projects/DraftReviewr/phases/1-mvp-hardening/index.json",
+        "projects/DraftReviewr/phases/1-mvp-hardening/step5-output.json"
+    ],
+    "verification": [
+        "python3 scripts/validate_phase.py 1-mvp-hardening --root projects/DraftReviewr → passed",
+        "npm run build --prefix projects/DraftReviewr → passed",
+        "npm run typecheck --prefix projects/DraftReviewr → passed"
+    ],
+    "known_issues": [
+        "API key stored in localStorage as plaintext (not encrypted)",
+        "PDF and .doc files not supported (extractTextFromFile handles only DOCX and TXT)",
+        "No browser E2E tests — verification is static build + typecheck only",
+        "claude.md is stale (references Supabase/API routes)"
+    ],
+    "deferred_backlog": [
+        "PDF text extraction support (pdf.js)",
+        "Server-side AI proxy for API key security",
+        "Browser E2E test coverage"
+    ],
+    "next_actions": [
+        "Phase 1 complete. Next phase can be planned based on product priorities (PDF support, server proxy, or E2E testing)."
+    ],
+    "blockers": [],
+    "resume_hint": "Phase 1 (MVP Hardening) complete. All steps finished. Tag: draft-reviewer-phase1-done. Proceed to next phase planning.",
+    "written_at": "2026-05-16T09:07:00+09:00"
+}
