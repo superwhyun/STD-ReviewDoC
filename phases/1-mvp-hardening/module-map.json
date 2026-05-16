@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "phase": "1-mvp-hardening",
+  "baseline": "phases/baselines/0-onboarding.json",
+  "policy": {
+    "context_mode": "contract-first",
+    "frozen_after_completion": true,
+    "default_read_order": [
+      "baseline",
+      "module-map",
+      "public-contracts",
+      "current-step",
+      "targeted-implementation-only-if-needed"
+    ]
+  },
+  "modules": [
+    {
+      "name": "hardening-contracts",
+      "owner_steps": [0],
+      "owned_paths": [
+        "phases/1-mvp-hardening/module-map.json",
+        "phases/1-mvp-hardening/step0-output.json",
+        "phases/project-manifest.json"
+      ],
+      "contracts": [
+        "phases/baselines/0-onboarding.json",
+        "phases/project-manifest.json",
+        "phases/1-mvp-hardening/index.json"
+      ],
+      "dependencies": [],
+      "status": "planned"
+    },
+    {
+      "name": "default-data-loading",
+      "owner_steps": [1],
+      "owned_paths": [
+        "lib/storage/local-storage.ts",
+        "lib/storage/default-data.json",
+        "public/default-data.json",
+        "phases/1-mvp-hardening/step1-output.json"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts",
+        "lib/storage/default-data.json",
+        "phases/baselines/0-onboarding.json"
+      ],
+      "dependencies": [
+        "client-storage"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "review-failure-state",
+      "owner_steps": [2],
+      "owned_paths": [
+        "components/documents/document-upload-section.tsx",
+        "lib/storage/local-storage.ts",
+        "lib/types.ts",
+        "phases/1-mvp-hardening/step2-output.json"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts",
+        "lib/openai-client.ts",
+        "phases/1-mvp-hardening/step1-output.json"
+      ],
+      "dependencies": [
+        "default-data-loading",
+        "client-storage",
+        "openai-review-client",
+        "document-review"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "product-contract-alignment",
+      "owner_steps": [3],
+      "owned_paths": [
+        "README.md",
+        "components/settings/api-key-settings.tsx",
+        "components/documents/document-upload-section.tsx",
+        "lib/openai-client.ts",
+        "phases/1-mvp-hardening/step3-output.json"
+      ],
+      "contracts": [
+        "README.md",
+        "lib/openai-client.ts",
+        "components/settings/api-key-settings.tsx",
+        "components/documents/document-upload-section.tsx",
+        "phases/1-mvp-hardening/step2-output.json"
+      ],
+      "dependencies": [
+        "review-failure-state",
+        "settings-api-key",
+        "openai-review-client",
+        "document-review"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "verification-tooling",
+      "owner_steps": [4],
+      "owned_paths": [
+        "package.json",
+        "tsconfig.json",
+        "next.config.mjs",
+        "phases/1-mvp-hardening/step4-output.json"
+      ],
+      "contracts": [
+        "package.json",
+        "tsconfig.json",
+        "phases/1-mvp-hardening/step3-output.json"
+      ],
+      "dependencies": [
+        "default-data-loading",
+        "review-failure-state",
+        "product-contract-alignment"
+      ],
+      "status": "planned"
+    },
+    {
+      "name": "runtime-smoke-and-phase-close",
+      "owner_steps": [5],
+      "owned_paths": [
+        "phases/index.json",
+        "phases/project-manifest.json",
+        "phases/baselines/1-mvp-hardening.json",
+        "phases/1-mvp-hardening/index.json",
+        "phases/1-mvp-hardening/step5-output.json"
+      ],
+      "contracts": [
+        "phases/1-mvp-hardening/step1-output.json",
+        "phases/1-mvp-hardening/step2-output.json",
+        "phases/1-mvp-hardening/step3-output.json",
+        "phases/1-mvp-hardening/step4-output.json",
+        "package.json"
+      ],
+      "dependencies": [
+        "default-data-loading",
+        "review-failure-state",
+        "product-contract-alignment",
+        "verification-tooling"
+      ],
+      "status": "planned"
+    }
+  ],
+  "shared_contracts": [
+    "README.md",
+    "package.json",
+    "lib/types.ts",
+    "lib/storage/local-storage.ts",
+    "lib/storage/default-data.json",
+    "lib/openai-client.ts",
+    "components/documents/document-upload-section.tsx",
+    "components/settings/api-key-settings.tsx"
+  ],
+  "integration_points": [
+    "app/page.tsx",
+    "components/documents/document-upload-section.tsx",
+    "components/settings/api-key-settings.tsx",
+    "lib/storage/local-storage.ts",
+    "lib/openai-client.ts",
+    "public/default-data.json",
+    "package.json",
+    "app/page.tsx",
+    "app/admin/page.tsx",
+    "app/settings/page.tsx"
+  ],
+  "deferred_backlog": [
+    {
+      "type": "feature",
+      "summary": "Robust PDF text extraction can be added later if product requirements require PDF support instead of documenting DOCX/TXT-only support.",
+      "suggested_phase": "pdf-extraction-support"
+    },
+    {
+      "type": "security-architecture",
+      "summary": "A hosted SaaS version should move OpenAI calls behind a server boundary instead of exposing user API keys to browser code.",
+      "suggested_phase": "server-side-ai-proxy"
+    },
+    {
+      "type": "testing",
+      "summary": "After runtime stabilization, add browser E2E coverage for settings, default data initialization, admin CRUD, and upload failure flows.",
+      "suggested_phase": "e2e-coverage"
+    }
+  ]
+}

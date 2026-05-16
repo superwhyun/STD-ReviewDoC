@@ -1,0 +1,17 @@
+{
+    "schema_version": 1,
+    "step": 5,
+    "name": "settings-ui",
+    "status": "completed",
+    "summary": "Multi-provider API key management UI with provider selector, model config, and legacy migration.",
+    "completed_work": [
+        "Rewrote api-key-settings.tsx with multi-provider support",
+        "Provider dropdown: OpenAI, Grok, OpenRouter, Kimi with checkmarks for configured providers",
+        "Per-provider API key + model input fields",
+        "Calls migrateLegacyApiKey() on first load",
+        "Uses llmProviderStorage for persistent config"
+    ],
+    "files_changed": [
+        "components/settings/api-key-settings.tsx"
+    ]
+}

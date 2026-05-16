@@ -1,0 +1,16 @@
+{
+    "schema_version": 1,
+    "step": 6,
+    "name": "integration",
+    "status": "completed",
+    "summary": "Wired multi-provider system into document upload with legacy fallback.",
+    "completed_work": [
+        "document-upload-section.tsx now imports createProvider and OpenAIProvider",
+        "handleUpload tries createProvider() first, falls back to processDocumentReview on error",
+        "File text extracted via OpenAIProvider.extractText() before passing to provider",
+        "Provider results mapped to existing reviewResultStorage.create() format"
+    ],
+    "files_changed": [
+        "components/documents/document-upload-section.tsx"
+    ]
+}

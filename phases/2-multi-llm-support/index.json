@@ -35,22 +35,26 @@
     {
       "step": 4,
       "name": "streaming-support",
-      "status": "pending"
+      "status": "completed",
+      "summary": "SSE streaming for all 4 providers."
     },
     {
       "step": 5,
       "name": "settings-ui",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Multi-provider API key UI with provider selector."
     },
     {
       "step": 6,
       "name": "integration",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Provider wired into document upload with fallback."
     },
     {
       "step": 7,
       "name": "phase-close",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Baseline written, phase closed, tag draft-reviewer-phase2-done."
     }
   ]
 }

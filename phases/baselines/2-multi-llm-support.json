@@ -1,0 +1,132 @@
+{
+    "schema_version": 1,
+    "phase": "2-multi-llm-support",
+    "tag": "draft-reviewer-phase2-done",
+    "source_module_map": "phases/2-multi-llm-support/module-map.json",
+    "project_state": {
+        "name": "DraftReviewr",
+        "root": "projects/DraftReviewr",
+        "summary": "Multi-LLM backend support added: OpenAI (Responses API), Grok (xAI Responses API), OpenRouter (Chat Completions), Kimi (Chat Completions). All providers support SSE streaming via ReadableStream + AsyncGenerator.",
+        "runtime": "Next.js 15.2.4 App Router, React 19, TypeScript, Tailwind CSS 4, shadcn/Radix UI."
+    },
+    "modules": [
+        {
+            "name": "llm-provider",
+            "public_surface": [
+                "lib/llm-provider.ts"
+            ],
+            "changes": "LLMProvider interface, createProvider factory, ReviewRequest/ReviewResult types"
+        },
+        {
+            "name": "storage-migration",
+            "public_surface": [
+                "lib/types.ts",
+                "lib/storage/local-storage.ts"
+            ],
+            "changes": "LLMProviderType, LLMProviderConfig types; llmProviderStorage, migrateLegacyApiKey"
+        },
+        {
+            "name": "openai-provider",
+            "public_surface": [
+                "lib/providers/openai.ts"
+            ],
+            "changes": "Full OpenAI provider with review() and reviewStream() via Responses API"
+        },
+        {
+            "name": "grok-provider",
+            "public_surface": [
+                "lib/providers/grok.ts"
+            ],
+            "changes": "Grok provider using xAI Responses API with SSE streaming"
+        },
+        {
+            "name": "openrouter-provider",
+            "public_surface": [
+                "lib/providers/openrouter.ts"
+            ],
+            "changes": "OpenRouter provider using Chat Completions API with SSE streaming"
+        },
+        {
+            "name": "kimi-provider",
+            "public_surface": [
+                "lib/providers/kimi.ts"
+            ],
+            "changes": "Kimi provider using Chat Completions API with SSE streaming"
+        },
+        {
+            "name": "settings-ui",
+            "public_surface": [
+                "components/settings/api-key-settings.tsx"
+            ],
+            "changes": "Multi-provider API key management with provider selector and model config"
+        },
+        {
+            "name": "document-review",
+            "public_surface": [
+                "components/documents/document-upload-section.tsx"
+            ],
+            "changes": "Provider-based review with legacy fallback to processDocumentReview"
+        }
+    ],
+    "routes": [
+        {
+            "path": "/",
+            "source": "app/page.tsx",
+            "build_status": "prerendered as static content"
+        },
+        {
+            "path": "/admin",
+            "source": "app/admin/page.tsx",
+            "build_status": "prerendered as static content"
+        },
+        {
+            "path": "/settings",
+            "source": "app/settings/page.tsx",
+            "build_status": "prerendered as static content"
+        }
+    ],
+    "shared_contracts": [
+        {
+            "path": "lib/llm-provider.ts",
+            "summary": "LLMProvider interface — the central abstraction for all backends"
+        },
+        {
+            "path": "lib/types.ts",
+            "summary": "LLMProviderType, LLMProviderConfig types"
+        },
+        {
+            "path": "lib/storage/local-storage.ts",
+            "summary": "llmProviderStorage with getAll, get, save, delete, getActive, setActive"
+        },
+        {
+            "path": "components/settings/api-key-settings.tsx",
+            "summary": "Multi-provider API key management UI"
+        }
+    ],
+    "integration_points": [
+        "components/documents/document-upload-section.tsx: Primary integration point — creates provider via createProvider(), falls back to legacy processDocumentReview",
+        "components/settings/api-key-settings.tsx: Provider configuration UI — saves to llmProviderStorage",
+        "lib/llm-provider.ts: Factory function — resolves provider from stored configs"
+    ],
+    "known_issues": [
+        "API keys stored in localStorage as plaintext — same as before; server-proxy phase deferred",
+        "PDF and legacy DOC files not supported — same as phase 1 baseline",
+        "No browser E2E tests — verification is static build + typecheck only",
+        "Streaming onToken callback appends to progress text string — may be noisy; improved UI can be added later"
+    ],
+    "verification": [
+        {
+            "command": "python3 scripts/validate_phase.py 2-multi-llm-support --root projects/DraftReviewr",
+            "status": "passed"
+        },
+        {
+            "command": "npm run build --prefix projects/DraftReviewr",
+            "status": "passed"
+        },
+        {
+            "command": "npm run typecheck --prefix projects/DraftReviewr",
+            "status": "passed"
+        }
+    ],
+    "written_at": "2026-05-16T10:25:00+09:00"
+}
