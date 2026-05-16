@@ -1,0 +1,37 @@
+{
+    "schema_version": 1,
+    "step": 4,
+    "name": "streaming-support",
+    "status": "completed",
+    "summary": "Added SSE streaming (ReadableStream + AsyncGenerator) to all 4 providers.",
+    "completed_work": [
+        "OpenAI: reviewStream() using SSE over Responses API with stream:true, parsing output_text and delta events",
+        "Grok: reviewStream() using SSE over xAI Responses API (same pattern as OpenAI)",
+        "OpenRouter: reviewStream() using SSE Chat Completions, parsing choices[0].delta.content",
+        "Kimi: reviewStream() using SSE Chat Completions (same pattern as OpenRouter)",
+        "All providers use ReadableStream.getReader() + TextDecoder for chunked parsing",
+        "All providers call request.onToken() callback for each token yielded",
+        "All providers properly release reader locks in finally blocks"
+    ],
+    "files_changed": [
+        "lib/providers/openai.ts",
+        "lib/providers/grok.ts",
+        "lib/providers/openrouter.ts",
+        "lib/providers/kimi.ts"
+    ],
+    "decisions": [
+        "Responses API providers (OpenAI, Grok) parse output_text delta and delta fields from SSE events",
+        "Chat Completions providers (OpenRouter, Kimi) parse choices[0].delta.content from SSE events",
+        "Buffer-based line splitting handles partial chunks across ReadableStream reads",
+        "onToken callback allows UI to display real-time token output"
+    ],
+    "verification": [
+        "npm run typecheck → passed",
+        "npm run build → passed",
+        "validate_phase → passed"
+    ],
+    "next_actions": [
+        "Step 5: settings-ui — multi-provider API key management UI"
+    ],
+    "resume_hint": "Step 4 complete. All providers have streaming. Proceed to step 5: settings-ui."
+}
