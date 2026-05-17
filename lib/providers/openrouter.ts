@@ -9,11 +9,12 @@ import { getCurrentLanguageInstruction } from "@/lib/storage/language-storage"
 
 interface ChatChoice { delta?: { content?: string }; message?: { content: string }; finish_reason?: string }
 
-function buildMessages(fileContent: string, prompts: Array<{ name: string; prompt: string }>): Array<{ role: string; content: string }> {
+function buildMessages(fileContent: string, prompts: Array<{ name: string; prompt: string }>, context?: string): Array<{ role: string; content: string }> {
     const items = prompts.map((p, i) => `${i + 1}. [${p.name}]\n${p.prompt}`).join("\n\n")
+    const contextSection = context ? `\n=== 문서 유형 ===\n${context}\n\n` : ""
     return [
-        { role: "system", content: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean. ${getCurrentLanguageInstruction()}` },
-        { role: "user", content: `다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.\n\n=== 검토 항목 ===\n${items}\n\n=== 응답 형식 ===\n각 검토 항목에 대해 다음 형식으로 답변해주세요:\n\n### [검토 항목 번호]. [검토 항목 이름]\n[검토 내용]\n\n---\n\n=== 문서 내용 ===\n${fileContent}` }
+        { role: "system", content: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}` },
+        { role: "user", content: `다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.\n\n${contextSection}=== 검토 항목 ===\n${items}\n\n=== 응답 형식 ===\n각 검토 항목에 대해 다음 형식으로 답변해주세요:\n\n### [검토 항목 번호]. [검토 항목 이름]\n[검토 내용]\n\n---\n\n=== 문서 내용 ===\n${fileContent}` }
     ]
 }
 
@@ -36,7 +37,7 @@ export class OpenRouterProvider implements LLMProvider {
 
     async review(request: ReviewRequest): Promise<ReviewResult[]> {
         const allItems = request.prompts.map((p, i) => ({ ...p, index: i }))
-        const msgs = buildMessages(request.fileContent, allItems)
+        const msgs = buildMessages(request.fileContent, allItems, request.documentTypeContext)
         request.onProgress?.(1, 1, "OpenRouter 검토 중...")
 
         const r = await fetch(`${this.baseUrl}/chat/completions`, {
@@ -53,7 +54,7 @@ export class OpenRouterProvider implements LLMProvider {
 
     async *reviewStream(request: ReviewRequest): AsyncGenerator<string> {
         const allItems = request.prompts.map((p, i) => ({ ...p, index: i }))
-        const msgs = buildMessages(request.fileContent, allItems)
+        const msgs = buildMessages(request.fileContent, allItems, request.documentTypeContext)
         request.onProgress?.(1, 1, "OpenRouter streaming 검토 중...")
 
         const r = await fetch(`${this.baseUrl}/chat/completions`, {

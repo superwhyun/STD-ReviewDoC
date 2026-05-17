@@ -8,7 +8,9 @@ import { llmProviderStorage } from "@/lib/storage/local-storage"
 
 export interface ReviewRequest {
     fileContent: string
+    file?: File
     prompts: Array<{ name: string; prompt: string }>
+    documentTypeContext?: string
     providerType?: LLMProviderType
     onProgress?: (current: number, total: number, itemName: string) => void
     onToken?: (token: string) => void

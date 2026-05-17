@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import type { DocumentType, ReviewItem } from "@/lib/types"
+import { reviewItemStorage } from "@/lib/storage/local-storage"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
@@ -25,14 +26,10 @@ export function ReviewItemsDialog({ open, onOpenChange, documentType }: ReviewIt
     }
   }, [open])
 
-  const fetchReviewItems = async () => {
+  const fetchReviewItems = () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/document-types/${documentType.id}/review-items`)
-      if (response.ok) {
-        const data = await response.json()
-        setReviewItems(data)
-      }
+      setReviewItems(reviewItemStorage.getByDocumentType(documentType.id))
     } finally {
       setIsLoading(false)
     }

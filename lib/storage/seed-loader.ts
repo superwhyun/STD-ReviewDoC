@@ -1,10 +1,5 @@
 import type { CommonReviewItem, DocumentType, ReviewItem } from "@/lib/types"
-
-const STORAGE_KEYS = {
-  DOCUMENT_TYPES: "draftreviewr:document-types",
-  REVIEW_ITEMS: "draftreviewr:review-items",
-  COMMON_REVIEW_ITEMS: "draftreviewr:common-review-items",
-} as const
+import { KEYS as STORAGE_KEYS } from "@/lib/storage/local-storage"
 
 const DOCUMENT_TYPE_SEED_PATHS = [
   "/data/document-types/itu-t-draft.json",

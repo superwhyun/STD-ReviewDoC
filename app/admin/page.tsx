@@ -5,20 +5,12 @@ import { CommonReviewItemsList } from "@/components/admin/common-review-items-li
 import { Button } from "@/components/ui/button"
 import { ExportImportDialog } from "@/components/export-import-dialog"
 import Link from "next/link"
-import { useEffect } from "react"
 import { RotateCcw } from "lucide-react"
-import { initializeSeedData, resetToSeedData } from "@/lib/storage/seed-loader"
+import { resetToSeedData } from "@/lib/storage/seed-loader"
 import { useToast } from "@/hooks/use-toast"
 
 export default function AdminPage() {
   const { toast } = useToast()
-
-  useEffect(() => {
-    const loadData = async () => {
-      await initializeSeedData()
-    }
-    loadData()
-  }, [])
 
   const handleResetToSeedData = async () => {
     try {

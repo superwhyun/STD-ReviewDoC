@@ -110,10 +110,17 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
           ...typeItems.map((item) => ({ name: item.name, prompt: item.prompt })),
         ]
 
+        const selectedDocType = documentTypes.find((t) => t.id === selectedType)
+        const documentTypeContext = selectedDocType
+          ? [selectedDocType.name, selectedDocType.description].filter(Boolean).join("\n")
+          : undefined
+
         const provider = await createProvider(selectedProvider)
         const providerResults = await provider.review({
           fileContent,
+          file: selectedFile,
           prompts,
+          documentTypeContext,
           onProgress: (current, total, itemName) => {
             const progressPercent = (current / total) * 100
             setProgress(progressPercent)

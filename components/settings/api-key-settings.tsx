@@ -20,7 +20,11 @@ const PROVIDERS: Array<{ type: LLMProviderType; label: string; placeholder: stri
   { type: "kimi", label: "Kimi", placeholder: "sk-...", link: "https://platform.moonshot.cn", linkText: "Moonshot 플랫폼" },
 ]
 
-const SHOW_REASONING_FOR: LLMProviderType[] = ["openai", "grok"]
+function shouldShowReasoning(provider: LLMProviderType, model: string): boolean {
+  if (provider === "grok") return true
+  if (provider === "openai") return /^o\d/.test(model)
+  return false
+}
 
 export function ApiKeySettings() {
   const [selectedProvider, setSelectedProvider] = useState<LLMProviderType>("openai")
@@ -76,7 +80,7 @@ export function ApiKeySettings() {
     setIsLoading(true); setMessage(null)
     try {
       const cfg: LLMProviderConfig = { provider: selectedProvider, apiKey, model: model || "" }
-      if (reasoning && SHOW_REASONING_FOR.includes(selectedProvider)) {
+      if (reasoning && shouldShowReasoning(selectedProvider, model)) {
         cfg.reasoning = { effort: reasoning as LLMProviderConfig["reasoning"] extends { effort: infer E } ? E : never }
       }
       llmProviderStorage.save(cfg)
@@ -146,7 +150,7 @@ export function ApiKeySettings() {
             )}
           </div>
 
-          {SHOW_REASONING_FOR.includes(selectedProvider) && (
+          {shouldShowReasoning(selectedProvider, model) && (
             <div className="space-y-2">
               <Label htmlFor="reasoning">Reasoning Effort</Label>
               <Select value={reasoning} onValueChange={setReasoning}>

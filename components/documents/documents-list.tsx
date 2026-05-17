@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { documentTypeStorage, documentStorage } from "@/lib/storage/local-storage"
+import { documentTypeStorage, documentStorage, reviewResultStorage } from "@/lib/storage/local-storage"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,7 @@ interface DocumentWithType extends Document {
     id: string
     name: string
   }
+  reviewed_at?: string
 }
 
 interface DocumentsListProps {
@@ -49,12 +50,20 @@ export function DocumentsList({ initialDocuments }: DocumentsListProps) {
   useEffect(() => {
     const enhancedDocs = initialDocuments.map((doc) => {
       const docType = documentTypeStorage.get(doc.document_type_id)
+      const results = reviewResultStorage.getByDocument(doc.id)
+      const reviewed_at = results.length > 0
+        ? results.reduce((latest, r) =>
+            r.created_at > latest ? r.created_at : latest,
+            results[0].created_at
+          )
+        : undefined
       return {
         ...doc,
         document_types: {
           id: doc.document_type_id,
           name: docType?.name || "Unknown Type",
         },
+        reviewed_at,
       }
     })
     setDocuments(enhancedDocs)
@@ -123,6 +132,20 @@ export function DocumentsList({ initialDocuments }: DocumentsListProps) {
                     <span className="text-sm text-muted-foreground">상태</span>
                     {getStatusBadge(doc.status)}
                   </div>
+                  {doc.reviewed_at && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">검토일</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(doc.reviewed_at).toLocaleString("ko-KR", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <Button
                       variant="outline"

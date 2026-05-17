@@ -89,7 +89,7 @@ export function ExportImportDialog() {
       setSuccess("백업이 복원되었습니다!")
       setImportData("")
       setTimeout(() => window.location.reload(), 1500)
-    } catch (err) {
+    } catch {
       setError("잘못된 JSON 형식입니다. 파일 내용을 확인해주세요.")
     }
   }

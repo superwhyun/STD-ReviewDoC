@@ -15,10 +15,11 @@ interface GrokResponse {
     output_text?: string
 }
 
-function buildPrompt(fileContent: string, prompts: Array<{ name: string; prompt: string }>): string {
+function buildPrompt(fileContent: string, prompts: Array<{ name: string; prompt: string }>, context?: string): string {
     const items = prompts.map((p, i) => `${i + 1}. [${p.name}]\n${p.prompt}`).join("\n\n")
-    return `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean. ${getCurrentLanguageInstruction()}
-
+    const contextSection = context ? `\n=== 문서 유형 ===\n${context}\n` : ""
+    return `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}
+${contextSection}
 다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.
 
 === 검토 항목 ===
@@ -57,7 +58,7 @@ export class GrokProvider implements LLMProvider {
 
     async review(request: ReviewRequest): Promise<ReviewResult[]> {
         const allItems = request.prompts.map((p, i) => ({ ...p, index: i }))
-        const fullPrompt = buildPrompt(request.fileContent, allItems)
+        const fullPrompt = buildPrompt(request.fileContent, allItems, request.documentTypeContext)
         request.onProgress?.(1, 1, "Grok 검토 중...")
 
         const r = await fetch(`${GROK_API_BASE}/responses`, {
@@ -75,7 +76,7 @@ export class GrokProvider implements LLMProvider {
 
     async *reviewStream(request: ReviewRequest): AsyncGenerator<string> {
         const allItems = request.prompts.map((p, i) => ({ ...p, index: i }))
-        const fullPrompt = buildPrompt(request.fileContent, allItems)
+        const fullPrompt = buildPrompt(request.fileContent, allItems, request.documentTypeContext)
         request.onProgress?.(1, 1, "Grok streaming 검토 중...")
 
         const r = await fetch(`${GROK_API_BASE}/responses`, {

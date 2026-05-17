@@ -69,7 +69,7 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[112rem] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-[90vw] sm:max-w-[90vw] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{document.file_name}</DialogTitle>
           <DialogDescription>{document.document_types.name} 검토 결과</DialogDescription>
@@ -92,11 +92,20 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="text-base">{item?.name}</CardTitle>
-                      {isCommon && (
-                        <Badge variant="secondary" className="shrink-0">
-                          공통
-                        </Badge>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {isCommon && (
+                          <Badge variant="secondary">공통</Badge>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(result.created_at).toLocaleString("ko-KR", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
                     </div>
                     <CardDescription className="text-xs">{item?.prompt}</CardDescription>
                   </CardHeader>

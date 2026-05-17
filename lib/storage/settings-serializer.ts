@@ -1,13 +1,7 @@
 import type { Language } from "@/lib/storage/language-storage"
 import { getLanguage, setLanguage } from "@/lib/storage/language-storage"
-import { commonReviewItemStorage, documentTypeStorage, reviewItemStorage } from "@/lib/storage/local-storage"
+import { commonReviewItemStorage, documentTypeStorage, reviewItemStorage, KEYS as STORAGE_KEYS } from "@/lib/storage/local-storage"
 import type { CommonReviewItem, DocumentType, ReviewItem } from "@/lib/types"
-
-const STORAGE_KEYS = {
-  DOCUMENT_TYPES: "draftreviewr:document-types",
-  REVIEW_ITEMS: "draftreviewr:review-items",
-  COMMON_REVIEW_ITEMS: "draftreviewr:common-review-items",
-} as const
 
 export interface SettingsExportReviewItem {
   id: string

@@ -6,17 +6,32 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 import { useEffect, useState } from "react"
 import { getLanguage, setLanguage, type Language } from "@/lib/storage/language-storage"
+import { getUseFilesApi, setUseFilesApi } from "@/lib/storage/openai-settings-storage"
 import { useToast } from "@/hooks/use-toast"
 
 export default function SettingsPage() {
   const [language, setSelectedLanguage] = useState<Language>("ko")
+  const [useFilesApi, setUseFilesApiState] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
     setSelectedLanguage(getLanguage())
+    setUseFilesApiState(getUseFilesApi())
   }, [])
+
+  const handleUseFilesApiChange = (value: boolean) => {
+    setUseFilesApi(value)
+    setUseFilesApiState(value)
+    toast({
+      title: "설정이 저장되었습니다",
+      description: value
+        ? "OpenAI Files API를 사용합니다. 대용량 문서에 유리합니다."
+        : "텍스트 추출 방식을 사용합니다.",
+    })
+  }
 
   const handleLanguageChange = (value: Language) => {
     setLanguage(value)
@@ -68,6 +83,28 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>OpenAI Files API</CardTitle>
+              <CardDescription>
+                활성화하면 문서를 OpenAI 서버에 직접 업로드한 뒤 검토하고, 완료 후 자동 삭제합니다.
+                대용량 문서나 표가 많은 문서에 유리합니다. OpenAI provider 선택 시에만 적용됩니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="use-files-api"
+                  checked={useFilesApi}
+                  onCheckedChange={handleUseFilesApiChange}
+                />
+                <Label htmlFor="use-files-api">
+                  {useFilesApi ? "Files API 사용 중" : "텍스트 추출 방식 사용 중"}
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+
           <ApiKeySettings />
         </div>
       </main>

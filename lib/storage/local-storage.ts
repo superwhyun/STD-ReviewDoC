@@ -6,7 +6,7 @@
 import { DocumentType, ReviewItem, CommonReviewItem, Document, ReviewResult } from "@/lib/types"
 import type { LLMProviderConfig, LLMProviderType } from "@/lib/types"
 
-const KEYS = {
+export const KEYS = {
   DOCUMENT_TYPES: "draftreviewr:document-types",
   REVIEW_ITEMS: "draftreviewr:review-items",
   COMMON_REVIEW_ITEMS: "draftreviewr:common-review-items",

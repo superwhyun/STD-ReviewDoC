@@ -108,7 +108,7 @@ async function createAssistant(fileId: string): Promise<string> {
     },
     body: JSON.stringify({
       name: "Document Reviewer",
-      instructions: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean. ${getCurrentLanguageInstruction()}`,
+      instructions: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}`,
       model: "gpt-4o",
       tools: [{ type: "file_search" }],
     }),
@@ -338,7 +338,7 @@ export async function reviewDocumentWithOpenAI(fileContent: string, prompt: stri
     throw new Error("OpenAI API key not found")
   }
 
-  const systemPrompt = `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean. ${getCurrentLanguageInstruction()}`
+  const systemPrompt = `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}`
   const userInput = `${systemPrompt}\n\n검토 항목: ${prompt}\n\n--- 문서 내용 ---\n${fileContent}`
 
   const response = await fetch(`${OPENAI_API_BASE}/responses`, {
@@ -393,7 +393,7 @@ export async function processDocumentReview(
   ]
 
   // Build comprehensive prompt with all review items
-  const systemPrompt = `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean. ${getCurrentLanguageInstruction()}`
+  const systemPrompt = `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}`
 
   const reviewInstructions = allItems
     .map((item, index) => `${index + 1}. [${item.name}]\n${item.prompt}`)
