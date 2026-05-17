@@ -23,7 +23,8 @@
     {
       "step": 2,
       "name": "seed-loader",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Added seed loader, app mount initializer, and admin reset button for standards seed data."
     },
     {
       "step": 3,

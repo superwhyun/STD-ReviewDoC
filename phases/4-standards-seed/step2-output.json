@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "project": "draft-reviewer",
+  "phase": "4-standards-seed",
+  "step": 2,
+  "name": "seed-loader",
+  "status": "completed",
+  "summary": "Implemented standards seed loading, app mount initialization, and admin reset-to-seed action.",
+  "completed_work": [
+    "Created lib/storage/seed-loader.ts with initializeSeedData() and resetToSeedData().",
+    "Seed loader fetches four document type seed files and public/data/common-review-items.json.",
+    "initializeSeedData() is idempotent: it inserts missing seed document types and common review items without replacing existing user data.",
+    "resetToSeedData() replaces document_types, review_items, and common_review_items with seed-derived arrays while leaving other localStorage keys untouched.",
+    "Created components/seed-initializer.tsx to run initializeSeedData() once on app mount and warn on errors.",
+    "Mounted SeedInitializer in app/layout.tsx.",
+    "Replaced admin page initialization with initializeSeedData() and added a 기본값으로 초기화 button that calls resetToSeedData(), shows toast feedback, and reloads the page."
+  ],
+  "files_changed": [
+    "lib/storage/seed-loader.ts",
+    "components/seed-initializer.tsx",
+    "app/layout.tsx",
+    "app/admin/page.tsx",
+    "phases/4-standards-seed/index.json",
+    "phases/4-standards-seed/step2-output.json"
+  ],
+  "decisions": [
+    "Seed loader writes directly to the existing draftreviewr:* localStorage keys to avoid changing lib/storage/local-storage.ts outside this step's owned paths.",
+    "The loader preserves existing data during initializeSeedData() by checking seed ids and appending only missing seed records.",
+    "The admin reset does not clear documents, review results, API keys, LLM configs, active provider, or future language settings.",
+    "The admin list components read storage on mount, so the reset action reloads the page after showing a toast."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "browser verification at http://127.0.0.1:3000",
+      "status": "passed",
+      "notes": "Home document type dropdown showed 표준초안 plus ITU-T 표준초안, ITU-T 기고서, JTC 1 표준초안, and JTC 1 기고서. Admin page had exactly one 기본값으로 초기화 button and displayed ITU-T 표준초안 content."
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed",
+      "notes": "Passed after step2-output and step status update."
+    }
+  ],
+  "known_issues": [
+    "app/page.tsx still calls legacy initializeDefaultData(); because SeedInitializer inserts missing seed ids, this does not block Step 2, but a later cleanup step could remove the legacy call when owned.",
+    "The in-app browser evaluation environment could not read localStorage directly, so browser verification used visible document type options and admin page content as the observable signal."
+  ],
+  "blockers": [],
+  "next_actions": [
+    "Start Step 3 language-setting.",
+    "Add draftreviewr:language storage and settings UI.",
+    "Inject ko/en language instructions into legacy openai-client and all four provider prompt builders."
+  ],
+  "resume_hint": "Resume with phases/4-standards-seed/step3.md. Seed files are now loaded through lib/storage/seed-loader.ts and app/layout.tsx mounts SeedInitializer."
+}

@@ -6,15 +6,36 @@ import { Button } from "@/components/ui/button"
 import { ExportImportDialog } from "@/components/export-import-dialog"
 import Link from "next/link"
 import { useEffect } from "react"
-import { initializeDefaultData } from "@/lib/storage/local-storage"
+import { RotateCcw } from "lucide-react"
+import { initializeSeedData, resetToSeedData } from "@/lib/storage/seed-loader"
+import { useToast } from "@/hooks/use-toast"
 
 export default function AdminPage() {
+  const { toast } = useToast()
+
   useEffect(() => {
     const loadData = async () => {
-      await initializeDefaultData()
+      await initializeSeedData()
     }
     loadData()
   }, [])
+
+  const handleResetToSeedData = async () => {
+    try {
+      const result = await resetToSeedData()
+      toast({
+        title: "기본값으로 초기화했습니다",
+        description: `문서 타입 ${result.documentTypes}개, 검토 항목 ${result.reviewItems + result.commonReviewItems}개를 불러왔습니다.`,
+      })
+      window.setTimeout(() => window.location.reload(), 600)
+    } catch (error) {
+      toast({
+        title: "기본값 초기화 실패",
+        description: error instanceof Error ? error.message : "seed 데이터를 불러오지 못했습니다.",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,6 +47,10 @@ export default function AdminPage() {
               <p className="mt-1 text-sm text-muted-foreground">문서 타입 및 검토 항목 관리</p>
             </div>
             <div className="flex gap-2">
+              <Button variant="outline" onClick={handleResetToSeedData}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                기본값으로 초기화
+              </Button>
               <ExportImportDialog />
               <Link href="/">
                 <Button variant="outline">사용자 페이지로</Button>
