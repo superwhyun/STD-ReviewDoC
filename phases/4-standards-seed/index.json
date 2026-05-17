@@ -41,7 +41,8 @@
     {
       "step": 5,
       "name": "import",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Added atomic settings import validation and wired the admin import UI to full replacement only."
     },
     {
       "step": 6,

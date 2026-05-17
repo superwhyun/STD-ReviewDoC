@@ -1,0 +1,53 @@
+{
+  "step": 5,
+  "name": "import",
+  "status": "completed",
+  "summary": "Implemented single-file settings import as a validated full replacement flow.",
+  "completed_work": [
+    "Added importSettings(json: unknown) to the settings serializer.",
+    "Validated version, document_types, nested review_items, common_review_items, optional language, and duplicate IDs before any localStorage writes.",
+    "Replaced only document type, review item, common review item, and optional language storage keys after validation succeeds.",
+    "Wired the admin import UI to the new serializer and removed the settings merge action.",
+    "Added inline error/success feedback and toast notifications for settings import results."
+  ],
+  "files_changed": [
+    "lib/storage/settings-serializer.ts",
+    "components/export-import-dialog.tsx",
+    "phases/4-standards-seed/index.json",
+    "phases/4-standards-seed/step5-output.json"
+  ],
+  "decisions": [
+    "Kept import as full replacement only; no partial import or merge path remains in the settings import UI.",
+    "Kept full backup restore on the existing exportImportStorage path because Step 5 only owns settings-file import.",
+    "Used the existing localStorage keys directly inside settings-serializer.ts because local-storage.ts is outside this step's owned paths.",
+    "Applied language only when the imported settings file includes a valid language field."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "Browser check at http://127.0.0.1:3000/admin",
+      "status": "passed",
+      "details": "Confirmed settings import shows a single full-replacement button, no merge button, and invalid settings JSON is rejected."
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "A parallel typecheck/build run can race on .next/types; rerunning typecheck after build passed.",
+    "projects/DraftReviewr/phases/3-provider-model-ui/index.json still lists pending steps while the top-level phase index and phase3 tag show completion; this pre-existing status drift remains outside Step 5."
+  ],
+  "next_actions": [
+    "Run Step 6: review-result-width."
+  ],
+  "blockers": [],
+  "resume_hint": "Continue with phases/4-standards-seed/step6.md. Use module-map.json and prior public contracts first; do not re-open implementation internals unless Step 6 requires targeted reads."
+}

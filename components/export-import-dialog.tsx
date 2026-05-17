@@ -6,16 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Download, Upload, Package, Database, AlertCircle } from "lucide-react"
 import { exportImportStorage } from "@/lib/storage/local-storage"
-import { exportSettingsJson, getSettingsExportFileName } from "@/lib/storage/settings-serializer"
+import { exportSettingsJson, getSettingsExportFileName, importSettings } from "@/lib/storage/settings-serializer"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
 
 export function ExportImportDialog() {
   const [open, setOpen] = useState(false)
   const [importData, setImportData] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const { toast } = useToast()
 
   const handleExportSettings = () => {
     const json = exportSettingsJson()
@@ -41,7 +43,7 @@ export function ExportImportDialog() {
     setSuccess("전체 백업이 성공적으로 내보내졌습니다!")
   }
 
-  const handleImportSettings = (merge: boolean) => {
+  const handleImportSettings = () => {
     try {
       setError("")
       setSuccess("")
@@ -51,12 +53,21 @@ export function ExportImportDialog() {
         return
       }
 
-      exportImportStorage.importSettings(importData, merge)
-      setSuccess(merge ? "설정이 병합되었습니다!" : "설정을 가져왔습니다!")
+      importSettings(JSON.parse(importData))
+      setSuccess("설정을 가져왔습니다. 페이지를 새로고침합니다.")
+      toast({
+        title: "설정을 가져왔습니다.",
+        description: "문서 유형, 검토 항목, 언어 설정이 교체되었습니다.",
+      })
       setImportData("")
       setTimeout(() => window.location.reload(), 1500)
     } catch (err) {
-      setError("잘못된 JSON 형식입니다. 파일 내용을 확인해주세요.")
+      setError("올바른 설정 파일이 아닙니다. 버전과 필수 항목을 확인해주세요.")
+      toast({
+        title: "설정 가져오기에 실패했습니다.",
+        description: "버전과 필수 항목이 포함된 설정 JSON인지 확인해주세요.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -151,7 +162,7 @@ export function ExportImportDialog() {
               <AlertDescription>
                 JSON 파일을 선택하거나 내용을 직접 붙여넣으세요.
                 <br />
-                <strong>병합</strong>: 기존 설정과 합침 / <strong>교체</strong>: 기존 설정을 덮어씀
+                설정 파일 가져오기는 전체 교체 방식입니다. 문서 유형, 검토 항목, 언어 설정만 교체되며 API 키와 문서, 검토 결과는 유지됩니다.
               </AlertDescription>
             </Alert>
 
@@ -179,14 +190,10 @@ export function ExportImportDialog() {
                 />
               </div>
 
-              <div className="flex gap-2">
-                <Button onClick={() => handleImportSettings(false)} className="flex-1" variant="default">
-                  설정 교체하기
-                </Button>
-                <Button onClick={() => handleImportSettings(true)} className="flex-1" variant="secondary">
-                  설정 병합하기
-                </Button>
-              </div>
+              <Button onClick={handleImportSettings} className="w-full" variant="default">
+                <Package className="mr-2 h-4 w-4" />
+                설정 가져오기
+              </Button>
 
               <Button onClick={handleImportFullBackup} className="w-full" variant="destructive">
                 <Database className="mr-2 h-4 w-4" />
