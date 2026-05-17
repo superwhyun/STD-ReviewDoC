@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "project": "draft-reviewer",
+  "phase": "4-standards-seed",
+  "step": 4,
+  "name": "export",
+  "status": "completed",
+  "summary": "Implemented the single settings JSON export format and connected it to the existing Export/Import dialog.",
+  "completed_work": [
+    "Created lib/storage/settings-serializer.ts.",
+    "Added SettingsExport, SettingsExportDocumentType, and SettingsExportReviewItem contracts.",
+    "Implemented exportSettings() to read document types, type-specific review items, common review items, and draftreviewr:language.",
+    "Exported document type review items nested under their owning document type.",
+    "Implemented exportSettingsJson() and getSettingsExportFileName() with draftreviewr-settings-{YYYY-MM-DD}.json naming.",
+    "Updated components/export-import-dialog.tsx so the settings export button uses the new serializer.",
+    "Preserved existing full backup export behavior and did not include API keys, documents, or review results in settings export."
+  ],
+  "files_changed": [
+    "lib/storage/settings-serializer.ts",
+    "components/export-import-dialog.tsx",
+    "phases/4-standards-seed/index.json",
+    "phases/4-standards-seed/step4-output.json"
+  ],
+  "decisions": [
+    "Settings export version is exactly \"1\" per Phase 4 contract.",
+    "DocumentType.description null values are exported as an empty string to match the export contract.",
+    "The legacy exportImportStorage full backup path remains unchanged for personal backup use.",
+    "Import buttons still use the legacy import path until Step 5 upgrades import handling."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "browser verification at http://127.0.0.1:3000/admin",
+      "status": "passed",
+      "notes": "Export/Import dialog opened from admin page, showed the single JSON export copy, and exposed the settings export button."
+    },
+    {
+      "command": "rg -n \"exportSettings\\(|exportSettingsJson|getSettingsExportFileName|draftreviewr-settings\" lib components",
+      "status": "passed"
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "The Step 4 export format is not yet accepted by the settings import path; Step 5 is responsible for import support.",
+    "Full backup export remains in the older backup shape and intentionally still includes private/local data."
+  ],
+  "blockers": [],
+  "next_actions": [
+    "Start Step 5 import.",
+    "Add parser/validator support for the version 1 single settings JSON format.",
+    "Wire replacement and merge imports through settings-serializer while preserving full backup restore behavior."
+  ],
+  "resume_hint": "Resume with phases/4-standards-seed/step5.md. The settings export contract is implemented in lib/storage/settings-serializer.ts and should be reused for import shape definitions."
+}

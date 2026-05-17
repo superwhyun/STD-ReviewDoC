@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Download, Upload, Package, Database, AlertCircle } from "lucide-react"
 import { exportImportStorage } from "@/lib/storage/local-storage"
+import { exportSettingsJson, getSettingsExportFileName } from "@/lib/storage/settings-serializer"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -17,12 +18,12 @@ export function ExportImportDialog() {
   const [success, setSuccess] = useState("")
 
   const handleExportSettings = () => {
-    const json = exportImportStorage.exportSettings()
+    const json = exportSettingsJson()
     const blob = new Blob([json], { type: "application/json" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `draftreviewr-settings-${Date.now()}.json`
+    a.download = getSettingsExportFileName()
     a.click()
     URL.revokeObjectURL(url)
     setSuccess("설정이 성공적으로 내보내졌습니다!")
@@ -124,6 +125,8 @@ export function ExportImportDialog() {
               <Package className="h-4 w-4" />
               <AlertDescription>
                 <strong>설정 파일</strong>: 문서 유형과 검토 항목만 포함 (판매/공유용)
+                <br />
+                언어 설정과 문서 타입별 검토 항목을 단일 JSON으로 내보냅니다.
                 <br />
                 <strong>전체 백업</strong>: API 키와 검토 이력 포함 (개인 백업용)
               </AlertDescription>

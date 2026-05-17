@@ -35,7 +35,8 @@
     {
       "step": 4,
       "name": "export",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Added versioned settings export serializer and wired settings export to the single JSON format."
     },
     {
       "step": 5,
