@@ -1,0 +1,52 @@
+{
+  "step": 7,
+  "name": "phase-close",
+  "status": "completed",
+  "summary": "Closed Phase 4 and recorded the standards seed baseline for future phases.",
+  "completed_work": [
+    "Verified steps 0 through 6 were completed before closing the phase.",
+    "Marked Step 7 completed in phases/4-standards-seed/index.json.",
+    "Marked 4-standards-seed completed in phases/index.json.",
+    "Created phases/baselines/4-standards-seed.json with modules, shared contracts, routes, integration points, import/export format, and seed reset details.",
+    "Updated phases/project-manifest.json to standards-seed-completed, cleared active_phase/current_phase, and added Phase 4 module summaries/history.",
+    "Prepared Phase 4 completion tag draft-reviewer-phase4-done."
+  ],
+  "files_changed": [
+    "phases/index.json",
+    "phases/project-manifest.json",
+    "phases/baselines/4-standards-seed.json",
+    "phases/4-standards-seed/index.json",
+    "phases/4-standards-seed/step7-output.json"
+  ],
+  "decisions": [
+    "Set active_phase and current_phase to null because no next phase is defined yet.",
+    "Kept Phase 4 baseline focused on public contracts and integration points so future phases do not need to re-read full implementations.",
+    "Did not modify implementation files because Step 7 is a phase closure step."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "git tag draft-reviewer-phase4-done",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "projects/DraftReviewr/phases/3-provider-model-ui/index.json still lists pending steps while the top-level phase index, baseline, tag, and git history show completion; this pre-existing drift remains documented in project-manifest.json."
+  ],
+  "next_actions": [
+    "Define the next phase before continuing, or start from phases/project-manifest.json and phases/baselines/4-standards-seed.json for any new phase."
+  ],
+  "blockers": [],
+  "resume_hint": "Phase 4 is closed. Future work should read phases/project-manifest.json and phases/baselines/4-standards-seed.json first, then scaffold or select the next phase."
+}

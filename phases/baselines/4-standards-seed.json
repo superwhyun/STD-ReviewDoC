@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "phase": "4-standards-seed",
+  "tag": "draft-reviewer-phase4-done",
+  "source_module_map": "phases/4-standards-seed/module-map.json",
+  "project_state": {
+    "name": "DraftReviewr",
+    "root": "projects/DraftReviewr",
+    "summary": "Standards seed data, default seed loading/reset, review output language setting, single settings JSON export/import, and wider review result dialog.",
+    "runtime": "Next.js 15.2.4 App Router, React 19, TypeScript, Tailwind CSS 4."
+  },
+  "modules": [
+    {
+      "name": "seed-data",
+      "paths": [
+        "public/data/document-types/itu-t-draft.json",
+        "public/data/document-types/itu-t-contribution.json",
+        "public/data/document-types/jtc1-draft.json",
+        "public/data/document-types/jtc1-contribution.json",
+        "public/data/common-review-items.json"
+      ],
+      "public_surface": "Nested document type seed JSON with review_items plus common review item seed JSON."
+    },
+    {
+      "name": "seed-loader",
+      "paths": [
+        "lib/storage/seed-loader.ts",
+        "components/seed-initializer.tsx",
+        "app/layout.tsx",
+        "app/admin/page.tsx"
+      ],
+      "public_surface": "initializeSeedDataIfEmpty() and resetToSeedData() load public/data seeds into draftreviewr:* localStorage keys."
+    },
+    {
+      "name": "language-setting",
+      "paths": [
+        "lib/storage/language-storage.ts",
+        "app/settings/page.tsx",
+        "lib/openai-client.ts",
+        "lib/providers/openai.ts",
+        "lib/providers/grok.ts",
+        "lib/providers/openrouter.ts",
+        "lib/providers/kimi.ts"
+      ],
+      "public_surface": "Language is stored under draftreviewr:language with ko/en values and injected into all review prompts."
+    },
+    {
+      "name": "settings-serializer",
+      "paths": [
+        "lib/storage/settings-serializer.ts",
+        "components/export-import-dialog.tsx"
+      ],
+      "public_surface": "exportSettingsJson(), getSettingsExportFileName(), and importSettings(json) for version 1 settings JSON."
+    },
+    {
+      "name": "review-result-width",
+      "paths": [
+        "components/documents/document-review-dialog.tsx"
+      ],
+      "public_surface": "Review result DialogContent uses sm:max-w-[112rem] for a wider result reading surface."
+    }
+  ],
+  "shared_contracts": [
+    "lib/types.ts",
+    "lib/storage/local-storage.ts",
+    "lib/storage/seed-loader.ts",
+    "lib/storage/language-storage.ts",
+    "lib/storage/settings-serializer.ts",
+    "public/data/document-types/itu-t-draft.json",
+    "public/data/document-types/itu-t-contribution.json",
+    "public/data/document-types/jtc1-draft.json",
+    "public/data/document-types/jtc1-contribution.json",
+    "public/data/common-review-items.json"
+  ],
+  "routes": [
+    {
+      "path": "/",
+      "integration": "SeedInitializer is mounted globally; document review results open in the wider DocumentReviewDialog."
+    },
+    {
+      "path": "/admin",
+      "integration": "Default seed reset and settings export/import entry points."
+    },
+    {
+      "path": "/settings",
+      "integration": "Review output language selection."
+    }
+  ],
+  "integration_points": [
+    "app/layout.tsx (SeedInitializer mount)",
+    "app/admin/page.tsx (default reset, ExportImportDialog)",
+    "app/settings/page.tsx (language selection UI)",
+    "components/export-import-dialog.tsx (version 1 settings export/import)",
+    "components/documents/document-review-dialog.tsx (wider result dialog)",
+    "lib/openai-client.ts (legacy fallback language instruction)",
+    "lib/providers/*.ts (multi-provider language instruction)"
+  ],
+  "export_import_format": {
+    "version": "1",
+    "shape": "document_types[] with nested review_items[], common_review_items[], exported_at, and optional language on import",
+    "excludes": [
+      "api key",
+      "documents",
+      "review_results"
+    ],
+    "import_semantics": "Full replacement after validation; no merge support."
+  },
+  "seed_files_location": "public/data/",
+  "seed_reset_trigger": "Admin UI '기본값으로 초기화' button -> resetToSeedData()",
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed"
+    }
+  ],
+  "written_at": "2026-05-17T11:08:30+09:00"
+}

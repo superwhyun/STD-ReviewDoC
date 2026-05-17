@@ -53,7 +53,8 @@
     {
       "step": 7,
       "name": "phase-close",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Closed Phase 4 with completed top-level status, baseline, manifest update, and phase handoff."
     }
   ]
 }

@@ -2,8 +2,8 @@
   "schema_version": 1,
   "project": "draft-reviewer",
   "project_root": "projects/DraftReviewr",
-  "status": "standards-seed-in-progress",
-  "active_phase": "4-standards-seed",
+  "status": "standards-seed-completed",
+  "active_phase": null,
   "modules": [
     {
       "name": "app-shell",
@@ -31,7 +31,27 @@
     },
     {
       "name": "export-import",
-      "summary": "JSON settings export/import and full backup/restore UI backed by localStorage serialization. Phase 4 will add a single settings JSON serializer with language and nested document review items."
+      "summary": "JSON settings export/import and full backup/restore UI backed by localStorage serialization. Phase 4 added a version 1 single settings JSON serializer with language and nested document review items."
+    },
+    {
+      "name": "seed-data",
+      "summary": "ITU-T and JTC 1 standards seed JSON files under public/data for draft and contribution document types plus common review items."
+    },
+    {
+      "name": "seed-loader",
+      "summary": "Loads public/data standards seeds into localStorage on empty startup and provides admin reset-to-seed behavior."
+    },
+    {
+      "name": "language-setting",
+      "summary": "Stores review output language under draftreviewr:language and injects ko/en language instructions into all review providers and legacy fallback."
+    },
+    {
+      "name": "settings-serializer",
+      "summary": "Version 1 settings export/import serializer for document types with nested review items, common review items, and language, excluding API keys and review data."
+    },
+    {
+      "name": "review-result-width",
+      "summary": "Wider review result dialog surface for reading standards review output."
     },
     {
       "name": "ui-foundation",
@@ -111,31 +131,17 @@
     },
     {
       "phase": "4-standards-seed",
-      "status": "in-progress",
-      "summary": "Add ITU-T/JTC 1 seed document types, language setting, single settings export/import JSON, and wider review result dialog."
+      "status": "completed",
+      "summary": "Added ITU-T/JTC 1 seed document types, seed loader/reset, review result language setting, single settings export/import JSON, and wider review result dialog."
     }
   ],
   "current_contract_summary": {
     "runtime": "Next.js 15 App Router with React 19 and TypeScript, implemented as client-heavy pages without project-local API routes.",
     "data_model": "DocumentType, ReviewItem, CommonReviewItem, UserApiKey, Document, ReviewResult, ApiKeyInfo, LLMProviderConfig, and LLMModel in lib/types.ts.",
-    "storage": "Browser localStorage keys under draftreviewr:* for document types, review items, common review items, documents, review results, legacy API key, user id, LLM configs, active provider, and planned language setting.",
+    "storage": "Browser localStorage keys under draftreviewr:* for document types, review items, common review items, documents, review results, legacy API key, user id, LLM configs, active provider, and review output language.",
     "ai_integration": "Browser fetch calls through lib/providers/*.ts for OpenAI, Grok, OpenRouter, and Kimi; legacy lib/openai-client.ts remains as fallback.",
-    "import_export": "Current settings export uses flat document_types/review_items/common_review_items arrays; phase 4 will add a versioned single settings JSON with language and nested document review items."
+    "import_export": "Settings export/import uses version 1 single JSON with language, document_types[] containing nested review_items[], and common_review_items[]; API keys, documents, and review_results are excluded from settings import/export."
   },
-  "updated_at": "2026-05-17T00:00:00+09:00",
-  "current_phase": {
-    "dir": "4-standards-seed",
-    "goal": "Add ITU-T/JTC 1 standards seed document types, language setting, single settings export/import JSON, and wider review result dialog.",
-    "step_order": [
-      "contracts",
-      "seed-json-files",
-      "seed-loader",
-      "language-setting",
-      "export",
-      "import",
-      "review-result-width",
-      "phase-close"
-    ],
-    "approval_required_before_execution": false
-  }
+  "updated_at": "2026-05-17T11:08:30+09:00",
+  "current_phase": null
 }
