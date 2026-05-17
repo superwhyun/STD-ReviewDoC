@@ -29,7 +29,8 @@
     {
       "step": 3,
       "name": "language-setting",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Added language preference storage, settings UI, and ko/en instructions in review prompts."
     },
     {
       "step": 4,

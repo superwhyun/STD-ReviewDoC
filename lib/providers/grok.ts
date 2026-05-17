@@ -5,6 +5,7 @@
 
 import type { LLMProviderConfig } from "@/lib/types"
 import type { LLMProvider, ReviewRequest, ReviewResult } from "@/lib/llm-provider"
+import { getCurrentLanguageInstruction } from "@/lib/storage/language-storage"
 
 const GROK_API_BASE = "https://api.x.ai/v1"
 
@@ -16,7 +17,7 @@ interface GrokResponse {
 
 function buildPrompt(fileContent: string, prompts: Array<{ name: string; prompt: string }>): string {
     const items = prompts.map((p, i) => `${i + 1}. [${p.name}]\n${p.prompt}`).join("\n\n")
-    return `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean.
+    return `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean. ${getCurrentLanguageInstruction()}
 
 다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.
 

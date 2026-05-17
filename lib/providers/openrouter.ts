@@ -5,13 +5,14 @@
 
 import type { LLMProviderConfig } from "@/lib/types"
 import type { LLMProvider, ReviewRequest, ReviewResult } from "@/lib/llm-provider"
+import { getCurrentLanguageInstruction } from "@/lib/storage/language-storage"
 
 interface ChatChoice { delta?: { content?: string }; message?: { content: string }; finish_reason?: string }
 
 function buildMessages(fileContent: string, prompts: Array<{ name: string; prompt: string }>): Array<{ role: string; content: string }> {
     const items = prompts.map((p, i) => `${i + 1}. [${p.name}]\n${p.prompt}`).join("\n\n")
     return [
-        { role: "system", content: "You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean." },
+        { role: "system", content: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean. ${getCurrentLanguageInstruction()}` },
         { role: "user", content: `다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.\n\n=== 검토 항목 ===\n${items}\n\n=== 응답 형식 ===\n각 검토 항목에 대해 다음 형식으로 답변해주세요:\n\n### [검토 항목 번호]. [검토 항목 이름]\n[검토 내용]\n\n---\n\n=== 문서 내용 ===\n${fileContent}` }
     ]
 }

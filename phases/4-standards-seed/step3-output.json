@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "project": "draft-reviewer",
+  "phase": "4-standards-seed",
+  "step": 3,
+  "name": "language-setting",
+  "status": "completed",
+  "summary": "Implemented review result language preference and injected language instructions into legacy and multi-provider review prompts.",
+  "completed_work": [
+    "Created lib/storage/language-storage.ts with Language type, LANGUAGE_KEY, getLanguage(), setLanguage(), getLanguageInstruction(), and getCurrentLanguageInstruction().",
+    "Added a review result language card to app/settings/page.tsx using draftreviewr:language with 한국어 and English options.",
+    "Changing language now persists immediately and shows a toast.",
+    "Appended the current language instruction to lib/openai-client.ts legacy review system prompts.",
+    "Appended the current language instruction to OpenAI, Grok, OpenRouter, and Kimi provider system prompts."
+  ],
+  "files_changed": [
+    "lib/storage/language-storage.ts",
+    "app/settings/page.tsx",
+    "lib/openai-client.ts",
+    "lib/providers/openai.ts",
+    "lib/providers/grok.ts",
+    "lib/providers/openrouter.ts",
+    "lib/providers/kimi.ts",
+    "phases/4-standards-seed/index.json",
+    "phases/4-standards-seed/step3-output.json"
+  ],
+  "decisions": [
+    "Language preference is isolated to draftreviewr:language and does not modify API key, provider, model, document type, or review item storage.",
+    "Existing review item prompts were not changed.",
+    "The existing Korean system prompt text remains in place and the explicit language instruction is appended at the end, matching the Step 3 contract.",
+    "Provider prompt builders were updated in addition to lib/openai-client.ts because the app uses lib/providers/*.ts before falling back to the legacy OpenAI path."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "browser verification at http://127.0.0.1:3000/settings",
+      "status": "passed",
+      "notes": "Settings page showed 검토 결과 언어 with 한국어 and English options. Selecting English displayed 언어 설정이 저장되었습니다 toast and marked English selected; the test then restored 한국어."
+    },
+    {
+      "command": "rg -n \"draftreviewr:language|getLanguageInstruction|getCurrentLanguageInstruction|언어 설정이 저장되었습니다|검토 결과 언어|Write all review results in English|검토 결과는 반드시 한국어\" app lib",
+      "status": "passed"
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "Some existing prompt body text outside the system instruction remains Korean; the explicit language instruction is appended to the system prompt as required by this step.",
+    "The production build was run while a dev server was active earlier, which required a clean dev server restart before browser verification."
+  ],
+  "blockers": [],
+  "next_actions": [
+    "Start Step 4 export.",
+    "Implement the single settings JSON export format including language and nested document type review_items.",
+    "Keep full backup behavior separate unless Step 4 explicitly changes it."
+  ],
+  "resume_hint": "Resume with phases/4-standards-seed/step4.md. Language storage is available at lib/storage/language-storage.ts and should be included in the settings serializer."
+}
