@@ -185,7 +185,7 @@ export function DocumentsList({ initialDocuments }: DocumentsListProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>문서 삭제</AlertDialogTitle>
             <AlertDialogDescription>
-              "{documentToDelete?.file_name}" 문서와 관련된 모든 검토 결과가 삭제됩니다. 이 작업은 취소할 수 없습니다.
+              &quot;{documentToDelete?.file_name}&quot; 문서와 관련된 모든 검토 결과가 삭제됩니다. 이 작업은 취소할 수 없습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
