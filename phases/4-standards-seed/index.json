@@ -47,7 +47,8 @@
     {
       "step": 6,
       "name": "review-result-width",
-      "status": "pending"
+      "status": "completed",
+      "summary": "Expanded the review result dialog width from max-w-4xl to a 112rem responsive max width."
     },
     {
       "step": 7,

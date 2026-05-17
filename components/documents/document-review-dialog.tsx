@@ -69,7 +69,7 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[112rem] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{document.file_name}</DialogTitle>
           <DialogDescription>{document.document_types.name} 검토 결과</DialogDescription>

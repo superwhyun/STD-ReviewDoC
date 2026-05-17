@@ -1,0 +1,54 @@
+{
+  "step": 6,
+  "name": "review-result-width",
+  "status": "completed",
+  "summary": "Expanded the document review result dialog width without changing result rendering logic.",
+  "completed_work": [
+    "Located the review result modal at components/documents/document-review-dialog.tsx.",
+    "Confirmed app/page.tsx renders DocumentsList and DocumentsList opens DocumentReviewDialog for completed documents.",
+    "Changed only the DialogContent width class in the review result component."
+  ],
+  "files_changed": [
+    "components/documents/document-review-dialog.tsx",
+    "phases/4-standards-seed/index.json",
+    "phases/4-standards-seed/step6-output.json"
+  ],
+  "decisions": [
+    "Used sm:max-w-[112rem] because the previous target width was max-w-4xl, which is 56rem; 112rem is the 2x value.",
+    "Used an sm: max-width class to override the DialogContent base sm:max-w-lg class from components/ui/dialog.tsx.",
+    "Did not change result data flow, markdown rendering, state management, or any other dialog."
+  ],
+  "width_change": {
+    "file": "components/documents/document-review-dialog.tsx",
+    "before": "max-w-4xl max-h-[80vh] overflow-y-auto",
+    "after": "sm:max-w-[112rem] max-h-[80vh] overflow-y-auto"
+  },
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/DraftReviewr",
+      "status": "passed"
+    },
+    {
+      "command": "git diff -- components/documents/document-review-dialog.tsx",
+      "status": "passed",
+      "details": "Diff shows only the DialogContent width class changed."
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 4-standards-seed --root projects/DraftReviewr",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "No Step 6 implementation issues found.",
+    "projects/DraftReviewr/phases/3-provider-model-ui/index.json still lists pending steps while the top-level phase index and phase3 tag show completion; this pre-existing status drift remains outside Step 6."
+  ],
+  "next_actions": [
+    "Run Step 7: phase-close."
+  ],
+  "blockers": [],
+  "resume_hint": "Continue with phases/4-standards-seed/step7.md. Step 7 owns phase closure files and should update the top-level phase status, baseline, manifest, and phase completion tag."
+}
