@@ -69,7 +69,7 @@
     "zod": "3.25.76"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["sharp", "nodemon"]
+    "ignoredBuiltDependencies": ["sharp"]
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
