@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "phase": "5-scoring-prompt-edit",
+  "step": 2,
+  "name": "step2-score-display-ui",
+  "status": "completed",
+  "summary": "Rendered score badges and an average score summary in the review result dialog.",
+  "completed_work": [
+    "Added getScoreBadgeClass() with green, amber, and red score ranges.",
+    "Rendered optional per-result score badges before the common item badge.",
+    "Rendered an overall average score summary under the dialog description when scored results exist."
+  ],
+  "files_changed": [
+    "components/documents/document-review-dialog.tsx",
+    "phases/5-scoring-prompt-edit/index.json",
+    "phases/5-scoring-prompt-edit/step2-output.json"
+  ],
+  "decisions": [
+    "Used conditional rendering so older review results without score do not show empty badges.",
+    "Used bg-amber-400 text-black for mid-range scores and avoided bg-yellow classes."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "grep \"getScoreBadgeClass\" projects/STD-ReviewDoC/components/documents/document-review-dialog.tsx",
+      "status": "passed"
+    },
+    {
+      "command": "grep \"amber-400\" projects/STD-ReviewDoC/components/documents/document-review-dialog.tsx",
+      "status": "passed"
+    },
+    {
+      "command": "grep \"bg-yellow\" projects/STD-ReviewDoC/components/documents/document-review-dialog.tsx",
+      "status": "passed",
+      "note": "No output."
+    }
+  ],
+  "known_issues": [
+    "Existing unrelated .gitignore and step0-step3 markdown edits remain in the worktree and were not reverted."
+  ],
+  "next_actions": [
+    "Proceed to step3-prompt-edit-in-results and preserve the score badge UI."
+  ],
+  "blockers": [],
+  "resume_hint": "Continue from components/documents/document-review-dialog.tsx. Score display is already implemented and should be preserved while adding inline prompt editing."
+}

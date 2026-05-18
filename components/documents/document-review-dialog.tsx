@@ -28,9 +28,20 @@ interface ReviewResultWithItem extends ReviewResult {
   common_review_items?: CommonReviewItem
 }
 
+function getScoreBadgeClass(score: number): string {
+  if (score >= 80) return "bg-green-500 text-white"
+  if (score >= 50) return "bg-amber-400 text-black"
+  return "bg-red-500 text-white"
+}
+
 export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentReviewDialogProps) {
   const [results, setResults] = useState<ReviewResultWithItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const scoredResults = results.filter((result) => result.score !== undefined)
+  const averageScore =
+    scoredResults.length > 0
+      ? Math.round(scoredResults.reduce((sum, result) => sum + result.score!, 0) / scoredResults.length)
+      : undefined
 
   useEffect(() => {
     if (open) {
@@ -73,6 +84,14 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
         <DialogHeader>
           <DialogTitle>{document.file_name}</DialogTitle>
           <DialogDescription>{document.document_types.name} 검토 결과</DialogDescription>
+          {averageScore !== undefined && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">전체 평균:</span>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getScoreBadgeClass(averageScore)}`}>
+                {averageScore}점
+              </span>
+            </div>
+          )}
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -93,6 +112,11 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="text-base">{item?.name}</CardTitle>
                       <div className="flex items-center gap-2 shrink-0">
+                        {result.score !== undefined && (
+                          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getScoreBadgeClass(result.score)}`}>
+                            {result.score}점
+                          </span>
+                        )}
                         {isCommon && (
                           <Badge variant="secondary">공통</Badge>
                         )}
