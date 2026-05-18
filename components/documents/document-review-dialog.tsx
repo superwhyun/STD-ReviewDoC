@@ -5,8 +5,11 @@ import type { ReviewResult, ReviewItem, CommonReviewItem } from "@/lib/types"
 import { reviewResultStorage, reviewItemStorage, commonReviewItemStorage } from "@/lib/storage/local-storage"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
+import { Pencil } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 
 interface Document {
@@ -37,6 +40,8 @@ function getScoreBadgeClass(score: number): string {
 export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentReviewDialogProps) {
   const [results, setResults] = useState<ReviewResultWithItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingPrompt, setEditingPrompt] = useState<string>("")
   const scoredResults = results.filter((result) => result.score !== undefined)
   const averageScore =
     scoredResults.length > 0
@@ -78,6 +83,48 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
     }
   }
 
+  const handleStartEditPrompt = (result: ReviewResultWithItem) => {
+    const item = result.common_review_items || result.review_items
+    setEditingId(result.id)
+    setEditingPrompt(item?.prompt ?? "")
+  }
+
+  const handleCancelEditPrompt = () => {
+    setEditingId(null)
+    setEditingPrompt("")
+  }
+
+  const handleSavePrompt = (result: ReviewResultWithItem) => {
+    const item = result.common_review_items || result.review_items
+    const nextPrompt = editingPrompt.trim()
+    if (!item || nextPrompt === "") return
+
+    if (result.common_review_item_id) {
+      commonReviewItemStorage.update(item.id, { name: item.name, prompt: nextPrompt })
+    } else if (result.review_item_id) {
+      reviewItemStorage.update(item.id, { name: item.name, prompt: nextPrompt })
+    }
+
+    setResults((prev) =>
+      prev.map((storedResult) =>
+        storedResult.id === result.id
+          ? {
+              ...storedResult,
+              common_review_items: storedResult.common_review_items
+                ? { ...storedResult.common_review_items, prompt: nextPrompt }
+                : undefined,
+              review_items: storedResult.review_items
+                ? { ...storedResult.review_items, prompt: nextPrompt }
+                : undefined,
+            }
+          : storedResult
+      )
+    )
+
+    setEditingId(null)
+    setEditingPrompt("")
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] sm:max-w-[90vw] max-h-[80vh] overflow-y-auto">
@@ -105,6 +152,7 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
             results.map((result) => {
               const item = result.common_review_items || result.review_items
               const isCommon = !!result.common_review_items
+              const isEditing = editingId === result.id
 
               return (
                 <Card key={result.id}>
@@ -131,7 +179,38 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
                         </span>
                       </div>
                     </div>
-                    <CardDescription className="text-xs">{item?.prompt}</CardDescription>
+                    {isEditing ? (
+                      <div className="space-y-2">
+                        <Textarea
+                          value={editingPrompt}
+                          onChange={(event) => setEditingPrompt(event.target.value)}
+                          rows={4}
+                          className="text-xs"
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" onClick={() => handleSavePrompt(result)} disabled={editingPrompt.trim() === ""}>
+                            저장
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={handleCancelEditPrompt}>
+                            취소
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start justify-between gap-2">
+                        <CardDescription className="text-xs whitespace-pre-wrap">{item?.prompt}</CardDescription>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0"
+                          onClick={() => handleStartEditPrompt(result)}
+                          disabled={!item}
+                          aria-label="검토 프롬프트 편집"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    )}
                   </CardHeader>
                   <CardContent>
                     <div className="prose prose-sm max-w-none dark:prose-invert">

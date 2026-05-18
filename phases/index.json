@@ -27,8 +27,8 @@
     },
     {
       "dir": "5-scoring-prompt-edit",
-      "status": "pending",
-      "summary": "검토 결과에 0~100점 스코어 badge 추가(색상 코딩), 결과 화면 내 검토 프롬프트 인라인 편집 기능."
+      "status": "completed",
+      "summary": "검토 결과에 0~100점 스코어 badge와 전체 평균 표시, 결과 화면 내 검토 프롬프트 인라인 편집 기능을 추가."
     }
   ]
 }

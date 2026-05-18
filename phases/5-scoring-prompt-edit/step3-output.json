@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "phase": "5-scoring-prompt-edit",
+  "step": 3,
+  "name": "step3-prompt-edit-in-results",
+  "status": "completed",
+  "summary": "Added inline prompt editing to the review result dialog and closed Phase 5.",
+  "completed_work": [
+    "Added editingId and editingPrompt state to DocumentReviewDialog.",
+    "Added a Pencil icon button for each review result prompt.",
+    "Rendered an inline Textarea with Save and Cancel controls for the active result.",
+    "Saved prompt edits to commonReviewItemStorage or reviewItemStorage and updated local dialog state without refetching results.",
+    "Marked Phase 5 completed in phases/index.json and wrote the Phase 5 baseline."
+  ],
+  "files_changed": [
+    "components/documents/document-review-dialog.tsx",
+    "phases/5-scoring-prompt-edit/index.json",
+    "phases/index.json",
+    "phases/baselines/5-scoring-prompt-edit.json",
+    "phases/project-manifest.json",
+    "phases/5-scoring-prompt-edit/step3-output.json"
+  ],
+  "decisions": [
+    "Only prompts are editable; markdown review result bodies remain read-only.",
+    "Prompt saves update local state directly instead of calling fetchResults().",
+    "Storage update calls include the existing item name because the current storage contract requires name and prompt together."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "grep \"Pencil\" projects/STD-ReviewDoC/components/documents/document-review-dialog.tsx",
+      "status": "passed"
+    },
+    {
+      "command": "grep \"handleSavePrompt\\|commonReviewItemStorage.update\\|reviewItemStorage.update\" projects/STD-ReviewDoC/components/documents/document-review-dialog.tsx",
+      "status": "passed"
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 5-scoring-prompt-edit --root projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "Browser check against http://localhost:3000",
+      "status": "passed",
+      "note": "Home route loaded with expected Korean document review UI text. Browser policy blocked localStorage seeding for dialog-state verification, so dialog behavior was verified by typecheck/build and targeted code checks."
+    }
+  ],
+  "known_issues": [
+    "Existing unrelated .gitignore and step0-step3 markdown edits remain in the worktree and were not reverted.",
+    "phases/3-provider-model-ui/index.json still has stale pending step statuses even though top-level status, manifest, baseline, and tag indicate Phase 3 completion."
+  ],
+  "next_actions": [
+    "Create git tag STD-ReviewDoC-phase5-done after the step3 commit."
+  ],
+  "blockers": [],
+  "resume_hint": "Phase 5 is complete after this step. Future work should read phases/baselines/5-scoring-prompt-edit.json and phases/project-manifest.json before inspecting implementation files."
+}

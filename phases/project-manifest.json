@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "draft-reviewer",
   "project_root": "projects/DraftReviewr",
-  "status": "standards-seed-completed",
+  "status": "scoring-prompt-edit-completed",
   "active_phase": null,
   "modules": [
     {
@@ -54,6 +54,26 @@
       "summary": "Wider review result dialog surface for reading standards review output."
     },
     {
+      "name": "score-schema",
+      "summary": "ReviewResult supports optional 0-100 score values while preserving existing unscored localStorage data."
+    },
+    {
+      "name": "llm-score-output",
+      "summary": "OpenAI, Grok, OpenRouter, Kimi, and legacy OpenAI fallback request SCORE output and parse completed responses into optional scores."
+    },
+    {
+      "name": "score-storage-contract",
+      "summary": "Provider results, upload mapping, and reviewResultStorage.create() carry score?: number through to localStorage."
+    },
+    {
+      "name": "score-display-ui",
+      "summary": "Review result dialog renders per-result score badges and an overall average score summary."
+    },
+    {
+      "name": "prompt-edit-in-results",
+      "summary": "Review result dialog allows inline editing of review item prompts with immediate local state refresh."
+    },
+    {
       "name": "ui-foundation",
       "summary": "shadcn/Radix UI component layer, hooks, and shared utility functions."
     }
@@ -90,6 +110,7 @@
     "lib/openai-client.ts",
     "lib/llm-provider.ts",
     "lib/providers/*.ts",
+    "components/documents/document-review-dialog.tsx",
     "components.json"
   ],
   "integration_points": [
@@ -100,7 +121,9 @@
     "lib/storage/local-storage.ts",
     "lib/storage/seed-loader.ts",
     "lib/storage/settings-serializer.ts",
-    "components/export-import-dialog.tsx"
+    "components/export-import-dialog.tsx",
+    "components/documents/document-upload-section.tsx",
+    "components/documents/document-review-dialog.tsx"
   ],
   "known_issues": [
     "claude.md appears to describe an older Supabase/API-route architecture and must not be treated as authoritative without verification.",
@@ -133,15 +156,21 @@
       "phase": "4-standards-seed",
       "status": "completed",
       "summary": "Added ITU-T/JTC 1 seed document types, seed loader/reset, review result language setting, single settings export/import JSON, and wider review result dialog."
+    },
+    {
+      "phase": "5-scoring-prompt-edit",
+      "status": "completed",
+      "summary": "Added optional review scores, provider SCORE parsing, score badges and average summary, and inline prompt editing in review results."
     }
   ],
   "current_contract_summary": {
     "runtime": "Next.js 15 App Router with React 19 and TypeScript, implemented as client-heavy pages without project-local API routes.",
-    "data_model": "DocumentType, ReviewItem, CommonReviewItem, UserApiKey, Document, ReviewResult, ApiKeyInfo, LLMProviderConfig, and LLMModel in lib/types.ts.",
-    "storage": "Browser localStorage keys under draftreviewr:* for document types, review items, common review items, documents, review results, legacy API key, user id, LLM configs, active provider, and review output language.",
-    "ai_integration": "Browser fetch calls through lib/providers/*.ts for OpenAI, Grok, OpenRouter, and Kimi; legacy lib/openai-client.ts remains as fallback.",
-    "import_export": "Settings export/import uses version 1 single JSON with language, document_types[] containing nested review_items[], and common_review_items[]; API keys, documents, and review_results are excluded from settings import/export."
+    "data_model": "DocumentType, ReviewItem, CommonReviewItem, UserApiKey, Document, ReviewResult with optional score, ApiKeyInfo, LLMProviderConfig, and LLMModel in lib/types.ts.",
+    "storage": "Browser localStorage keys under draftreviewr:* for document types, review items, common review items, documents, scored review results, legacy API key, user id, LLM configs, active provider, and review output language.",
+    "ai_integration": "Browser fetch calls through lib/providers/*.ts for OpenAI, Grok, OpenRouter, and Kimi; legacy lib/openai-client.ts remains as fallback. Non-streaming review paths request and parse SCORE output.",
+    "import_export": "Settings export/import uses version 1 single JSON with language, document_types[] containing nested review_items[], and common_review_items[]; API keys, documents, and review_results are excluded from settings import/export.",
+    "review_result_ui": "DocumentReviewDialog shows score badges and average score when scores exist, and supports inline prompt editing for review items/common review items."
   },
-  "updated_at": "2026-05-17T11:08:30+09:00",
+  "updated_at": "2026-05-18T10:16:24+09:00",
   "current_phase": null
 }
