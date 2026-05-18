@@ -18,6 +18,33 @@ interface ResponsesAPIResponse {
     usage: { input_tokens: number; output_tokens: number; total_tokens: number }
 }
 
+const SCORE_INSTRUCTIONS = `응답 첫 줄은 반드시 아래 형식으로만 작성하시오:
+SCORE: {점수}
+점수는 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 중 하나의 정수이다.
+판정 기준: 80~100은 기준 충족 수준, 50~70은 일부 개선 필요, 0~40은 중대한 문제 존재.
+두 번째 줄부터 검토 내용을 작성하시오.`
+
+export function parseScoreFromResult(raw: string): { score: number | undefined; result: string } {
+    const lines = raw.split("\n")
+    const firstLine = lines[0]?.trim() || ""
+    let match = firstLine.match(/^SCORE:\s*(\d+)$/)
+    let scoreLineIndex = 0
+
+    if (!match) {
+        scoreLineIndex = lines.findIndex((line, index) => index <= 1 && /^SCORE:\s*\d+$/.test(line.trim()))
+        match = scoreLineIndex >= 0 ? lines[scoreLineIndex].trim().match(/^SCORE:\s*(\d+)$/) : null
+    }
+
+    if (match) {
+        const score = Math.min(100, Math.max(0, parseInt(match[1], 10)))
+        const result = lines
+            .filter((_, index) => index !== scoreLineIndex)
+            .join("\n")
+            .trimStart()
+        return { score, result }
+    }
+    return { score: undefined, result: raw }
+}
 
 async function uploadFileToOpenAI(file: File, apiKey: string): Promise<string> {
     const formData = new FormData()
@@ -44,6 +71,7 @@ function buildPromptText(prompts: Array<{ name: string; prompt: string }>, conte
     const items = prompts.map((p, i) => `${i + 1}. [${p.name}]\n${p.prompt}`).join("\n\n")
     const contextSection = context ? `\n=== 문서 유형 ===\n${context}\n` : ""
     return `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}
+${SCORE_INSTRUCTIONS}
 ${contextSection}
 다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.
 
@@ -54,6 +82,7 @@ ${items}
 각 검토 항목에 대해 다음 형식으로 답변해주세요:
 
 ### [검토 항목 번호]. [검토 항목 이름]
+SCORE: {점수}
 [검토 내용]
 
 ---`
@@ -75,6 +104,7 @@ function buildPrompt(fileContent: string, prompts: Array<{ name: string; prompt:
     const items = prompts.map((p, i) => `${i + 1}. [${p.name}]\n${p.prompt}`).join("\n\n")
     const contextSection = context ? `\n=== 문서 유형 ===\n${context}\n` : ""
     return `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}
+${SCORE_INSTRUCTIONS}
 ${contextSection}
 다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.
 
@@ -85,6 +115,7 @@ ${items}
 각 검토 항목에 대해 다음 형식으로 답변해주세요:
 
 ### [검토 항목 번호]. [검토 항목 이름]
+SCORE: {점수}
 [검토 내용]
 
 ---
@@ -154,7 +185,11 @@ export class OpenAIProvider implements LLMProvider {
             if (!fullReview) throw new Error("No text content found in API response")
 
             const sections = parseSections(fullReview)
-            return allItems.map((item, idx) => ({ itemName: item.name, result: (sections[idx] || `검토 항목 "${item.name}"에 대한 응답을 찾을 수 없습니다.`).split("---")[0].trim() }))
+            return allItems.map((item, idx) => {
+                const rawResult = (sections[idx] || `검토 항목 "${item.name}"에 대한 응답을 찾을 수 없습니다.`).split("---")[0].trim()
+                const parsed = parseScoreFromResult(rawResult)
+                return { itemName: item.name, result: parsed.result, score: parsed.score }
+            })
         } finally {
             if (fileId) await deleteFileFromOpenAI(fileId, this.apiKey)
         }

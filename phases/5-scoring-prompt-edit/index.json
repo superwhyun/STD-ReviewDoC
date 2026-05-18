@@ -18,8 +18,9 @@
     {
       "step": 1,
       "name": "step1-llm-score-output",
-      "status": "pending",
-      "summary": "Unblocked by step4 score storage contract changes."
+      "status": "completed",
+      "summary": "Added SCORE prompt instructions and post-response score parsing for OpenAI, Grok, OpenRouter, Kimi, and legacy fallback.",
+      "completed_at": "2026-05-18T10:11:23+09:00"
     },
     {
       "step": 2,

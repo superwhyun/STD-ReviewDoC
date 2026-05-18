@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "phase": "5-scoring-prompt-edit",
+  "step": 1,
+  "name": "step1-llm-score-output",
+  "status": "completed",
+  "summary": "Added SCORE instructions and post-completion parsing across all providers and the legacy OpenAI fallback.",
+  "completed_work": [
+    "Added SCORE prompt instructions to OpenAI, Grok, OpenRouter, Kimi, and legacy OpenAI client prompts.",
+    "Implemented a single shared parseScoreFromResult() helper in lib/providers/openai.ts and reused it from other provider paths.",
+    "Parsed completed non-streaming provider responses after section splitting and returned score with each provider ReviewResult.",
+    "Parsed legacy processDocumentReview() results and returned optional score for storage."
+  ],
+  "files_changed": [
+    "lib/providers/openai.ts",
+    "lib/providers/grok.ts",
+    "lib/providers/openrouter.ts",
+    "lib/providers/kimi.ts",
+    "lib/openai-client.ts",
+    "phases/5-scoring-prompt-edit/index.json",
+    "phases/5-scoring-prompt-edit/step1-output.json"
+  ],
+  "decisions": [
+    "Kept SCORE parsing out of reviewStream() implementations so parsing only happens after complete non-streaming responses.",
+    "Allowed parseScoreFromResult() to handle SCORE on either the first line or the next line after a section heading because existing multi-item parsing preserves section titles.",
+    "Left storage and upload mapping unchanged in this step because the blocking-fix step already added the score storage contract."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "grep -r \"SCORE:\" projects/STD-ReviewDoC/lib/providers/",
+      "status": "passed"
+    },
+    {
+      "command": "grep \"SCORE:\" projects/STD-ReviewDoC/lib/openai-client.ts",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "Existing unrelated .gitignore and step0-step3 markdown edits remain in the worktree and were not reverted.",
+    "SCORE values are optional at storage time; older or malformed model responses will save without a score."
+  ],
+  "next_actions": [
+    "Proceed to step2-score-display-ui to render score badges in the review result dialog."
+  ],
+  "blockers": [],
+  "resume_hint": "Read phases/5-scoring-prompt-edit/step2.md and components/documents/document-review-dialog.tsx. ReviewResult.score is now available on stored review results."
+}

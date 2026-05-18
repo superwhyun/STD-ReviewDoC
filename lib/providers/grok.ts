@@ -6,6 +6,7 @@
 import type { LLMProviderConfig } from "@/lib/types"
 import type { LLMProvider, ReviewRequest, ReviewResult } from "@/lib/llm-provider"
 import { getCurrentLanguageInstruction } from "@/lib/storage/language-storage"
+import { parseScoreFromResult } from "@/lib/providers/openai"
 
 const GROK_API_BASE = "https://api.x.ai/v1"
 
@@ -15,10 +16,17 @@ interface GrokResponse {
     output_text?: string
 }
 
+const SCORE_INSTRUCTIONS = `응답 첫 줄은 반드시 아래 형식으로만 작성하시오:
+SCORE: {점수}
+점수는 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 중 하나의 정수이다.
+판정 기준: 80~100은 기준 충족 수준, 50~70은 일부 개선 필요, 0~40은 중대한 문제 존재.
+두 번째 줄부터 검토 내용을 작성하시오.`
+
 function buildPrompt(fileContent: string, prompts: Array<{ name: string; prompt: string }>, context?: string): string {
     const items = prompts.map((p, i) => `${i + 1}. [${p.name}]\n${p.prompt}`).join("\n\n")
     const contextSection = context ? `\n=== 문서 유형 ===\n${context}\n` : ""
     return `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}
+${SCORE_INSTRUCTIONS}
 ${contextSection}
 다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.
 
@@ -29,6 +37,7 @@ ${items}
 각 검토 항목에 대해 다음 형식으로 답변해주세요:
 
 ### [검토 항목 번호]. [검토 항목 이름]
+SCORE: {점수}
 [검토 내용]
 
 ---
@@ -71,7 +80,11 @@ export class GrokProvider implements LLMProvider {
         if (!fullReview) { const msg = data.output?.find(i => i.type === "message"); if (msg?.content) { const tc = msg.content.find(c => c.type === "output_text"); if (tc) fullReview = tc.text } }
         if (!fullReview) throw new Error("No text content in Grok response")
         const sections = parseSections(fullReview)
-        return allItems.map((item, idx) => ({ itemName: item.name, result: (sections[idx] || `"${item.name}" 응답 없음`).split("---")[0].trim() }))
+        return allItems.map((item, idx) => {
+            const rawResult = (sections[idx] || `"${item.name}" 응답 없음`).split("---")[0].trim()
+            const parsed = parseScoreFromResult(rawResult)
+            return { itemName: item.name, result: parsed.result, score: parsed.score }
+        })
     }
 
     async *reviewStream(request: ReviewRequest): AsyncGenerator<string> {

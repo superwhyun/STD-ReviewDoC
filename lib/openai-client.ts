@@ -5,9 +5,16 @@
 
 import { apiKeyStorage } from "./storage/local-storage"
 import { getCurrentLanguageInstruction } from "./storage/language-storage"
+import { parseScoreFromResult } from "./providers/openai"
 import mammoth from "mammoth"
 
 const OPENAI_API_BASE = "https://api.openai.com/v1"
+
+const SCORE_INSTRUCTIONS = `응답 첫 줄은 반드시 아래 형식으로만 작성하시오:
+SCORE: {점수}
+점수는 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 중 하나의 정수이다.
+판정 기준: 80~100은 기준 충족 수준, 50~70은 일부 개선 필요, 0~40은 중대한 문제 존재.
+두 번째 줄부터 검토 내용을 작성하시오.`
 
 export interface OpenAIError {
   error: string
@@ -108,7 +115,7 @@ async function createAssistant(fileId: string): Promise<string> {
     },
     body: JSON.stringify({
       name: "Document Reviewer",
-      instructions: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}`,
+      instructions: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}\n${SCORE_INSTRUCTIONS}`,
       model: "gpt-4o",
       tools: [{ type: "file_search" }],
     }),
@@ -338,7 +345,8 @@ export async function reviewDocumentWithOpenAI(fileContent: string, prompt: stri
     throw new Error("OpenAI API key not found")
   }
 
-  const systemPrompt = `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}`
+  const systemPrompt = `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}
+${SCORE_INSTRUCTIONS}`
   const userInput = `${systemPrompt}\n\n검토 항목: ${prompt}\n\n--- 문서 내용 ---\n${fileContent}`
 
   const response = await fetch(`${OPENAI_API_BASE}/responses`, {
@@ -366,7 +374,8 @@ export async function reviewDocumentWithOpenAI(fileContent: string, prompt: stri
   }
 
   const data: ResponsesAPIResponse = await response.json()
-  return data.output_text || "No response from OpenAI"
+  const parsed = parseScoreFromResult(data.output_text || "No response from OpenAI")
+  return parsed.result
 }
 
 /**
@@ -382,6 +391,7 @@ export async function processDocumentReview(
     review_item_id?: string
     common_review_item_id?: string
     result: string
+    score?: number
   }>
 > {
   // Extract text from file
@@ -393,7 +403,8 @@ export async function processDocumentReview(
   ]
 
   // Build comprehensive prompt with all review items
-  const systemPrompt = `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}`
+  const systemPrompt = `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}
+${SCORE_INSTRUCTIONS}`
 
   const reviewInstructions = allItems
     .map((item, index) => `${index + 1}. [${item.name}]\n${item.prompt}`)
@@ -410,6 +421,7 @@ ${reviewInstructions}
 각 검토 항목에 대해 다음 형식으로 답변해주세요:
 
 ### [검토 항목 번호]. [검토 항목 이름]
+SCORE: {점수}
 [검토 내용]
 
 ---
@@ -480,6 +492,7 @@ ${fileContent}`
     review_item_id?: string
     common_review_item_id?: string
     result: string
+    score?: number
   }> = []
 
   // Try multiple parsing strategies
@@ -512,11 +525,13 @@ ${fileContent}`
 
     // Clean up the result (remove leading/trailing whitespace and separators)
     reviewResult = reviewResult.split("---")[0].trim()
+    const parsed = parseScoreFromResult(reviewResult)
 
     results.push({
       review_item_id: item.isCommon ? undefined : item.id,
       common_review_item_id: item.isCommon ? item.id : undefined,
-      result: reviewResult,
+      result: parsed.result,
+      score: parsed.score,
     })
   })
 

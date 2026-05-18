@@ -6,15 +6,22 @@
 import type { LLMProviderConfig } from "@/lib/types"
 import type { LLMProvider, ReviewRequest, ReviewResult } from "@/lib/llm-provider"
 import { getCurrentLanguageInstruction } from "@/lib/storage/language-storage"
+import { parseScoreFromResult } from "@/lib/providers/openai"
 
 interface ChatChoice { delta?: { content?: string }; message?: { content: string }; finish_reason?: string }
+
+const SCORE_INSTRUCTIONS = `응답 첫 줄은 반드시 아래 형식으로만 작성하시오:
+SCORE: {점수}
+점수는 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 중 하나의 정수이다.
+판정 기준: 80~100은 기준 충족 수준, 50~70은 일부 개선 필요, 0~40은 중대한 문제 존재.
+두 번째 줄부터 검토 내용을 작성하시오.`
 
 function buildMessages(fileContent: string, prompts: Array<{ name: string; prompt: string }>, context?: string): Array<{ role: string; content: string }> {
     const items = prompts.map((p, i) => `${i + 1}. [${p.name}]\n${p.prompt}`).join("\n\n")
     const contextSection = context ? `\n=== 문서 유형 ===\n${context}\n\n` : ""
     return [
-        { role: "system", content: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}` },
-        { role: "user", content: `다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.\n\n${contextSection}=== 검토 항목 ===\n${items}\n\n=== 응답 형식 ===\n각 검토 항목에 대해 다음 형식으로 답변해주세요:\n\n### [검토 항목 번호]. [검토 항목 이름]\n[검토 내용]\n\n---\n\n=== 문서 내용 ===\n${fileContent}` }
+        { role: "system", content: `You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback. ${getCurrentLanguageInstruction()}\n${SCORE_INSTRUCTIONS}` },
+        { role: "user", content: `다음 문서를 여러 관점에서 검토해주세요. 각 검토 항목에 대해 명확하게 구분하여 답변해주세요.\n\n${contextSection}=== 검토 항목 ===\n${items}\n\n=== 응답 형식 ===\n각 검토 항목에 대해 다음 형식으로 답변해주세요:\n\n### [검토 항목 번호]. [검토 항목 이름]\nSCORE: {점수}\n[검토 내용]\n\n---\n\n=== 문서 내용 ===\n${fileContent}` }
     ]
 }
 
@@ -49,7 +56,11 @@ export class OpenRouterProvider implements LLMProvider {
         const fullReview = data.choices?.[0]?.message?.content
         if (!fullReview) throw new Error("No content in OpenRouter response")
         const sections = parseSections(fullReview)
-        return allItems.map((item, idx) => ({ itemName: item.name, result: (sections[idx] || `"${item.name}" 응답 없음`).split("---")[0].trim() }))
+        return allItems.map((item, idx) => {
+            const rawResult = (sections[idx] || `"${item.name}" 응답 없음`).split("---")[0].trim()
+            const parsed = parseScoreFromResult(rawResult)
+            return { itemName: item.name, result: parsed.result, score: parsed.score }
+        })
     }
 
     async *reviewStream(request: ReviewRequest): AsyncGenerator<string> {
