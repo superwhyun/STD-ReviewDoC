@@ -18,7 +18,8 @@
     {
       "step": 1,
       "name": "step1-llm-score-output",
-      "status": "pending"
+      "status": "pending",
+      "summary": "Unblocked by step4 score storage contract changes."
     },
     {
       "step": 2,
@@ -29,6 +30,15 @@
       "step": 3,
       "name": "step3-prompt-edit-in-results",
       "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "blocking-fix-score-storage-contract",
+      "status": "completed",
+      "type": "blocking-fix",
+      "unblocks": [1],
+      "summary": "Added score to provider result, review result storage create input, and document upload save mapping.",
+      "completed_at": "2026-05-18T10:05:56+09:00"
     }
   ]
 }

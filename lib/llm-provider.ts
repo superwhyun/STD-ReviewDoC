@@ -19,6 +19,7 @@ export interface ReviewRequest {
 export interface ReviewResult {
     itemName: string
     result: string
+    score?: number
 }
 
 export interface LLMProvider {

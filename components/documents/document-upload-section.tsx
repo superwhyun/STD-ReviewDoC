@@ -100,7 +100,7 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
 
       setProgressText("AI 검토 시작...")
 
-      let results: Array<{ review_item_id?: string; common_review_item_id?: string; result: string }>
+      let results: Array<{ review_item_id?: string; common_review_item_id?: string; result: string; score?: number }>
 
       try {
         // Try the new multi-provider system first
@@ -139,6 +139,7 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
             review_item_id: isCommon ? undefined : typeItems[i - commonItems.length]?.id,
             common_review_item_id: isCommon ? commonItems[i]?.id : undefined,
             result: pr.result,
+            score: pr.score,
           }
         })
       } catch (providerError) {
@@ -163,6 +164,7 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
           review_item_id: result.review_item_id,
           common_review_item_id: result.common_review_item_id,
           result: result.result,
+          score: result.score,
         })
       })
 

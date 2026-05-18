@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "phase": "5-scoring-prompt-edit",
+  "step": 4,
+  "name": "blocking-fix-score-storage-contract",
+  "type": "blocking-fix",
+  "status": "completed",
+  "summary": "Unblocked step1 by adding a score field path from provider review results through upload result mapping into reviewResultStorage.create().",
+  "completed_work": [
+    "Added score?: number to the provider ReviewResult contract in lib/llm-provider.ts.",
+    "Allowed reviewResultStorage.create() to accept and persist score?: number in lib/storage/local-storage.ts.",
+    "Updated document upload result mapping and save calls to pass score through to localStorage."
+  ],
+  "files_changed": [
+    "lib/llm-provider.ts",
+    "lib/storage/local-storage.ts",
+    "components/documents/document-upload-section.tsx",
+    "phases/5-scoring-prompt-edit/index.json",
+    "phases/5-scoring-prompt-edit/module-map.json",
+    "phases/5-scoring-prompt-edit/step4.md",
+    "phases/5-scoring-prompt-edit/step4-output.json"
+  ],
+  "decisions": [
+    "Kept score optional across provider and storage contracts for backward compatibility.",
+    "Did not implement provider SCORE prompting or parsing in this blocking fix; that remains step1 ownership."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 5-scoring-prompt-edit --root projects/STD-ReviewDoC",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [
+    "Existing unrelated .gitignore and step markdown edits remain in the worktree and were not reverted.",
+    "step1 still needs provider prompt updates, parseScoreFromResult implementation, legacy fallback parsing, build verification, and its own handoff."
+  ],
+  "next_actions": [
+    "Resume step1-llm-score-output now that score can be carried and saved."
+  ],
+  "blockers": [],
+  "resume_hint": "Run step1 using the updated contracts: provider ReviewResult.score, reviewResultStorage.create({ score }), and document upload save mapping already exist."
+}

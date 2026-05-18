@@ -257,6 +257,7 @@ export const reviewResultStorage = {
     review_item_id?: string
     common_review_item_id?: string
     result: string
+    score?: number
   }): ReviewResult {
     const results = this.getAll()
 
@@ -266,6 +267,7 @@ export const reviewResultStorage = {
       review_item_id: data.review_item_id || null,
       common_review_item_id: data.common_review_item_id || null,
       result: data.result,
+      score: data.score,
       created_at: new Date().toISOString(),
     }
     results.push(newResult)

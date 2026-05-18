@@ -68,11 +68,27 @@
       ],
       "dependencies": ["score-schema", "score-display-ui"],
       "status": "planned"
+    },
+    {
+      "name": "score-storage-contract",
+      "owner_steps": [4],
+      "owned_paths": [
+        "lib/llm-provider.ts",
+        "lib/storage/local-storage.ts",
+        "components/documents/document-upload-section.tsx"
+      ],
+      "contracts": [
+        "lib/types.ts"
+      ],
+      "dependencies": ["score-schema"],
+      "status": "planned",
+      "unblocks": ["llm-score-output"]
     }
   ],
   "shared_contracts": [
     "lib/types.ts",
-    "lib/storage/local-storage.ts"
+    "lib/storage/local-storage.ts",
+    "lib/llm-provider.ts"
   ],
   "integration_points": [
     "lib/providers/*.ts (SCORE 파싱 + score 저장)",
