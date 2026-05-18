@@ -51,6 +51,7 @@ export interface ReviewResult {
   review_item_id: string | null
   common_review_item_id: string | null
   result: string
+  score?: number
   created_at: string
 }
 

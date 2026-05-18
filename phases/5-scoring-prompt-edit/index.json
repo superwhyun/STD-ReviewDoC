@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "project": "STD-ReviewDoC",
+  "phase": "5-scoring-prompt-edit",
+  "execution_policy": {
+    "context_mode": "contract-first",
+    "blocking_fix_priority": true,
+    "append_only_steps": true
+  },
+  "steps": [
+    {
+      "step": 0,
+      "name": "step0-module-map",
+      "status": "completed",
+      "summary": "Added optional ReviewResult.score contract and confirmed phase module-map contains no scaffold placeholders.",
+      "completed_at": "2026-05-18T09:48:56+09:00"
+    },
+    {
+      "step": 1,
+      "name": "step1-llm-score-output",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "step2-score-display-ui",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "step3-prompt-edit-in-results",
+      "status": "pending"
+    }
+  ]
+}

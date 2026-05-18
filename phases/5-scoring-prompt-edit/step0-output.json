@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "phase": "5-scoring-prompt-edit",
+  "step": 0,
+  "name": "step0-module-map",
+  "status": "completed",
+  "summary": "Added the optional ReviewResult.score contract for Phase 5 and confirmed the module map has no scaffold placeholders.",
+  "completed_work": [
+    "Added score?: number to ReviewResult in lib/types.ts for backward-compatible review result scoring.",
+    "Confirmed phases/5-scoring-prompt-edit/module-map.json contains no replace-with placeholders.",
+    "Updated phases/5-scoring-prompt-edit/index.json step0 status to completed."
+  ],
+  "files_changed": [
+    "lib/types.ts",
+    "phases/5-scoring-prompt-edit/index.json",
+    "phases/5-scoring-prompt-edit/step0-output.json"
+  ],
+  "decisions": [
+    "Kept score optional to preserve existing review_results localStorage data.",
+    "Did not modify provider, legacy OpenAI, component, or app files because those are owned by later Phase 5 steps."
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "grep -r \"replace-with\" projects/STD-ReviewDoC/phases/5-scoring-prompt-edit/module-map.json",
+      "status": "passed",
+      "note": "No output."
+    },
+    {
+      "command": "grep \"score\" projects/STD-ReviewDoC/lib/types.ts",
+      "status": "passed",
+      "note": "Found score?: number."
+    }
+  ],
+  "known_issues": [
+    "Existing workspace state includes unrelated modified .gitignore and top-level phases/index.json, plus the untracked Phase 5 scaffold created before this step execution.",
+    "phases/3-provider-model-ui/index.json still has stale pending step statuses even though top-level status, manifest, baseline, and tag indicate Phase 3 completion."
+  ],
+  "next_actions": [
+    "Proceed to step1-llm-score-output: update provider prompts/parsing and storage creation paths to capture 0-100 scores."
+  ],
+  "blockers": [],
+  "resume_hint": "Read phases/5-scoring-prompt-edit/module-map.json, phases/5-scoring-prompt-edit/step1.md, lib/types.ts, and the provider files owned by step1. Treat ReviewResult.score as the Phase 5 public contract."
+}

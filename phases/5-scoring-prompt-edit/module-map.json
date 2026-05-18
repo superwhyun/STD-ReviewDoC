@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "phase": "5-scoring-prompt-edit",
+  "baseline": "phases/baselines/4-standards-seed.json",
+  "policy": {
+    "context_mode": "contract-first",
+    "frozen_after_completion": true,
+    "default_read_order": [
+      "baseline",
+      "module-map",
+      "public-contracts",
+      "current-step",
+      "targeted-implementation-only-if-needed"
+    ]
+  },
+  "modules": [
+    {
+      "name": "score-schema",
+      "owner_steps": [0],
+      "owned_paths": [
+        "phases/5-scoring-prompt-edit/module-map.json",
+        "lib/types.ts"
+      ],
+      "contracts": [
+        "lib/types.ts"
+      ],
+      "dependencies": [],
+      "status": "planned"
+    },
+    {
+      "name": "llm-score-output",
+      "owner_steps": [1],
+      "owned_paths": [
+        "lib/providers/openai.ts",
+        "lib/providers/grok.ts",
+        "lib/providers/openrouter.ts",
+        "lib/providers/kimi.ts",
+        "lib/openai-client.ts"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts"
+      ],
+      "dependencies": ["score-schema"],
+      "status": "planned"
+    },
+    {
+      "name": "score-display-ui",
+      "owner_steps": [2],
+      "owned_paths": [
+        "components/documents/document-review-dialog.tsx"
+      ],
+      "contracts": [
+        "lib/types.ts"
+      ],
+      "dependencies": ["score-schema", "llm-score-output"],
+      "status": "planned"
+    },
+    {
+      "name": "prompt-edit-in-results",
+      "owner_steps": [3],
+      "owned_paths": [
+        "components/documents/document-review-dialog.tsx"
+      ],
+      "contracts": [
+        "lib/types.ts",
+        "lib/storage/local-storage.ts"
+      ],
+      "dependencies": ["score-schema", "score-display-ui"],
+      "status": "planned"
+    }
+  ],
+  "shared_contracts": [
+    "lib/types.ts",
+    "lib/storage/local-storage.ts"
+  ],
+  "integration_points": [
+    "lib/providers/*.ts (SCORE 파싱 + score 저장)",
+    "lib/openai-client.ts (레거시 폴백 SCORE 파싱)",
+    "components/documents/document-review-dialog.tsx (score badge + prompt 인라인 편집)"
+  ],
+  "deferred_backlog": []
+}

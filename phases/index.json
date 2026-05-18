@@ -24,6 +24,11 @@
       "dir": "4-standards-seed",
       "status": "completed",
       "summary": "표준기구 문서타입 4종(ITU-T 표준초안·기고서, JTC 1 표준초안·기고서) seed JSON 로딩, 언어 설정, Export/Import 단일 JSON, 검토 결과 화면 너비 개선."
+    },
+    {
+      "dir": "5-scoring-prompt-edit",
+      "status": "pending",
+      "summary": "검토 결과에 0~100점 스코어 badge 추가(색상 코딩), 결과 화면 내 검토 프롬프트 인라인 편집 기능."
     }
   ]
 }
