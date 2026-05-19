@@ -5,16 +5,10 @@
 
 import { apiKeyStorage } from "./storage/local-storage"
 import { getCurrentLanguageInstruction } from "./storage/language-storage"
-import { parseScoreFromResult } from "./providers/openai"
+import { parseScoreFromResult, SCORE_INSTRUCTIONS } from "./providers/openai"
 import mammoth from "mammoth"
 
 const OPENAI_API_BASE = "https://api.openai.com/v1"
-
-const SCORE_INSTRUCTIONS = `응답 첫 줄은 반드시 아래 형식으로만 작성하시오:
-SCORE: {점수}
-점수는 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 중 하나의 정수이다.
-판정 기준: 80~100은 기준 충족 수준, 50~70은 일부 개선 필요, 0~40은 중대한 문제 존재.
-두 번째 줄부터 검토 내용을 작성하시오.`
 
 export interface OpenAIError {
   error: string
@@ -339,7 +333,7 @@ async function extractTextFromFile(file: File): Promise<string> {
 /**
  * Review document with OpenAI using Responses API
  */
-export async function reviewDocumentWithOpenAI(fileContent: string, prompt: string): Promise<string> {
+export async function reviewDocumentWithOpenAI(fileContent: string, prompt: string): Promise<{ result: string; score?: number }> {
   const apiKey = apiKeyStorage.get()
   if (!apiKey) {
     throw new Error("OpenAI API key not found")
@@ -374,8 +368,7 @@ ${SCORE_INSTRUCTIONS}`
   }
 
   const data: ResponsesAPIResponse = await response.json()
-  const parsed = parseScoreFromResult(data.output_text || "No response from OpenAI")
-  return parsed.result
+  return parseScoreFromResult(data.output_text || "No response from OpenAI")
 }
 
 /**
@@ -462,10 +455,6 @@ ${fileContent}`
 
   const data: ResponsesAPIResponse = await response.json()
 
-  console.log("=== API Response Structure ===")
-  console.log(JSON.stringify(data, null, 2))
-  console.log("==============================")
-
   // Extract text from Responses API format
   let fullReview = ""
 
@@ -482,10 +471,6 @@ ${fileContent}`
     console.error("Could not extract text from response:", data)
     throw new Error("No text content found in API response")
   }
-
-  console.log("=== Extracted Review Text ===")
-  console.log(fullReview)
-  console.log("=============================")
 
   // Parse the response and split by review items
   const results: Array<{
@@ -510,14 +495,6 @@ ${fileContent}`
   if (sections.length === 0 || sections[0].trim() === "") {
     sections = fullReview.split(/\n\d+\.\s*\[/).slice(1).map(s => "[" + s)
   }
-
-  console.log("=== Parsed Sections ===")
-  console.log("Number of sections:", sections.length)
-  console.log("Number of items:", allItems.length)
-  sections.forEach((section, idx) => {
-    console.log(`Section ${idx}:`, section.substring(0, 100))
-  })
-  console.log("=====================")
 
   allItems.forEach((item, index) => {
     // Try to find the corresponding section

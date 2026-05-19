@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
 import { Pencil } from "lucide-react"
+import { toast } from "sonner"
 import ReactMarkdown from "react-markdown"
 
 interface Document {
@@ -97,7 +98,11 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
   const handleSavePrompt = (result: ReviewResultWithItem) => {
     const item = result.common_review_items || result.review_items
     const nextPrompt = editingPrompt.trim()
-    if (!item || nextPrompt === "") return
+    if (!item) return
+    if (nextPrompt === "") {
+      toast.error("프롬프트를 입력해주세요.")
+      return
+    }
 
     if (result.common_review_item_id) {
       commonReviewItemStorage.update(item.id, { name: item.name, prompt: nextPrompt })

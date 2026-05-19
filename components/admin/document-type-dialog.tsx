@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { DocumentType } from "@/lib/types"
 import { documentTypeStorage } from "@/lib/storage/local-storage"
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,13 @@ export function DocumentTypeDialog({ open, onOpenChange, documentType, onSuccess
   const [description, setDescription] = useState(documentType?.description || "")
   const [isLoading, setIsLoading] = useState(false)
 
+  useEffect(() => {
+    if (open) {
+      setName(documentType?.name || "")
+      setDescription(documentType?.description || "")
+    }
+  }, [open, documentType])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -45,8 +52,7 @@ export function DocumentTypeDialog({ open, onOpenChange, documentType, onSuccess
 
       if (result) {
         onSuccess(result)
-        setName("")
-        setDescription("")
+        onOpenChange(false)
       }
     } finally {
       setIsLoading(false)

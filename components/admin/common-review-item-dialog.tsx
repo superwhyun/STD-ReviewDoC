@@ -31,14 +31,11 @@ export function CommonReviewItemDialog({ open, onOpenChange, item, onSave }: Com
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (item) {
-      setName(item.name)
-      setPrompt(item.prompt)
-    } else {
-      setName("")
-      setPrompt("")
+    if (open) {
+      setName(item?.name ?? "")
+      setPrompt(item?.prompt ?? "")
     }
-  }, [item])
+  }, [open, item])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,6 +52,7 @@ export function CommonReviewItemDialog({ open, onOpenChange, item, onSave }: Com
 
       if (result) {
         onSave(result)
+        onOpenChange(false)
       }
     } finally {
       setLoading(false)
