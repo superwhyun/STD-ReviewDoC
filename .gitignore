@@ -32,6 +32,7 @@ yarn-error.log*
 # vercel
 .vercel
 
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -42,3 +43,9 @@ next-env.d.ts
 # supabase
 /supabase/.branches
 /supabase/.temp
+
+# serena
+.serena/
+
+# harness phase output (recovery artifacts — not tracked)
+phases/**/step*-output.json
