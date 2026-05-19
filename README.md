@@ -107,17 +107,40 @@ pnpm build
 
 ### Vercel
 
+#### CLI로 수동 배포
+
 ```bash
 # Vercel CLI 설치
 npm install -g vercel
 
-# 배포 (처음 실행 시 로그인 및 프로젝트 연결)
+# 최초 배포 (로그인 및 프로젝트 연결)
 vercel
+
+# 프로덕션 배포
+vercel deploy --prod
 ```
 
 - 환경 변수 설정 불필요 (API 키는 사용자가 앱에서 직접 입력)
 - 배포 후 HTTPS 자동 적용
 - `vercel.json`에 CSP 보안 헤더가 포함되어 있습니다
+
+#### GitHub 연동으로 자동 배포
+
+GitHub 저장소와 연결하면 `main` 브랜치에 푸시할 때마다 자동으로 프로덕션 배포됩니다.
+
+1. [vercel.com](https://vercel.com) 대시보드에서 프로젝트 선택
+2. **Settings → Git → Connect Git Repository**
+3. GitHub 저장소(`superwhyun/STD-ReviewDoC`) 연결
+
+연결 후 동작:
+
+| 이벤트 | 결과 |
+|--------|------|
+| `main` 브랜치 푸시 | 프로덕션 자동 배포 |
+| PR 생성 | 미리보기 URL 자동 생성 |
+| PR 병합 | 프로덕션 자동 반영 |
+
+> **참고**: CLI로 처음 배포한 경우 GitHub 연동이 자동으로 설정되지 않습니다. Vercel 대시보드에서 별도로 연결해야 합니다.
 
 ### Docker
 
