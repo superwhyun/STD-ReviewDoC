@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "phase": "6-deployment",
+  "baseline": "phases/baselines/5-scoring-prompt-edit.json",
+  "policy": {
+    "context_mode": "contract-first",
+    "frozen_after_completion": true,
+    "default_read_order": [
+      "baseline",
+      "module-map",
+      "public-contracts",
+      "current-step",
+      "targeted-implementation-only-if-needed"
+    ]
+  },
+  "modules": [
+    {
+      "name": "static-export-config",
+      "owner_steps": [0],
+      "owned_paths": [
+        "next.config.mjs"
+      ],
+      "contracts": [
+        "next.config.mjs"
+      ],
+      "dependencies": [],
+      "status": "planned"
+    },
+    {
+      "name": "vercel-config",
+      "owner_steps": [1],
+      "owned_paths": [
+        "vercel.json"
+      ],
+      "contracts": [
+        "vercel.json"
+      ],
+      "dependencies": ["static-export-config"],
+      "status": "planned"
+    },
+    {
+      "name": "docker-config",
+      "owner_steps": [2],
+      "owned_paths": [
+        "Dockerfile",
+        "nginx.conf",
+        "docker-compose.yml",
+        ".dockerignore",
+        "public/robots.txt"
+      ],
+      "contracts": [
+        "Dockerfile",
+        "docker-compose.yml"
+      ],
+      "dependencies": ["static-export-config"],
+      "status": "planned"
+    }
+  ],
+  "shared_contracts": [
+    "next.config.mjs"
+  ],
+  "integration_points": [
+    "next.config.mjs (output: export — step1·2 공통 전제)",
+    "vercel.json (Vercel 배포 헤더)",
+    "Dockerfile + nginx.conf (Docker 정적 서빙)"
+  ],
+  "deferred_backlog": []
+}

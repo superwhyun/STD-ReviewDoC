@@ -8,7 +8,7 @@
 - 구현 파악이 필요한 경우에만 targeted read:
   - `components/documents/document-review-dialog.tsx` (step2 완료 상태)
 
-이전 step의 구현 파일이나 긴 handoff를 기본 입력으로 삼지 마라.
+이전 step의 구현 파일을 기본 입력으로 삼지 마라.
 
 ## 모듈 할당
 
@@ -156,8 +156,7 @@ python3 scripts/validate_phase.py 5-scoring-prompt-edit --root projects/STD-Revi
 5. `python3 scripts/validate_phase.py 5-scoring-prompt-edit --root projects/STD-ReviewDoC` → 통과.
 6. `owned_paths` 밖의 파일이 변경되지 않았는지 `git diff --name-only` 확인.
 7. `phases/5-scoring-prompt-edit/index.json`의 step3 상태를 `completed`로 업데이트.
-8. `step3-output.json` handoff 작성.
-9. phase 마감: `phases/index.json`의 phase5 상태를 `completed`로 업데이트.
+8. phase 마감: `phases/index.json`의 phase5 상태를 `completed`로 업데이트.
 10. phase 마감: `phases/baselines/5-scoring-prompt-edit.json` 작성.
 11. phase 마감: `git tag STD-ReviewDoC-phase5-done` (프로젝트 git repo 안에서).
 
@@ -168,4 +167,3 @@ python3 scripts/validate_phase.py 5-scoring-prompt-edit --root projects/STD-Revi
 - `lib/providers/*.ts`, `lib/openai-client.ts` 를 수정하지 마라 (step1 소유).
 - `lib/types.ts` 를 수정하지 마라 (step0 소유).
 - `lib/storage/local-storage.ts` 인터페이스를 변경하지 마라.
-- handoff 없이 종료하지 마라.

@@ -1,233 +1,181 @@
 # DraftReviewr
 
-AI 기반 한국 표준 초안 문서 자동 검토 시스템 - **완전한 클라이언트 사이드 애플리케이션**
+AI 기반 표준 초안 문서 자동 검토 시스템 — 완전한 클라이언트 사이드 애플리케이션
 
-## 🎯 주요 특징
+## 특징
 
-- ✅ **서버리스 아키텍처** - 데이터베이스 불필요, 완전한 브라우저 기반
-- ✅ **localStorage 기반** - 모든 설정이 브라우저에 저장
-- ✅ **직접 OpenAI 연동** - 서버를 거치지 않고 브라우저에서 직접 API 호출
-- ✅ **Export/Import** - 검토 설정을 JSON 파일로 내보내기/가져오기
-- ✅ **지식 거래 가능** - 잘 정제된 검토 항목 세트를 판매/공유 가능
-- ✅ **프라이버시** - 파일이 서버에 저장되지 않음
+- 서버·데이터베이스 불필요 — 브라우저만으로 동작
+- 모든 데이터는 브라우저 localStorage에 저장
+- OpenAI, Grok, OpenRouter, Kimi 멀티 LLM 지원
+- 검토 항목별 0~100점 스코어 자동 산출 및 색상 표시
+- 검토 결과 화면에서 프롬프트 직접 편집 가능
+- 검토 설정을 JSON 파일로 내보내기/가져오기
 
 ## 기술 스택
 
-- **Next.js 15** (App Router, 클라이언트 사이드만 사용)
-- **React 19**
-- **TypeScript**
-- **OpenAI GPT-5** (직접 API 호출)
-- **localStorage** (데이터 저장)
-- **Tailwind CSS + shadcn/ui**
+- Next.js 15 (App Router, static export)
+- React 19, TypeScript
+- Tailwind CSS + shadcn/ui
+- localStorage (데이터 저장)
 
-## 시작하기
+---
+
+## 설치 및 로컬 실행
 
 ### 사전 요구사항
 
-- Node.js 18+
-- OpenAI API 키
+- Node.js 20+
+- pnpm (`npm install -g pnpm`)
+- LLM 제공자 API 키 (OpenAI, Grok, OpenRouter, Kimi 중 하나 이상)
 
-### 설치 및 실행
+### 설치
 
 ```bash
-# 1. 의존성 설치
-npm install
+# 의존성 설치
+pnpm install
 
-# 2. 개발 서버 시작
-npm run dev
+# 개발 서버 실행
+pnpm dev
 ```
 
-브라우저에서 http://localhost:3000 열기
+브라우저에서 http://localhost:3000 접속
 
-### 초기 설정
+### 빌드
 
-1. **설정 페이지**로 이동
-2. **OpenAI API 키** 입력 및 저장
-3. **관리자 대시보드**에서 문서 유형 및 검토 항목 설정
-4. 완료!
+```bash
+# 프로덕션 빌드 (out/ 디렉터리에 정적 파일 생성)
+pnpm build
+```
+
+---
+
+## 초기 설정
+
+1. 상단 **설정** 메뉴로 이동
+2. 사용할 LLM 제공자 선택 후 API 키 입력
+3. 상단 **관리자** 메뉴에서 문서 유형 및 검토 항목 설정
+4. 홈에서 문서 업로드 후 검토 시작
+
+---
 
 ## 주요 기능
 
-### 1. 📝 문서 검토
+### 문서 검토
 
 - DOCX, TXT 파일 지원 (브라우저에서 직접 텍스트 추출)
-- 브라우저에서 직접 OpenAI에 업로드
-- 커스터마이징 가능한 검토 항목
-- 실시간 진행 상황 표시
+- 공통 검토 항목 + 문서 유형별 검토 항목 자동 적용
+- 검토 항목당 **0~100점 스코어** 자동 산출
+  - 80~100점: 초록 (기준 충족)
+  - 50~79점: 노란색 (일부 개선 필요)
+  - 0~49점: 빨간색 (중대한 문제)
+- 전체 평균 점수 요약 표시
 
-### 2. ⚙️ 검토 항목 관리
+### 프롬프트 인라인 편집
 
-**공통 검토 항목**
-- 모든 문서 유형에 적용
-- 예: 문서 형식, 맞춤법, 용어 일관성
+검토 결과 화면에서 연필 아이콘을 클릭하면 해당 검토 항목의 프롬프트를 바로 수정할 수 있습니다. 다음 검토 시 즉시 반영됩니다.
 
-**유형별 검토 항목**
-- 특정 문서 유형에만 적용
-- 예: 표준초안의 경우 - 적용 범위, 인용 표준, 기술 내용
+### LLM 제공자
 
-### 3. 📦 Export / Import
+| 제공자 | 비고 |
+|--------|------|
+| OpenAI | GPT-5, Responses API |
+| Grok | xAI Responses API |
+| OpenRouter | 다양한 모델 선택 가능 |
+| Kimi | Moonshot AI |
 
-#### 설정 파일 내보내기 (판매/공유용)
-```json
-{
-  "version": "1.0.0",
-  "document_types": [...],
-  "review_items": [...],
-  "common_review_items": [...]
-}
-```
+설정 페이지에서 제공자와 모델을 선택하고, 검토 시작 시 선택 제공자가 사용됩니다.
 
-이 파일은 **전문 지식**입니다:
-- 잘 정제된 검토 기준
-- 표준 분야 전문가의 노하우
-- 판매하거나 공유 가능
+### 표준 기구 시드 데이터
 
-#### 전체 백업 (개인용)
-- API 키 포함
-- 검토 이력 포함
-- 개인 백업 및 복원용
+앱 최초 실행 시 아래 문서 유형이 자동으로 로드됩니다.
 
-### 4. 🛡️ 보안 & 프라이버시
+- ITU-T 표준 초안
+- ITU-T 기고서
+- JTC 1 표준 초안
+- JTC 1 기고서
 
-- API 키는 브라우저에만 저장
-- 파일이 서버에 업로드되지 않음
-- OpenAI에 직접 전송 후 자동 삭제
-- 완전한 클라이언트 사이드 처리
+관리자 메뉴에서 기본값으로 초기화할 수 있습니다.
 
-## 프로젝트 구조
+### Export / Import
 
-```
-DraftReviewr/
-├── app/
-│   ├── page.tsx                    # 홈 (문서 업로드)
-│   ├── admin/page.tsx              # 관리자 대시보드
-│   ├── settings/page.tsx           # 설정 (API 키)
-│   └── layout.tsx                  # 루트 레이아웃
-├── components/
-│   ├── admin/                      # 관리자 컴포넌트
-│   ├── documents/                  # 문서 관련 컴포넌트
-│   ├── settings/                   # 설정 컴포넌트
-│   ├── export-import-dialog.tsx    # Export/Import UI
-│   └── ui/                         # 재사용 UI 컴포넌트
-├── lib/
-│   ├── storage/
-│   │   └── local-storage.ts        # localStorage 관리
-│   ├── openai-client.ts            # OpenAI API 클라이언트
-│   ├── types.ts                    # TypeScript 타입
-│   └── utils.ts                    # 유틸리티
-└── public/                         # 정적 파일
-```
+- **설정 내보내기**: 문서 유형·검토 항목·언어 설정을 JSON 파일로 저장 (API 키·검토 이력 제외)
+- **설정 가져오기**: JSON 파일을 불러와 설정을 복원 (기존 설정 전체 교체)
 
-## 사용 시나리오
-
-### 개인 사용자
-1. OpenAI API 키 등록
-2. 검토 항목 커스터마이징
-3. 문서 업로드 및 검토
-4. 백업 파일 저장 (개인용)
-
-### 전문가 (지식 판매)
-1. 표준 문서 검토 전문 지식 축적
-2. 검토 항목 세트 정제
-3. 설정 파일 Export
-4. JSON 파일 판매 (예: "표준문서 전문가 검토 팩 v1.0")
-
-### 구매자
-1. 전문가의 설정 파일 구매
-2. Import (병합 또는 교체)
-3. 즉시 전문가 수준의 검토 사용
-
-## 스크립트
-
-```bash
-# 개발 서버 (nodemon으로 자동 재시작)
-npm run dev
-
-# 개발 서버 (일반)
-npm run dev:simple
-
-# 프로덕션 빌드
-npm run build
-
-# 프로덕션 실행
-npm run start
-
-# 린트
-npm run lint
-```
+---
 
 ## 배포
 
-### Vercel (권장)
+### Vercel
 
 ```bash
 # Vercel CLI 설치
 npm install -g vercel
 
-# 배포
+# 배포 (처음 실행 시 로그인 및 프로젝트 연결)
 vercel
 ```
 
-환경 변수 설정 불필요! 사용자가 앱 내에서 API 키를 설정합니다.
+- 환경 변수 설정 불필요 (API 키는 사용자가 앱에서 직접 입력)
+- 배포 후 HTTPS 자동 적용
+- `vercel.json`에 CSP 보안 헤더가 포함되어 있습니다
 
-### 기타 정적 호스팅
+### Docker
 
 ```bash
-npm run build
+# 이미지 빌드 및 컨테이너 실행
+docker compose up -d
+
+# 접속
+# http://localhost:3000
 ```
 
-`.next` 폴더를 Netlify, Cloudflare Pages 등에 배포
+포트를 바꾸려면 `docker-compose.yml`의 `3000:80`에서 앞 숫자를 수정합니다.
 
-## 데이터 구조
+Docker 없이 정적 파일만 서빙하려면:
 
-모든 데이터는 localStorage에 저장됩니다:
-
-```
-draftreviewr:document-types         # 문서 유형
-draftreviewr:review-items           # 유형별 검토 항목
-draftreviewr:common-review-items    # 공통 검토 항목
-draftreviewr:documents              # 문서 목록
-draftreviewr:review-results         # 검토 결과
-draftreviewr:api-key                # OpenAI API 키
-draftreviewr:user-id                # 사용자 ID (자동 생성)
+```bash
+pnpm build        # out/ 생성
+npx serve out/    # 임시 서버로 확인
 ```
 
-## OpenAI API 사용
+---
 
-### 비용
+## 스크립트
 
-- 파일 업로드: 무료
-- GPT-5 사용: 토큰당 과금
-- 평균 문서 검토 (5개 항목): 약 $0.50-1.00
+| 명령 | 설명 |
+|------|------|
+| `pnpm dev` | 개발 서버 (nodemon, 파일 변경 시 자동 재시작) |
+| `pnpm dev:simple` | 개발 서버 (일반) |
+| `pnpm build` | 프로덕션 빌드 (`out/` 생성) |
+| `pnpm lint` | ESLint 검사 |
+| `pnpm typecheck` | TypeScript 타입 검사 |
 
-### API 키 발급
+---
 
-1. https://platform.openai.com 방문
-2. API Keys 섹션에서 새 키 생성
-3. 앱의 설정 페이지에서 입력
+## 데이터 저장 구조
 
-## 비즈니스 모델 아이디어
+모든 데이터는 브라우저 localStorage에 저장됩니다.
 
-### 1. 지식 마켓플레이스
-- 전문가들이 검토 설정 파일 판매
-- 카테고리: 표준문서, 법률문서, 의학논문 등
+| 키 | 내용 |
+|----|------|
+| `draftreviewr:document-types` | 문서 유형 |
+| `draftreviewr:review-items` | 유형별 검토 항목 |
+| `draftreviewr:common-review-items` | 공통 검토 항목 |
+| `draftreviewr:documents` | 문서 목록 |
+| `draftreviewr:review-results` | 검토 결과 |
+| `draftreviewr:language` | 검토 출력 언어 (ko/en) |
+| `draftreviewr:llm-*` | LLM 제공자 설정 |
 
-### 2. SaaS 래퍼
-- 기본 앱 무료 제공
-- 프리미엄 검토 팩 판매
+---
 
-### 3. 컨설팅
-- 기업별 맞춤 검토 기준 제작
-- JSON 파일로 납품
+## 보안 참고사항
+
+- API 키는 브라우저 localStorage에 저장됩니다 (암호화되지 않음)
+- 공용 PC에서는 사용 후 설정 페이지에서 API 키를 삭제하세요
+- 문서 파일은 서버에 저장되지 않고 LLM API로 직접 전송됩니다
+
+---
 
 ## 라이선스
 
 MIT
-
-## 기여
-
-이슈와 PR 환영합니다!
-
-## 문의
-
-프로젝트 관련 문의사항은 GitHub Issues를 이용해주세요.

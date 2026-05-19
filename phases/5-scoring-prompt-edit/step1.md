@@ -15,7 +15,7 @@
 - `lib/providers/kimi.ts`
 - `lib/openai-client.ts`
 
-이전 step의 구현 파일이나 긴 handoff를 기본 입력으로 삼지 마라.
+이전 step의 구현 파일을 기본 입력으로 삼지 마라.
 
 ## 모듈 할당
 
@@ -105,7 +105,6 @@ grep "SCORE:" projects/STD-ReviewDoC/lib/openai-client.ts
 4. `grep "SCORE:" projects/STD-ReviewDoC/lib/openai-client.ts` → 존재 확인.
 5. `owned_paths` 밖의 파일이 변경되지 않았는지 `git diff --name-only` 확인.
 6. `phases/5-scoring-prompt-edit/index.json`의 step1 상태를 `completed`로 업데이트.
-7. `step1-output.json` handoff 작성.
 
 ## 금지사항
 
@@ -113,4 +112,3 @@ grep "SCORE:" projects/STD-ReviewDoC/lib/openai-client.ts
 - `lib/types.ts` 를 수정하지 마라 (step0 소유).
 - `lib/storage/local-storage.ts` 인터페이스를 변경하지 마라.
 - `components/` 아래 파일을 수정하지 마라 (step2·3 소유).
-- handoff 없이 종료하지 마라.

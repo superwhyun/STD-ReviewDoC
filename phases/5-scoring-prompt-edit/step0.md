@@ -9,7 +9,7 @@
 - `lib/types.ts` — 현재 타입 정의 (ReviewResult 포함)
 - `lib/storage/local-storage.ts` — reviewResultStorage 인터페이스 확인
 
-이전 step의 구현 파일이나 긴 handoff를 기본 입력으로 삼지 마라.
+이전 step의 구현 파일을 기본 입력으로 삼지 마라.
 baseline, module-map, public contract를 먼저 읽고, AC 달성에 꼭 필요한 경우에만 구현을 제한적으로 읽어라.
 
 ## 모듈 할당
@@ -87,11 +87,9 @@ grep "score" projects/STD-ReviewDoC/lib/types.ts
 2. `grep "replace-with" projects/STD-ReviewDoC/phases/5-scoring-prompt-edit/module-map.json` → 출력 없음 확인.
 3. `owned_paths` 밖의 파일이 변경되지 않았는지 `git diff --name-only` 로 확인.
 4. `phases/5-scoring-prompt-edit/index.json`의 step0 상태를 `completed`로 업데이트.
-5. `step0-output.json` handoff 작성.
 
 ## 금지사항
 
 - `lib/providers/*.ts`, `lib/openai-client.ts` 를 수정하지 마라 (step1 소유).
 - `components/` 아래 파일을 수정하지 마라 (step2·3 소유).
 - score 색상 로직이나 UI를 이 step에 섞지 마라.
-- handoff 없이 종료하지 마라.

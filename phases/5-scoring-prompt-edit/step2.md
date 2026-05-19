@@ -7,7 +7,7 @@
 - 구현 파악이 필요한 경우에만 targeted read:
   - `components/documents/document-review-dialog.tsx`
 
-이전 step의 구현 파일이나 긴 handoff를 기본 입력으로 삼지 마라.
+이전 step의 구현 파일을 기본 입력으로 삼지 마라.
 
 ## 모듈 할당
 
@@ -108,7 +108,6 @@ grep "amber-400" projects/STD-ReviewDoC/components/documents/document-review-dia
 5. `grep "bg-yellow"` → 출력 없음 확인 (yellow 계열 미사용).
 6. `owned_paths` 밖의 파일이 변경되지 않았는지 `git diff --name-only` 확인.
 7. `phases/5-scoring-prompt-edit/index.json`의 step2 상태를 `completed`로 업데이트.
-8. `step2-output.json` handoff 작성.
 
 ## 금지사항
 
@@ -117,4 +116,3 @@ grep "amber-400" projects/STD-ReviewDoC/components/documents/document-review-dia
 - `bg-yellow-*` 계열 클래스를 사용하지 마라. 진한 노란색은 `bg-amber-400`만 사용한다.
 - score 없는 결과에 빈 badge를 렌더링하지 마라 (조건부 렌더링 필수).
 - 프롬프트 편집 기능을 이 step에 섞지 마라 (step3 소유).
-- handoff 없이 종료하지 마라.

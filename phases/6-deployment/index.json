@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "project": "STD-ReviewDoC",
+  "phase": "6-deployment",
+  "execution_policy": {
+    "context_mode": "contract-first",
+    "blocking_fix_priority": true,
+    "append_only_steps": true
+  },
+  "steps": [
+    {
+      "step": 0,
+      "name": "step0-static-export-config",
+      "status": "completed",
+      "summary": "next.config.mjs: ignoreBuildErrors/ignoreDuringBuilds 제거, output: export 추가. typecheck 통과, out/ 생성 확인."
+    },
+    {
+      "step": 1,
+      "name": "step1-vercel",
+      "status": "completed",
+      "summary": "vercel.json 생성: CSP 헤더(4개 provider), X-Content-Type-Options, X-Frame-Options, Referrer-Policy."
+    },
+    {
+      "step": 2,
+      "name": "step2-docker",
+      "status": "completed",
+      "summary": "Dockerfile(멀티스테이지 pnpm+nginx), nginx.conf(SPA 라우팅+캐싱+보안헤더), docker-compose.yml(3000:80), .dockerignore, public/robots.txt 생성."
+    }
+  ]
+}

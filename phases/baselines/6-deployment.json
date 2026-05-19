@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "phase": "6-deployment",
+  "tag": "STD-ReviewDoC-phase6-done",
+  "source_module_map": "phases/6-deployment/module-map.json",
+  "project_state": {
+    "name": "DraftReviewr",
+    "root": "projects/STD-ReviewDoC",
+    "summary": "Deployment configurations added, including Next.js static export ('output: export'), Vercel deployment with secure headers (vercel.json), and Docker multi-stage build (Dockerfile + nginx SPA routing + docker-compose).",
+    "runtime": "Next.js 15.2.4 App Router, React 19, TypeScript, Tailwind CSS 4."
+  },
+  "modules": [
+    {
+      "name": "static-export-config",
+      "paths": [
+        "next.config.mjs"
+      ],
+      "public_surface": "next.config.mjs configured for static HTML export ('output: export') and disabled unoptimized images for static builds."
+    },
+    {
+      "name": "vercel-config",
+      "paths": [
+        "vercel.json"
+      ],
+      "public_surface": "vercel.json defines Content-Security-Policy (CSP) headers targeting all supported LLM provider API domains, as well as frame/referrer security policies."
+    },
+    {
+      "name": "docker-config",
+      "paths": [
+        "Dockerfile",
+        "nginx.conf",
+        "docker-compose.yml",
+        ".dockerignore",
+        "public/robots.txt"
+      ],
+      "public_surface": "Dockerfile uses multi-stage pnpm building and alpine runner; nginx.conf manages SPA routing, static assets caching, and security headers; docker-compose exposes port 3000."
+    }
+  ],
+  "shared_contracts": [
+    "next.config.mjs"
+  ],
+  "routes": [
+    {
+      "path": "/",
+      "integration": "Static export generates index.html, admin.html, and settings.html serving static pages out of out/ directory."
+    }
+  ],
+  "integration_points": [
+    "next.config.mjs (output: export static configuration)",
+    "vercel.json (Vercel edge security headers)",
+    "Dockerfile (SPA build and packaging)",
+    "nginx.conf (SPA routes handling and caching)"
+  ],
+  "verification": [
+    {
+      "command": "npm run typecheck --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "npm run build --prefix projects/STD-ReviewDoC",
+      "status": "passed"
+    },
+    {
+      "command": "python3 scripts/validate_phase.py 6-deployment --root projects/STD-ReviewDoC",
+      "status": "passed"
+    }
+  ],
+  "known_issues": [],
+  "written_at": "2026-05-20T00:15:00+09:00"
+}

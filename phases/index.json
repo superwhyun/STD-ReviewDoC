@@ -29,6 +29,11 @@
       "dir": "5-scoring-prompt-edit",
       "status": "completed",
       "summary": "검토 결과에 0~100점 스코어 badge와 전체 평균 표시, 결과 화면 내 검토 프롬프트 인라인 편집 기능을 추가."
+    },
+    {
+      "dir": "6-deployment",
+      "status": "completed",
+      "summary": "next.config.mjs 정리(output: export), Vercel 배포(vercel.json + CSP 헤더), Docker 배포(Dockerfile + nginx SPA 라우팅 + docker-compose)."
     }
   ]
 }
