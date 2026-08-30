@@ -2,483 +2,129 @@
 
 ## 프로젝트 개요
 
-DraftReviewr는 한국 표준 초안 문서를 위한 AI 기반 자동 검토 시스템입니다. **완전한 클라이언트 사이드 애플리케이션**으로, 데이터베이스나 백엔드 서버 없이 브라우저에서 직접 OpenAI GPT-4o API를 호출하여 문서를 분석합니다.
+DraftReviewr(저장소명 STD-ReviewDoC)는 ITU-T / JTC1(ISO) 계열 표준 초안·기고문을 대상으로 하는
+AI 기반 자동 검토 도구임. **서버·데이터베이스가 전혀 없는 완전 클라이언트 사이드 애플리케이션**으로,
+Next.js 정적 export(`output: "export"`)로 빌드되어 브라우저에서 직접 LLM API를 호출함.
+
+> 이 문서는 이전 버전(Supabase + Next.js API Routes 기반 설계)을 서술하고 있었으나,
+> 실제 코드는 이미 완전 클라이언트 사이드 + localStorage 구조로 전환되어 있어 2026-08-30에 재작성함.
+> Supabase, `app/api/*`, `lib/crypto.ts`, `scripts/*.sql`은 현재 저장소에 존재하지 않음.
 
 ## 아키텍처 특징
 
-- **서버리스**: 데이터베이스, API 서버 불필요
-- **localStorage 기반**: 모든 데이터가 브라우저에 저장
-- **직접 OpenAI 연동**: 서버를 거치지 않고 브라우저에서 직접 API 호출
-- **Export/Import**: 검토 설정을 JSON 파일로 내보내기/가져오기 가능
-- **지식 거래**: 잘 정제된 검토 항목 세트를 판매/공유 가능
+- **서버리스**: 백엔드 서버, 데이터베이스 없음. Vercel 정적 호스팅 또는 Docker+Nginx로 정적 파일만 서빙.
+- **localStorage 기반**: 문서 유형/검토 항목/검토 결과/LLM 설정/API 키를 전부 브라우저 localStorage에 저장.
+- **멀티 LLM 직접 연동**: 브라우저에서 각 프로바이더 API를 직접 호출(서버 프록시 없음).
+- **시드 데이터**: `public/data/*.json`에 ITU-T/JTC1 문서 유형별 기본 검토 항목을 정적으로 제공.
+- **Export/Import**: 검토 설정을 JSON 파일로 내보내기/가져오기 가능.
 
 ## 기술 스택
 
-### 핵심 프레임워크
-- **Next.js 15.2.4** (App Router, 클라이언트 사이드만 사용)
-- **React 19**
-- **TypeScript 5**
+- **Next.js 15.3.9** (App Router, `output: "export"`, `images.unoptimized: true`)
+- **React 19**, **TypeScript 5**
+- **Tailwind CSS 4** + **Radix UI** + **shadcn/ui**
+- **localStorage** (모든 데이터 저장, 서버 없음)
+- **mammoth + JSZip** (브라우저에서 DOCX 텍스트/추적 변경 내용 추출)
+- **pnpm** (패키지 매니저; `package-lock.json`은 사용하지 않음)
 
-### 데이터 & API
-- **localStorage** (모든 데이터 저장)
-- **OpenAI API** (GPT-4o, 브라우저에서 직접 호출)
+## LLM 프로바이더 (`lib/providers/`)
 
-### UI & 스타일링
-- **Tailwind CSS 4.1.9**
-- **Radix UI** (33+ 컴포넌트)
-- **shadcn/ui**
-- **Lucide React** (아이콘)
+`lib/llm-provider.ts`가 프로바이더를 동적 import로 로드하는 공통 인터페이스(`LLMProvider`)를 정의함.
 
-### 주요 라이브러리
-- **React Hook Form + Zod** (폼 관리 & 검증)
-- **date-fns** (날짜 처리)
-- **sonner** (토스트 알림)
-- **recharts** (차트)
+| 프로바이더 | 파일 | API 엔드포인트 |
+|---|---|---|
+| OpenAI | `providers/openai.ts` | `https://api.openai.com/v1` |
+| Grok (xAI) | `providers/grok.ts` | `https://api.x.ai/v1/responses` |
+| Kimi (Moonshot) | `providers/kimi.ts` | `https://api.moonshot.cn/v1/chat/completions` |
+| OpenRouter | `providers/openrouter.ts` | `https://openrouter.ai/api/v1/chat/completions` (설정 가능) |
+
+각 프로바이더는 `review()`(전체 완료), `reviewStream()`(스트리밍), `validateApiKey()`, `listModels()`를 구현함.
+설정(`LLMProviderConfig`: provider/apiKey/model/baseUrl/reasoning)은 `lib/storage/local-storage.ts`의
+`llmProviderStorage`에 프로바이더별로 저장됨.
 
 ## 프로젝트 구조
 
 ```
-DraftReviewr/
-├── app/                          # Next.js App Router
-│   ├── page.tsx                  # 홈 (문서 업로드 & 목록)
-│   ├── admin/page.tsx           # 관리자 대시보드
-│   ├── settings/page.tsx        # 설정 (API 키 관리)
-│   └── api/                      # API 라우트
-│       ├── documents/
-│       │   ├── upload/          # 파일 업로드
-│       │   ├── review/          # AI 검토 처리
-│       │   └── [id]/results/   # 검토 결과 조회
-│       ├── document-types/      # 문서 유형 관리
-│       ├── review-items/        # 유형별 검토 항목
-│       ├── common-review-items/ # 공통 검토 항목
-│       └── user/api-key/        # API 키 관리
-├── components/                   # React 컴포넌트
-│   ├── admin/                   # 관리자 컴포넌트
-│   ├── documents/               # 문서 관련 컴포넌트
-│   ├── settings/                # 설정 컴포넌트
-│   └── ui/                      # 재사용 UI 컴포넌트 (70+개)
-├── lib/                         # 유틸리티 라이브러리
-│   ├── types.ts                # TypeScript 타입 정의
-│   ├── document-processor.ts   # 문서 텍스트 추출
-│   ├── crypto.ts               # API 키 암호화/복호화
-│   └── supabase/               # Supabase 클라이언트
-└── scripts/                     # 데이터베이스 스크립트
-    ├── 001_create_tables.sql
-    └── 002_add_common_review_items.sql
+STD-ReviewDoC/
+├── app/
+│   ├── page.tsx              # 홈: 문서 업로드 & 목록 & 검토 결과
+│   ├── admin/page.tsx        # 관리자: 문서 유형/검토 항목 관리
+│   └── settings/page.tsx     # 설정: LLM 프로바이더/API 키 관리
+├── components/
+│   ├── admin/                # 문서 유형·검토 항목 CRUD UI
+│   ├── documents/            # 업로드, 목록, 검토 결과 다이얼로그
+│   ├── settings/              # API 키/프로바이더 설정 UI
+│   ├── ui/                   # shadcn/ui 기반 재사용 컴포넌트 (70+개)
+│   ├── export-import-dialog.tsx
+│   └── seed-initializer.tsx  # 최초 실행 시 public/data 시드를 localStorage로 로드
+├── lib/
+│   ├── types.ts               # 도메인 타입 정의
+│   ├── document-processor.ts  # DOCX(mammoth+JSZip, 추적변경 마커 포함)/TXT 텍스트 추출
+│   ├── llm-provider.ts        # 프로바이더 추상화 계층
+│   ├── openai-client.ts       # (레거시) OpenAI 전용 직접 호출 헬퍼
+│   ├── providers/             # 프로바이더별 구현체 (openai/grok/kimi/openrouter)
+│   └── storage/
+│       ├── local-storage.ts          # localStorage 키/CRUD 전반 (KEYS 상수 참고)
+│       ├── openai-settings-storage.ts
+│       ├── language-storage.ts
+│       ├── seed-loader.ts            # public/data/*.json → localStorage 초기 시드
+│       └── settings-serializer.ts    # export/import JSON 직렬화
+└── public/data/                # ITU-T/JTC1 문서 유형별 기본 검토 항목 시드
 ```
 
-## 데이터베이스 스키마
+## 데이터 모델 (`lib/types.ts`, localStorage 저장)
 
-### 주요 테이블
+Supabase 테이블이 아니라 localStorage에 저장되는 순수 TypeScript 인터페이스임 (`created_at`/`updated_at` 등
+필드명은 과거 DB 스키마의 흔적이 남아있을 뿐 실제 DB는 없음).
 
-#### document_types
-문서 유형 정의 (예: "표준초안", "기술보고서")
-```sql
-- id: UUID (PK)
-- name: TEXT (UNIQUE)
-- description: TEXT
-- created_at, updated_at: TIMESTAMP
-```
+- `DocumentType`: 문서 유형(예: "표준초안")
+- `ReviewItem`: 문서 유형별 검토 항목(name, prompt, order_index)
+- `CommonReviewItem`: 모든 문서에 공통 적용되는 검토 항목
+- `Document`: 업로드된 문서 메타데이터, `status: pending | processing | completed | failed`
+- `ReviewResult`: 검토 항목별 결과 텍스트 + 0~100 `score`
+- `LLMProviderConfig`: provider/apiKey/model/baseUrl/reasoning effort
 
-#### review_items
-유형별 검토 기준
-```sql
-- id: UUID (PK)
-- document_type_id: UUID (FK)
-- name: TEXT
-- prompt: TEXT (AI 검토용 프롬프트)
-- order_index: INTEGER
-```
-
-#### common_review_items
-모든 문서에 공통 적용되는 검토 기준
-```sql
-- id: UUID (PK)
-- name: TEXT
-- prompt: TEXT
-- order_index: INTEGER
-```
-
-#### documents
-업로드된 문서
-```sql
-- id: UUID (PK)
-- user_id: TEXT
-- document_type_id: UUID (FK)
-- file_name: TEXT
-- file_url: TEXT (Supabase Storage)
-- status: TEXT ('pending' | 'processing' | 'completed' | 'failed')
-```
-
-#### review_results
-AI 생성 검토 결과
-```sql
-- id: UUID (PK)
-- document_id: UUID (FK)
-- review_item_id: UUID (FK, nullable)
-- common_review_item_id: UUID (FK, nullable)
-- result: TEXT
-```
-
-#### user_api_keys
-사용자 OpenAI API 키 (암호화 저장)
-```sql
-- id: UUID (PK)
-- user_id: TEXT (UNIQUE)
-- encrypted_api_key: TEXT
-- provider: TEXT (default: 'openai')
-```
-
-## TypeScript 타입 정의
-
-`lib/types.ts`에 정의된 주요 타입:
-
-```typescript
-interface DocumentType {
-  id: string
-  name: string
-  description: string | null
-  created_at: string
-  updated_at: string
-}
-
-interface ReviewItem {
-  id: string
-  document_type_id: string
-  name: string
-  prompt: string
-  order_index: number
-  created_at: string
-  updated_at: string
-}
-
-interface CommonReviewItem {
-  id: string
-  name: string
-  prompt: string
-  order_index: number
-  created_at: string
-  updated_at: string
-}
-
-interface Document {
-  id: string
-  user_id: string
-  document_type_id: string
-  file_name: string
-  file_url: string
-  status: "pending" | "processing" | "completed" | "failed"
-  created_at: string
-  updated_at: string
-}
-
-interface ReviewResult {
-  id: string
-  document_id: string
-  review_item_id: string | null
-  common_review_item_id: string | null
-  result: string
-  created_at: string
-}
-```
-
-## API 엔드포인트
-
-### 문서 관리
-
-#### POST /api/documents/upload
-문서 파일 업로드
-- **Body**: FormData (file, document_type_id, user_id)
-- **프로세스**:
-  1. Supabase Storage에 파일 업로드
-  2. DB에 문서 레코드 생성
-  3. 자동으로 검토 프로세스 트리거
-
-#### POST /api/documents/review
-AI 문서 검토 처리
-- **Body**: `{ document_id: string }`
-- **프로세스**:
-  1. 문서 상태를 "processing"으로 업데이트
-  2. 사용자 API 키 복호화
-  3. OpenAI Files API에 파일 업로드
-  4. 공통 검토 항목 처리
-  5. 유형별 검토 항목 처리
-  6. 결과를 review_results 테이블에 저장
-  7. OpenAI에서 파일 삭제
-  8. 상태를 "completed" 또는 "failed"로 업데이트
-
-#### GET /api/documents/[id]/results
-문서의 검토 결과 조회
-
-### 문서 유형 관리
-
-#### GET /api/document-types
-모든 문서 유형 조회
-
-#### POST /api/document-types
-새 문서 유형 생성
-- **Body**: `{ name: string, description?: string }`
-
-#### PUT /api/document-types/[id]
-문서 유형 수정
-
-#### DELETE /api/document-types/[id]
-문서 유형 삭제 (관련 검토 항목도 cascade 삭제)
-
-#### GET /api/document-types/[id]/review-items
-특정 문서 유형의 모든 검토 항목 조회
-
-### 검토 항목 관리
-
-#### POST /api/review-items
-유형별 검토 항목 생성
-- **Body**: `{ document_type_id: string, name: string, prompt: string }`
-
-#### PUT /api/review-items/[id]
-검토 항목 수정
-
-#### DELETE /api/review-items/[id]
-검토 항목 삭제
-
-### 공통 검토 항목 관리
-
-#### GET /api/common-review-items
-모든 공통 검토 항목 조회 (order_index 순)
-
-#### POST /api/common-review-items
-공통 검토 항목 생성
-- **Body**: `{ name: string, prompt: string }`
-
-#### PUT /api/common-review-items/[id]
-공통 검토 항목 수정
-
-#### DELETE /api/common-review-items/[id]
-공통 검토 항목 삭제
-
-### 사용자 API 키 관리
-
-#### GET /api/user/api-key?user_id={userId}
-사용자 API 키 정보 조회 (마스킹됨)
-
-#### POST /api/user/api-key
-API 키 저장/업데이트
-- **Body**: `{ user_id: string, api_key: string, provider?: string }`
-- **프로세스**: 저장 전 API 키 암호화
-
-#### DELETE /api/user/api-key?user_id={userId}
-API 키 삭제
+localStorage 키(`lib/storage/local-storage.ts`의 `KEYS`):
+`draftreviewr:document-types`, `draftreviewr:review-items`, `draftreviewr:common-review-items`,
+`draftreviewr:documents`, `draftreviewr:review-results`, `draftreviewr:api-key`(레거시),
+`draftreviewr:llm-configs`, `draftreviewr:active-provider`, `draftreviewr:user-id`
 
 ## 주요 기능
 
-### 1. 문서 업로드 & 관리
-- 드래그 앤 드롭 파일 업로드 인터페이스
-- PDF, DOC, DOCX, TXT 형식 지원
-- Supabase Storage에 파일 저장
-- 문서 상태 추적 (pending → processing → completed/failed)
+1. **문서 업로드 & 검토**: DOCX/TXT 업로드 → 브라우저에서 텍스트(및 추적 변경 내용) 추출 → 공통 검토 항목 +
+   문서 유형별 검토 항목을 순서대로 LLM에 전달 → 항목별 0~100점 스코어와 피드백 표시.
+2. **관리자 대시보드**: 문서 유형/공통 검토 항목/유형별 검토 항목 CRUD.
+3. **프롬프트 인라인 편집**: 검토 결과 화면에서 프롬프트를 바로 수정, 다음 검토부터 반영.
+4. **설정**: 프로바이더 선택, API 키 입력/검증, 모델 목록 조회.
+5. **Export/Import**: 검토 항목 설정 전체를 JSON으로 내보내기/가져오기 (`settings-serializer.ts`).
 
-### 2. AI 기반 문서 검토
-- OpenAI GPT-4o 모델 통합
-- OpenAI Files API를 사용한 파일 기반 문서 분석
-- 문서 유형별 커스터마이징 가능한 검토 프롬프트
-- 한국어 검토 피드백 지원
-- Temperature: 0.7, Max tokens: 2000
+## 보안 관련 알려진 트레이드오프
 
-### 3. 유연한 검토 시스템
-- **공통 검토 항목**: 유형에 관계없이 모든 문서에 적용
-- **유형별 검토 항목**: 특정 유형의 문서에만 적용
-- 커스터마이징 가능한 프롬프트와 순서가 있는 검토 항목
-- 구조화된 검토 결과 저장
+- **API 키는 암호화 없이 localStorage에 평문 저장**되며, 각 프로바이더 API를 브라우저에서 직접
+  `Authorization: Bearer {apiKey}`로 호출함. "서버 없음"이라는 설계 목표상 의도된 구조이지만,
+  XSS가 발생하면 키가 그대로 유출될 수 있음.
+- 유일한 방어선은 CSP 등 응답 헤더임 — `vercel.json`과 `nginx.conf`에 각 프로바이더 도메인만
+  허용하는 `Content-Security-Policy`를 설정해 둠. 배포 방식을 늘릴 경우 반드시 CSP를 함께 적용할 것.
+- 서버가 없으므로 인증/권한 개념도 없음(단일 브라우저 사용자 전제). 여러 사용자가 공유하는 환경에는
+  적합하지 않음.
 
-### 4. 관리자 대시보드
-- 문서 유형 생성 및 관리
-- 각 문서 유형별 검토 항목 구성
-- 공통 검토 항목 관리
-- 모든 문서 및 검토 결과 조회
+## 배포
 
-### 5. 사용자 설정
-- 안전한 API 키 관리
-- 암호화된 저장소
-- 보안을 위한 마스킹된 API 키 표시
-- API 키 업데이트 및 삭제
+세 가지 방식 모두 `next build` 결과물(`out/`)을 정적으로 서빙하는 동일한 산출물 기반임.
 
-### 6. 사용자 경험
-- 한국어 UI
-- 모바일 지원 반응형 디자인
-- 실시간 상태 업데이트
-- 사용자 액션에 대한 토스트 알림
-- 검토 결과용 모달 다이얼로그
+- **Vercel**: `vercel.json`에서 보안 헤더(CSP 포함) 설정.
+- **Docker + Nginx**: `Dockerfile`(멀티스테이지: pnpm 빌드 → nginx:alpine 서빙) + `nginx.conf`
+  (SPA 라우팅 fallback, 정적 에셋 캐싱, 보안 헤더). Nginx는 `add_header`를 location 블록에 재선언하지
+  않으면 상위(server) 블록에서 상속되지 않으므로, 헤더를 추가할 때는 각 location에 반복 선언해야 함.
+- **정적 export 로컬 확인**: `pnpm build` → `out/` 디렉터리를 임의의 정적 서버로 서빙.
 
-## 핵심 비즈니스 로직
+패키지 매니저는 **pnpm으로 통일**되어 있음 (`pnpm-lock.yaml`, `pnpm-workspace.yaml`). `package.json`에는
+pnpm 필드를 두지 않으며, 빌드 스크립트 허용 여부는 `pnpm-workspace.yaml`의 `allowBuilds`에서 관리함
+(`sharp`는 이미지 최적화가 꺼져 있어 false, `unrs-resolver`도 false).
 
-### 문서 검토 워크플로우
+## 알려진 제한사항
 
-`app/api/documents/review/route.ts`에 구현됨:
-
-1. **초기화**
-   - DB에서 문서 세부정보 조회
-   - 상태를 "processing"으로 업데이트
-   - 사용자 API 키 조회 및 복호화
-
-2. **OpenAI에 파일 업로드**
-   - Supabase Storage에서 파일 다운로드
-   - OpenAI Files API에 업로드 (purpose: "assistants")
-   - Chat completions에서 사용할 file ID 수신
-
-3. **공통 검토 처리**
-   - order_index 순으로 모든 공통 검토 항목 조회
-   - 각 항목에 대해:
-     - 파일 참조와 함께 OpenAI Chat Completions API 호출
-     - common_review_item_id와 함께 review_results 테이블에 저장
-
-4. **유형별 검토 처리**
-   - 문서 유형의 검토 항목 조회
-   - 각 항목에 대해:
-     - 파일 참조와 함께 OpenAI Chat Completions API 호출
-     - review_item_id와 함께 review_results 테이블에 저장
-
-5. **정리**
-   - OpenAI 스토리지에서 파일 삭제
-   - 문서 상태를 "completed"로 업데이트
-   - 오류 발생 시 상태를 "failed"로 업데이트
-
-### OpenAI 통합 세부사항
-
-**파일 업로드**
-```typescript
-POST https://api.openai.com/v1/files
-Headers: Authorization: Bearer {apiKey}
-Body: FormData with file and purpose="assistants"
-```
-
-**문서 검토**
-```typescript
-POST https://api.openai.com/v1/chat/completions
-Model: gpt-4o
-System Prompt: "You are a professional document reviewer specializing in standard draft documents. Provide detailed, constructive feedback in Korean."
-User Message:
-  - { type: "text", text: {prompt} }
-  - { type: "file", file_id: {fileId} }
-Temperature: 0.7
-Max Tokens: 2000
-```
-
-**파일 삭제**
-```typescript
-DELETE https://api.openai.com/v1/files/{fileId}
-```
-
-### 암호화 구현
-
-`lib/crypto.ts`에 구현됨:
-
-**주의**: 현재 구현은 간단한 base64 인코딩을 사용합니다. 프로덕션용이 아닙니다.
-
-```typescript
-// 암호화
-function encryptApiKey(apiKey: string): string {
-  const combined = `${ENCRYPTION_KEY}:${apiKey}`
-  return Buffer.from(combined).toString("base64")
-}
-
-// 복호화
-function decryptApiKey(encrypted: string): string {
-  const combined = Buffer.from(encrypted, "base64").toString("utf-8")
-  const [key, apiKey] = combined.split(":")
-  if (key !== ENCRYPTION_KEY) throw new Error("Invalid encryption key")
-  return apiKey
-}
-```
-
-**프로덕션 권장사항**: AES-256-GCM 암호화 또는 키 관리 서비스 사용
-
-## 주요 컴포넌트
-
-### 페이지 컴포넌트
-
-1. **홈 페이지** (`app/page.tsx`)
-   - 문서 업로드 섹션
-   - 상태 배지가 있는 문서 목록
-   - 검토 결과 다이얼로그
-
-2. **관리자 대시보드** (`app/admin/page.tsx`)
-   - 공통 검토 항목 관리
-   - 문서 유형 관리
-   - 문서 유형별 검토 항목 관리
-
-3. **설정 페이지** (`app/settings/page.tsx`)
-   - API 키 구성
-   - 보안 정보 표시
-
-### 주요 클라이언트 컴포넌트
-
-#### 문서 관리
-- **DocumentUploadSection**: 드래그 앤 드롭 파일 업로드, 유형 선택
-- **DocumentsList**: 상태 표시가 있는 문서 카드 그리드
-- **DocumentReviewDialog**: AI 검토 결과를 표시하는 모달
-
-#### 관리자 컴포넌트
-- **DocumentTypesList**: 문서 유형 CRUD 인터페이스
-- **CommonReviewItemsList**: 공통 검토 항목 관리
-- **ReviewItemCard**: 유형별 검토 항목 표시
-- **ReviewItemForm**: 검토 항목 생성/편집 폼
-
-#### 설정 컴포넌트
-- **ApiKeySettings**: 암호화/복호화가 있는 API 키 관리
-
-## 환경 변수
-
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-ENCRYPTION_KEY=your_encryption_key_change_in_production
-```
-
-## 현재 제한사항 & 프로덕션 권장사항
-
-### 보안
-1. **API 키 암호화**: base64 인코딩을 AES-256-GCM 암호화로 교체
-2. **인증**: 현재 정적 `user_id = "demo-user"` 사용 - 적절한 인증 구현 필요
-3. **권한**: Supabase에 행 수준 보안(RLS) 정책 추가
-4. **API 키 저장**: 시크릿 관리자(AWS Secrets Manager, Vault) 사용 고려
-
-### 문서 처리
-1. **텍스트 추출**: PDF, DOCX 형식용 적절한 파서 구현 필요
-2. **파일 검증**: 파일 크기 제한 및 콘텐츠 검증 추가
-3. **에러 처리**: 에러 메시지 및 재시도 로직 개선
-
-### 성능
-1. **페이지네이션**: 대용량 문서 목록에 페이지네이션 추가
-2. **캐싱**: 자주 액세스되는 데이터 캐싱 구현
-3. **백그라운드 작업**: 장시간 실행 검토용 큐 기반 처리 고려
-
-### 기능
-1. **사용자 인증**: Supabase Auth로 적절한 사용자 인증 구현
-2. **협업**: 문서 공유 및 다중 사용자 지원 추가
-3. **내보내기**: 검토 결과 PDF/DOCX 내보내기 추가
-4. **히스토리**: 문서 수정 이력 추적
-5. **분석**: 검토 통계 및 인사이트 추가
-
-## 주목할 만한 구현 세부사항
-
-1. **정적 사용자 ID**: 애플리케이션은 현재 코드베이스 전체에서 하드코딩된 `"demo-user"`를 사용합니다. 실제 인증으로 교체 필요.
-
-2. **Supabase 클라이언트 패턴**: 앱은 두 개의 별도 Supabase 클라이언트 사용:
-   - 서버 클라이언트 (SSR 지원) - 서버 컴포넌트 및 API 라우트용
-   - 브라우저 클라이언트 (싱글톤) - 클라이언트 컴포넌트용
-
-3. **한국어**: 모든 UI 텍스트와 시스템 프롬프트가 한국어로 되어 있습니다.
-
-4. **파일 저장**: 문서는 Supabase Storage의 `documents` 버킷에 저장됩니다.
-   - 경로 구조: `{userId}/{timestamp}.{extension}`
-
-5. **검토 순서**: 공통 검토 항목이 항상 유형별 항목보다 먼저 처리되며, `order_index`로 순서 제어.
-
-6. **OpenAI 파일 라이프사이클**: 파일은 검토 시작 시 OpenAI에 업로드되고 검토 완료 후 삭제됩니다.
-
-7. **Cascade 삭제**: 문서 유형을 삭제하면 관련된 모든 검토 항목과 결과가 삭제됩니다.
-
-8. **상태 추적**: 문서는 네 가지 상태를 가집니다:
-   - `pending`: 업로드됨
-   - `processing`: 검토 중
-   - `completed`: 성공
-   - `failed`: 오류 발생
+1. 단일 브라우저/단일 사용자 전제 — 여러 기기 간 데이터 동기화 없음(localStorage 특성상 당연).
+2. PDF 지원 없음 — 현재 DOCX/TXT만 처리(`lib/document-processor.ts`).
+3. API 키 평문 저장 — 위 "보안 관련 알려진 트레이드오프" 참고.
+4. localStorage 용량 한계 — 문서/결과가 많아지면 QuotaExceededError 가능(코드에서 알림 처리는 되어 있음).
