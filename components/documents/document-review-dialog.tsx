@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Spinner } from "@/components/ui/spinner"
 import { Badge } from "@/components/ui/badge"
-import { Pencil } from "lucide-react"
+import { Pencil, Download, Copy, Check } from "lucide-react"
 import { toast } from "sonner"
 import ReactMarkdown from "react-markdown"
 
@@ -38,11 +38,36 @@ function getScoreBadgeClass(score: number): string {
   return "bg-red-500 text-white"
 }
 
+function generateMarkdownReport(docName: string, docTypeName: string, results: ReviewResultWithItem[], avgScore?: number): string {
+  const dateStr = new Date().toLocaleString("ko-KR")
+  let md = `# [검토 보고서] ${docName}\n\n`
+  md += `- **문서 유형**: ${docTypeName}\n`
+  md += `- **검토 일시**: ${dateStr}\n`
+  if (avgScore !== undefined) {
+    md += `- **전체 평균 점수**: ${avgScore}점\n`
+  }
+  md += `\n---\n\n`
+
+  results.forEach((res, i) => {
+    const item = res.common_review_items || res.review_items
+    const itemName = item?.name || `검토 항목 ${i + 1}`
+    const scoreStr = res.score !== undefined ? ` (점수: ${res.score}점)` : ""
+    md += `## ${i + 1}. ${itemName}${scoreStr}\n\n`
+    if (item?.prompt) {
+      md += `> **검토 기준**: ${item.prompt}\n\n`
+    }
+    md += `${res.result}\n\n---\n\n`
+  })
+
+  return md
+}
+
 export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentReviewDialogProps) {
   const [results, setResults] = useState<ReviewResultWithItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingPrompt, setEditingPrompt] = useState<string>("")
+  const [copied, setCopied] = useState(false)
   const scoredResults = results.filter((result) => result.score !== undefined)
   const averageScore =
     scoredResults.length > 0
@@ -60,7 +85,6 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
     try {
       const reviewResults = reviewResultStorage.getByDocument(document.id)
 
-      // Enhance results with review item details
       const enhancedResults: ReviewResultWithItem[] = reviewResults.map((result) => {
         if (result.common_review_item_id) {
           const commonItem = commonReviewItemStorage.get(result.common_review_item_id)
@@ -126,24 +150,71 @@ export function DocumentReviewDialog({ document, open, onOpenChange }: DocumentR
       )
     )
 
+    toast.success("프롬프트가 수정되었습니다. 다음 검토 시 반영됩니다.")
     setEditingId(null)
     setEditingPrompt("")
   }
 
+  const handleDownloadMarkdown = () => {
+    if (results.length === 0) {
+      toast.error("다운로드할 검토 결과가 없습니다.")
+      return
+    }
+    const md = generateMarkdownReport(document.file_name, document.document_types.name, results, averageScore)
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = window.document.createElement("a")
+    a.href = url
+    a.download = `검토보고서_${document.file_name.replace(/\.[^/.]+$/, "")}.md`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success("마크다운 보고서가 다운로드되었습니다.")
+  }
+
+  const handleCopyMarkdown = async () => {
+    if (results.length === 0) {
+      toast.error("복사할 검토 결과가 없습니다.")
+      return
+    }
+    try {
+      const md = generateMarkdownReport(document.file_name, document.document_types.name, results, averageScore)
+      await navigator.clipboard.writeText(md)
+      setCopied(true)
+      toast.success("검토 결과가 클립보드에 마크다운으로 복사되었습니다.")
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error("클립보드 복사에 실패했습니다.")
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] sm:max-w-[90vw] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-[90vw] sm:max-w-[90vw] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{document.file_name}</DialogTitle>
-          <DialogDescription>{document.document_types.name} 검토 결과</DialogDescription>
-          {averageScore !== undefined && (
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">전체 평균:</span>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getScoreBadgeClass(averageScore)}`}>
-                {averageScore}점
-              </span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <DialogTitle className="text-xl font-bold">{document.file_name}</DialogTitle>
+              <DialogDescription className="mt-1">{document.document_types.name} 검토 결과</DialogDescription>
+              {averageScore !== undefined && (
+                <div className="flex items-center gap-2 text-sm mt-2">
+                  <span className="text-muted-foreground">전체 평균:</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${getScoreBadgeClass(averageScore)}`}>
+                    {averageScore}점
+                  </span>
+                </div>
+              )}
             </div>
-          )}
+            <div className="flex items-center gap-2 shrink-0">
+              <Button variant="outline" size="sm" onClick={handleCopyMarkdown} disabled={results.length === 0}>
+                {copied ? <Check className="mr-1.5 h-3.5 w-3.5 text-green-500" /> : <Copy className="mr-1.5 h-3.5 w-3.5" />}
+                {copied ? "복사됨" : "마크다운 복사"}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadMarkdown} disabled={results.length === 0}>
+                <Download className="mr-1.5 h-3.5 w-3.5" />
+                보고서 다운로드
+              </Button>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

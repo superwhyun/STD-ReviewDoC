@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { SeedInitializer } from "@/components/seed-initializer"
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { Suspense } from "react"
 import "./globals.css"
 
@@ -26,6 +27,7 @@ export default function RootLayout({
           <SeedInitializer />
           {children}
           <Toaster />
+          <SonnerToaster position="top-right" richColors />
           <Analytics />
         </Suspense>
       </body>

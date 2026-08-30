@@ -1,4 +1,5 @@
 /**
+ * @deprecated Legacy OpenAI client. Use `lib/llm-provider.ts` and `lib/providers/` instead.
  * Client-side OpenAI API integration
  * Handles document upload and review directly from browser
  */

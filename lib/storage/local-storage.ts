@@ -31,7 +31,14 @@ function getItem<T>(key: string, defaultValue: T): T {
 
 function setItem(key: string, value: any): void {
   if (typeof window === "undefined") return
-  localStorage.setItem(key, JSON.stringify(value))
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch (error) {
+    console.error(`Failed to save to localStorage for key: ${key}`, error)
+    if (error instanceof DOMException && (error.name === "QuotaExceededError" || error.code === 22)) {
+      alert("브라우저 로컬 저장소(localStorage) 용량이 가득 찼습니다. 오래된 문서나 검토 결과를 삭제해주세요.")
+    }
+  }
 }
 
 // Document Types
@@ -273,6 +280,21 @@ export const reviewResultStorage = {
     results.push(newResult)
     setItem(KEYS.REVIEW_RESULTS, results)
     return newResult
+  },
+
+  update(id: string, data: { result?: string; score?: number }): ReviewResult | null {
+    const results = this.getAll()
+    const index = results.findIndex((r) => r.id === id)
+    if (index === -1) return null
+
+    results[index] = {
+      ...results[index],
+      ...(data.result !== undefined ? { result: data.result } : {}),
+      ...(data.score !== undefined ? { score: data.score } : {}),
+      created_at: new Date().toISOString(),
+    }
+    setItem(KEYS.REVIEW_RESULTS, results)
+    return results[index]
   },
 
   deleteByDocument(documentId: string): boolean {

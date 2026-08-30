@@ -5,9 +5,8 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import type { DocumentType, LLMProviderType, LLMProviderConfig } from "@/lib/types"
 import { documentStorage, reviewItemStorage, commonReviewItemStorage, reviewResultStorage, llmProviderStorage } from "@/lib/storage/local-storage"
-import { processDocumentReview } from "@/lib/openai-client"
+import { extractText } from "@/lib/document-processor"
 import { createProvider } from "@/lib/llm-provider"
-import { OpenAIProvider } from "@/lib/providers/openai"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -15,11 +14,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Progress } from "@/components/ui/progress"
+import { toast } from "sonner"
 
 interface DocumentUploadSectionProps {
   documentTypes: DocumentType[]
   userId?: string
   onDocumentAdded?: () => void
+}
+
+const ALLOWED_EXTENSIONS = [".docx", ".txt"]
+
+function isValidFile(file: File): boolean {
+  const ext = "." + (file.name.split(".").pop()?.toLowerCase() || "")
+  return ALLOWED_EXTENSIONS.includes(ext)
 }
 
 export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }: DocumentUploadSectionProps) {
@@ -42,7 +49,12 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0])
+      const file = e.target.files[0]
+      if (!isValidFile(file)) {
+        toast.error("DOCX 또는 TXT 파일만 업로드할 수 있습니다.")
+        return
+      }
+      setSelectedFile(file)
     }
   }
 
@@ -62,13 +74,10 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0]
-      const allowedTypes = [
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "text/plain",
-      ]
-
-      if (allowedTypes.includes(file.type)) {
+      if (isValidFile(file)) {
         setSelectedFile(file)
+      } else {
+        toast.error("DOCX 또는 TXT 파일만 지원합니다.")
       }
     }
   }
@@ -77,85 +86,64 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
     if (!selectedFile || !selectedType) return
 
     setIsUploading(true)
-    setProgress(0)
-    setProgressText("문서 업로드 중...")
+    setProgress(10)
+    setProgressText("문서 텍스트 추출 중...")
 
     let newDocument: ReturnType<typeof documentStorage.create> | null = null
 
     try {
-      // Create document entry with file data URL (for small files) or file name
-      const fileUrl = selectedFile.name // In a real app, you might store the file content as data URL
+      const fileUrl = selectedFile.name
       newDocument = documentStorage.create({
         document_type_id: selectedType,
         file_name: selectedFile.name,
         file_url: fileUrl,
       })
 
-      // Update status to processing
       documentStorage.updateStatus(newDocument.id, "processing")
 
-      // Get review items
       const commonItems = commonReviewItemStorage.getAll()
       const typeItems = reviewItemStorage.getByDocumentType(selectedType)
 
-      setProgressText("AI 검토 시작...")
+      const fileContent = await extractText(selectedFile)
+      const prompts = [
+        ...commonItems.map((item) => ({ name: item.name, prompt: item.prompt })),
+        ...typeItems.map((item) => ({ name: item.name, prompt: item.prompt })),
+      ]
 
-      let results: Array<{ review_item_id?: string; common_review_item_id?: string; result: string; score?: number }>
-
-      try {
-        // Try the new multi-provider system first
-        const fileContent = await OpenAIProvider.extractText(selectedFile)
-        const prompts = [
-          ...commonItems.map((item) => ({ name: item.name, prompt: item.prompt })),
-          ...typeItems.map((item) => ({ name: item.name, prompt: item.prompt })),
-        ]
-
-        const selectedDocType = documentTypes.find((t) => t.id === selectedType)
-        const documentTypeContext = selectedDocType
-          ? [selectedDocType.name, selectedDocType.description].filter(Boolean).join("\n")
-          : undefined
-
-        const provider = await createProvider(selectedProvider)
-        const providerResults = await provider.review({
-          fileContent,
-          file: selectedFile,
-          prompts,
-          documentTypeContext,
-          onProgress: (current, total, itemName) => {
-            const progressPercent = (current / total) * 100
-            setProgress(progressPercent)
-            setProgressText(`검토 중: ${itemName} (${current}/${total})`)
-          },
-          onToken: (token) => {
-            // Append streaming tokens to progress text
-            setProgressText((prev) => prev + token)
-          },
-        })
-
-        // Map provider results back to storage format
-        results = providerResults.map((pr, i) => {
-          const isCommon = i < commonItems.length
-          return {
-            review_item_id: isCommon ? undefined : typeItems[i - commonItems.length]?.id,
-            common_review_item_id: isCommon ? commonItems[i]?.id : undefined,
-            result: pr.result,
-            score: pr.score,
-          }
-        })
-      } catch (providerError) {
-        // Fallback to legacy processDocumentReview
-        console.warn("Provider review failed, falling back to legacy OpenAI client:", providerError)
-        results = await processDocumentReview(
-          selectedFile,
-          commonItems,
-          typeItems,
-          (current, total, itemName) => {
-            const progressPercent = (current / total) * 100
-            setProgress(progressPercent)
-            setProgressText(`검토 중: ${itemName} (${current}/${total})`)
-          }
-        )
+      if (prompts.length === 0) {
+        throw new Error("검토할 항목이 없습니다. 관리자 메뉴에서 검토 항목을 먼저 설정해주세요.")
       }
+
+      const selectedDocType = documentTypes.find((t) => t.id === selectedType)
+      const documentTypeContext = selectedDocType
+        ? [selectedDocType.name, selectedDocType.description].filter(Boolean).join("\n")
+        : undefined
+
+      setProgress(25)
+      setProgressText("AI 검토 시작 중...")
+
+      const provider = await createProvider(selectedProvider)
+      const providerResults = await provider.review({
+        fileContent,
+        file: selectedFile,
+        prompts,
+        documentTypeContext,
+        onProgress: (current, total, itemName) => {
+          const progressPercent = Math.min(95, 25 + Math.round((current / total) * 70))
+          setProgress(progressPercent)
+          setProgressText(`검토 진행 중 (${current}/${total}): ${itemName}`)
+        },
+      })
+
+      const results = providerResults.map((pr, i) => {
+        const isCommon = i < commonItems.length
+        return {
+          review_item_id: isCommon ? undefined : typeItems[i - commonItems.length]?.id,
+          common_review_item_id: isCommon ? commonItems[i]?.id : undefined,
+          result: pr.result,
+          score: pr.score,
+        }
+      })
 
       // Save review results
       results.forEach((result) => {
@@ -173,8 +161,8 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
 
       setProgressText("검토 완료!")
       setProgress(100)
+      toast.success(`"${selectedFile.name}" 문서 검토가 완료되었습니다.`)
 
-      // Notify parent and reset form
       if (onDocumentAdded) {
         onDocumentAdded()
       }
@@ -187,13 +175,13 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
         setIsUploading(false)
       }, 1000)
     } catch (error) {
-      console.error("Error uploading document:", error)
-      setProgressText("검토 실패: " + (error instanceof Error ? error.message : "알 수 없는 오류"))
+      console.error("Error uploading/reviewing document:", error)
+      const errorMsg = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다."
+      setProgressText("검토 실패: " + errorMsg)
+      toast.error("검토 실패: " + errorMsg)
 
-      // Update document status to failed if it was created before the error
       if (newDocument) {
         documentStorage.updateStatus(newDocument.id, "failed")
-        // Notify parent so the list refreshes and shows the failed status
         if (onDocumentAdded) {
           onDocumentAdded()
         }
