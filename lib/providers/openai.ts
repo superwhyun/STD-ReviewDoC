@@ -241,12 +241,42 @@ export class OpenAIProvider implements LLMProvider {
     }
 
     async listModels(): Promise<Array<{ id: string; name: string }>> {
-        const r = await fetch(`${OPENAI_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
-        if (!r.ok) throw new Error("Failed to list OpenAI models")
-        const data = await r.json()
-        return (data.data || [])
-            .filter((m: { id: string }) => /^gpt-[5-9]/.test(m.id) || /^o\d/.test(m.id))
-            .map((m: { id: string }) => ({ id: m.id, name: m.id }))
+        const DEFAULT_MODELS = [
+            { id: "gpt-4o", name: "gpt-4o (추천 · 최신 지능)" },
+            { id: "gpt-4o-mini", name: "gpt-4o-mini (빠르고 경제적)" },
+            { id: "o3-mini", name: "o3-mini (최신 고급 추론)" },
+            { id: "o1", name: "o1 (복잡한 분석 및 추론)" },
+            { id: "o1-mini", name: "o1-mini (경량 추론)" },
+            { id: "gpt-4.5-preview", name: "gpt-4.5-preview (최신 대형 모델)" },
+            { id: "gpt-5", name: "gpt-5 (Responses API)" },
+        ]
+
+        if (!this.apiKey) return DEFAULT_MODELS
+
+        try {
+            const r = await fetch(`${OPENAI_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
+            if (!r.ok) return DEFAULT_MODELS
+            const data = await r.json()
+            const models = (data.data || [])
+                .filter((m: { id: string }) => {
+                    const id = m.id.toLowerCase()
+                    // Filter out non-chat / audio / image / embedding models
+                    if (id.includes("realtime") || id.includes("audio") || id.includes("tts") || id.includes("dall-e") || id.includes("embedding") || id.includes("whisper") || id.includes("moderation") || id.includes("babbage") || id.includes("davinci")) {
+                        return false
+                    }
+                    return id.startsWith("gpt-") || id.startsWith("o1") || id.startsWith("o3") || id.startsWith("chatgpt-")
+                })
+                .map((m: { id: string }) => ({ id: m.id, name: m.id }))
+
+            if (models.length === 0) return DEFAULT_MODELS
+
+            // Prepend known recommended models if missing
+            const modelIds = new Set(models.map((m: { id: string }) => m.id))
+            const missingPresets = DEFAULT_MODELS.filter(p => !modelIds.has(p.id))
+            return [...models, ...missingPresets]
+        } catch {
+            return DEFAULT_MODELS
+        }
     }
 
     static async extractText(file: File): Promise<string> { return extractDocumentText(file) }

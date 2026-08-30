@@ -102,11 +102,25 @@ export class KimiProvider implements LLMProvider {
     }
 
     async listModels(): Promise<Array<{ id: string; name: string }>> {
-        const r = await fetch(`${KIMI_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
-        if (!r.ok) throw new Error("Failed to list Kimi models")
-        const data = await r.json()
-        return (data.data || [])
-            .filter((m: any) => m.id.includes("moonshot"))
-            .map((m: any) => ({ id: m.id, name: m.id }))
+        const DEFAULT_MODELS = [
+            { id: "moonshot-v1-auto", name: "moonshot-v1-auto (컨텍스트 자동 최적화 · 추천)" },
+            { id: "moonshot-v1-128k", name: "moonshot-v1-128k (대용량 문서용)" },
+            { id: "moonshot-v1-32k", name: "moonshot-v1-32k (중형 문서용)" },
+            { id: "moonshot-v1-8k", name: "moonshot-v1-8k (단문용)" },
+        ]
+
+        if (!this.apiKey) return DEFAULT_MODELS
+
+        try {
+            const r = await fetch(`${KIMI_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
+            if (!r.ok) return DEFAULT_MODELS
+            const data = await r.json()
+            const models = (data.data || [])
+                .filter((m: any) => m.id && (m.id.includes("moonshot") || m.id.includes("kimi")))
+                .map((m: any) => ({ id: m.id, name: m.id }))
+            return models.length > 0 ? models : DEFAULT_MODELS
+        } catch {
+            return DEFAULT_MODELS
+        }
     }
 }

@@ -126,11 +126,25 @@ export class GrokProvider implements LLMProvider {
     }
 
     async listModels(): Promise<Array<{ id: string; name: string }>> {
-        const r = await fetch(`${GROK_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
-        if (!r.ok) throw new Error("Failed to list Grok models")
-        const data = await r.json()
-        return (data.data || [])
-            .filter((m: any) => m.id.includes("grok"))
-            .map((m: any) => ({ id: m.id, name: m.id }))
+        const DEFAULT_MODELS = [
+            { id: "grok-3", name: "grok-3 (최신 플래그십)" },
+            { id: "grok-2-latest", name: "grok-2-latest (최신 고성능)" },
+            { id: "grok-2-vision-1212", name: "grok-2-vision-1212" },
+            { id: "grok-beta", name: "grok-beta" },
+        ]
+
+        if (!this.apiKey) return DEFAULT_MODELS
+
+        try {
+            const r = await fetch(`${GROK_API_BASE}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
+            if (!r.ok) return DEFAULT_MODELS
+            const data = await r.json()
+            const models = (data.data || [])
+                .filter((m: any) => m.id && (m.id.includes("grok") || m.id.includes("xai")))
+                .map((m: any) => ({ id: m.id, name: m.id }))
+            return models.length > 0 ? models : DEFAULT_MODELS
+        } catch {
+            return DEFAULT_MODELS
+        }
     }
 }

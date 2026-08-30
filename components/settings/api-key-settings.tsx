@@ -40,36 +40,53 @@ export function ApiKeySettings() {
 
   useEffect(() => { migrateLegacyApiKey(); loadConfigs() }, [])
 
-  const loadConfigs = () => {
+  const loadConfigs = useCallback(() => {
     const all = llmProviderStorage.getAll()
     setConfigs(all)
     const active = llmProviderStorage.getActive()
     setSelectedProvider(active)
     const cfg = all.find((c) => c.provider === active)
-    if (cfg) { setModel(cfg.model); setReasoning(cfg.reasoning?.effort || "") }
-  }
+    if (cfg) {
+      setModel(cfg.model)
+      setReasoning(cfg.reasoning?.effort || "")
+      fetchModels(active, cfg.apiKey, cfg.model)
+    } else {
+      fetchModels(active, "", "")
+    }
+  }, [])
 
-  const fetchModels = useCallback(async (provider: LLMProviderType, apiKey: string) => {
+  useEffect(() => {
+    migrateLegacyApiKey()
+    loadConfigs()
+  }, [loadConfigs])
+
+  const fetchModels = async (provider: LLMProviderType, key: string, currentModel?: string) => {
     setLoadingModels(true)
     try {
-      const p = await createProvider({ provider, apiKey, model: "" } as LLMProviderConfig)
+      const p = await createProvider({ provider, apiKey: key, model: "" } as LLMProviderConfig)
       const list = await p.listModels()
       setModels(list)
-      if (list.length > 0 && !list.find(m => m.id === model)) setModel(list[0].id)
+      const targetModel = currentModel !== undefined ? currentModel : model
+      if (list.length > 0 && !targetModel) {
+        setModel(list[0].id)
+      }
     } catch {
       setModels([])
-    } finally { setLoadingModels(false) }
-  }, [model])
+    } finally {
+      setLoadingModels(false)
+    }
+  }
 
   const handleProviderChange = (provider: LLMProviderType) => {
     setSelectedProvider(provider)
     llmProviderStorage.setActive(provider)
-    setApiKey(""); setMessage(null)
+    setApiKey("")
+    setMessage(null)
     const cfg = configs.find((c) => c.provider === provider)
-    setModel(cfg?.model || "")
+    const selectedM = cfg?.model || ""
+    setModel(selectedM)
     setReasoning(cfg?.reasoning?.effort || "")
-    setModels([])
-    if (cfg) fetchModels(provider, cfg.apiKey)
+    fetchModels(provider, cfg?.apiKey || "", selectedM)
   }
 
   const currentConfig = configs.find((c) => c.provider === selectedProvider)
@@ -84,8 +101,10 @@ export function ApiKeySettings() {
         cfg.reasoning = { effort: reasoning as LLMProviderConfig["reasoning"] extends { effort: infer E } ? E : never }
       }
       llmProviderStorage.save(cfg)
-      setMessage({ type: "success", text: `${PROVIDERS.find(p => p.type === selectedProvider)?.label} API 키 저장됨` })
-      setApiKey(""); loadConfigs(); fetchModels(selectedProvider, apiKey)
+      setMessage({ type: "success", text: `${PROVIDERS.find(p => p.type === selectedProvider)?.label} API 키 및 모델 저장됨` })
+      setApiKey("")
+      loadConfigs()
+      fetchModels(selectedProvider, apiKey, model)
     } catch {
       setMessage({ type: "error", text: "API 키 저장 중 오류" })
     } finally { setIsLoading(false) }
@@ -94,9 +113,18 @@ export function ApiKeySettings() {
   const handleDelete = async () => {
     if (!confirm(`${PROVIDERS.find(p => p.type === selectedProvider)?.label} API 키를 삭제하시겠습니까?`)) return
     setIsLoading(true); setMessage(null)
-    try { llmProviderStorage.delete(selectedProvider); setMessage({ type: "success", text: "삭제됨" }); setModel(""); setReasoning(""); loadConfigs(); setModels([]) }
-    catch { setMessage({ type: "error", text: "삭제 중 오류" }) }
-    finally { setIsLoading(false) }
+    try {
+      llmProviderStorage.delete(selectedProvider)
+      setMessage({ type: "success", text: "삭제됨" })
+      setModel("")
+      setReasoning("")
+      loadConfigs()
+      fetchModels(selectedProvider, "", "")
+    } catch {
+      setMessage({ type: "error", text: "삭제 중 오류" })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const info = PROVIDERS.find(p => p.type === selectedProvider)!
@@ -133,20 +161,48 @@ export function ApiKeySettings() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="model">모델</Label>
-              {currentConfig && (
-                <Button type="button" variant="ghost" size="sm" disabled={loadingModels} onClick={() => fetchModels(selectedProvider, currentConfig.apiKey)}>
-                  <RefreshCw className={`h-3 w-3 mr-1 ${loadingModels ? "animate-spin" : ""}`} />새로고침
-                </Button>
-              )}
+              <Label htmlFor="model">검토 모델 선택 (최신 모델 조회)</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={loadingModels}
+                onClick={() => fetchModels(selectedProvider, currentConfig?.apiKey || apiKey, model)}
+              >
+                <RefreshCw className={`h-3 w-3 mr-1 ${loadingModels ? "animate-spin" : ""}`} />
+                {loadingModels ? "모델 조회 중..." : "최신 모델 새로고침"}
+              </Button>
             </div>
             {models.length > 0 ? (
-              <Select value={model} onValueChange={setModel}>
-                <SelectTrigger id="model"><SelectValue placeholder="모델 선택" /></SelectTrigger>
-                <SelectContent>{models.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Select value={model} onValueChange={setModel}>
+                  <SelectTrigger id="model">
+                    <SelectValue placeholder="모델을 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {models.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    placeholder="또는 모델명 직접 입력 (예: gpt-4o, claude-3.7-sonnet 등)"
+                    className="text-xs font-mono"
+                  />
+                </div>
+              </div>
             ) : (
-              <Input id="model" value={model} onChange={(e) => setModel(e.target.value)} placeholder="직접 입력 또는 API 키 저장 후 새로고침" />
+              <Input
+                id="model"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder="모델명 직접 입력 (예: gpt-4o, grok-3 등)"
+              />
             )}
           </div>
 

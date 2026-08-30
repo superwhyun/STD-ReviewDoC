@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Upload, FileText } from "lucide-react"
+import { Upload, FileText, RefreshCw } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
@@ -34,18 +34,75 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
   const [selectedType, setSelectedType] = useState<string>("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedProvider, setSelectedProvider] = useState<LLMProviderType>("openai")
+  const [selectedModel, setSelectedModel] = useState<string>("")
   const [availableProviders, setAvailableProviders] = useState<LLMProviderConfig[]>([])
+  const [providerModels, setProviderModels] = useState<Array<{ id: string; name: string }>>([])
+  const [loadingModels, setLoadingModels] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [progress, setProgress] = useState(0)
   const [progressText, setProgressText] = useState("")
 
-  useEffect(() => {
+  const loadProviderConfigs = async () => {
     const configs = llmProviderStorage.getAll()
     setAvailableProviders(configs)
     const active = llmProviderStorage.getActive()
-    if (configs.some(c => c.provider === active)) setSelectedProvider(active)
+    const targetProvider = configs.some(c => c.provider === active) ? active : configs[0]?.provider || "openai"
+    setSelectedProvider(targetProvider)
+    const activeCfg = configs.find(c => c.provider === targetProvider)
+    const currentM = activeCfg?.model || ""
+    setSelectedModel(currentM)
+    await loadModelsForProvider(targetProvider, activeCfg?.apiKey || "", currentM)
+  }
+
+  const loadModelsForProvider = async (provider: LLMProviderType, apiKey: string, currentM?: string) => {
+    setLoadingModels(true)
+    try {
+      const p = await createProvider({ provider, apiKey, model: "" } as LLMProviderConfig)
+      const list = await p.listModels()
+      setProviderModels(list)
+      if (currentM) {
+        setSelectedModel(currentM)
+      } else if (list.length > 0) {
+        setSelectedModel(list[0].id)
+      }
+    } catch {
+      setProviderModels([])
+    } finally {
+      setLoadingModels(false)
+    }
+  }
+
+  useEffect(() => {
+    loadProviderConfigs()
   }, [])
+
+  const handleProviderChange = async (provider: LLMProviderType) => {
+    setSelectedProvider(provider)
+    llmProviderStorage.setActive(provider)
+    const cfg = availableProviders.find(c => c.provider === provider)
+    const currentM = cfg?.model || ""
+    setSelectedModel(currentM)
+    await loadModelsForProvider(provider, cfg?.apiKey || "", currentM)
+  }
+
+  const handleModelChange = (newModel: string) => {
+    setSelectedModel(newModel)
+    const cfg = availableProviders.find(c => c.provider === selectedProvider)
+    if (cfg) {
+      llmProviderStorage.save({
+        ...cfg,
+        model: newModel,
+      })
+      setAvailableProviders(llmProviderStorage.getAll())
+    }
+  }
+
+  const handleRefreshModels = async () => {
+    const cfg = availableProviders.find(c => c.provider === selectedProvider)
+    await loadModelsForProvider(selectedProvider, cfg?.apiKey || "", selectedModel)
+    toast.success("최신 모델 목록을 갱신했습니다.")
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -120,9 +177,17 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
         : undefined
 
       setProgress(25)
-      setProgressText("AI 검토 시작 중...")
+      setProgressText(`AI 검토 시작 중... (${selectedProvider.toUpperCase()} · ${selectedModel || "기본 모델"})`)
 
-      const provider = await createProvider(selectedProvider)
+      const cfg = availableProviders.find((c) => c.provider === selectedProvider)
+      const activeConfig: LLMProviderConfig = {
+        provider: selectedProvider,
+        apiKey: cfg?.apiKey || "",
+        model: selectedModel || cfg?.model || "",
+        reasoning: cfg?.reasoning,
+      }
+
+      const provider = await createProvider(activeConfig)
       const providerResults = await provider.review({
         fileContent,
         file: selectedFile,
@@ -201,23 +266,58 @@ export function DocumentUploadSection({ documentTypes, userId, onDocumentAdded }
         <CardDescription>검토할 표준초안 문서를 업로드하고 타입을 선택하세요</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {availableProviders.length > 1 && (
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>AI 제공자</Label>
-            <Select value={selectedProvider} onValueChange={(v) => setSelectedProvider(v as LLMProviderType)}>
+            <Select value={selectedProvider} onValueChange={(v) => handleProviderChange(v as LLMProviderType)}>
               <SelectTrigger>
                 <SelectValue placeholder="제공자 선택" />
               </SelectTrigger>
               <SelectContent>
-                {availableProviders.map((c) => (
-                  <SelectItem key={c.provider} value={c.provider}>
-                    {c.provider === "openai" ? "OpenAI" : c.provider === "grok" ? "Grok (xAI)" : c.provider === "openrouter" ? "OpenRouter" : "Kimi"} ({c.model})
-                  </SelectItem>
-                ))}
+                <SelectItem value="openai">OpenAI {availableProviders.some(c => c.provider === "openai") ? "✓" : ""}</SelectItem>
+                <SelectItem value="grok">Grok (xAI) {availableProviders.some(c => c.provider === "grok") ? "✓" : ""}</SelectItem>
+                <SelectItem value="openrouter">OpenRouter {availableProviders.some(c => c.provider === "openrouter") ? "✓" : ""}</SelectItem>
+                <SelectItem value="kimi">Kimi (Moonshot) {availableProviders.some(c => c.provider === "kimi") ? "✓" : ""}</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        )}
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>AI 검토 모델</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 px-1.5 text-xs text-muted-foreground hover:text-foreground"
+                disabled={loadingModels}
+                onClick={handleRefreshModels}
+                title="최신 모델 목록 새로고침"
+              >
+                <RefreshCw className={`h-3 w-3 mr-1 ${loadingModels ? "animate-spin" : ""}`} />
+                새로고침
+              </Button>
+            </div>
+            {providerModels.length > 0 ? (
+              <Select value={selectedModel} onValueChange={handleModelChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="모델 선택" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[260px]">
+                  {providerModels.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="text-xs text-muted-foreground py-2">
+                설정에서 API 키를 등록하거나 기본 모델이 사용됩니다.
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="space-y-2">
           <Label htmlFor="document-type">문서 타입</Label>

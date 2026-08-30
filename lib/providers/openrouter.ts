@@ -103,9 +103,30 @@ export class OpenRouterProvider implements LLMProvider {
     }
 
     async listModels(): Promise<Array<{ id: string; name: string }>> {
-        const r = await fetch(`${this.baseUrl}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
-        if (!r.ok) throw new Error("Failed to list OpenRouter models")
-        const data = await r.json()
-        return (data.data || []).map((m: any) => ({ id: m.id, name: `${m.id}${m.name ? ` - ${m.name}` : ""}` }))
+        const DEFAULT_MODELS = [
+            { id: "anthropic/claude-3.7-sonnet", name: "anthropic/claude-3.7-sonnet (최신 플래그십)" },
+            { id: "openai/gpt-4o", name: "openai/gpt-4o (추천)" },
+            { id: "openai/gpt-4o-mini", name: "openai/gpt-4o-mini" },
+            { id: "google/gemini-2.0-flash-001", name: "google/gemini-2.0-flash-001" },
+            { id: "deepseek/deepseek-r1", name: "deepseek/deepseek-r1 (추론 특화)" },
+            { id: "deepseek/deepseek-chat", name: "deepseek/deepseek-chat (V3)" },
+            { id: "meta-llama/llama-3.3-70b-instruct", name: "meta-llama/llama-3.3-70b-instruct" },
+            { id: "openai/o3-mini", name: "openai/o3-mini" },
+        ]
+
+        if (!this.apiKey) return DEFAULT_MODELS
+
+        try {
+            const r = await fetch(`${this.baseUrl}/models`, { headers: { Authorization: `Bearer ${this.apiKey}` } })
+            if (!r.ok) return DEFAULT_MODELS
+            const data = await r.json()
+            const models = (data.data || []).map((m: any) => ({
+                id: m.id,
+                name: m.name ? `${m.id} (${m.name})` : m.id,
+            }))
+            return models.length > 0 ? models : DEFAULT_MODELS
+        } catch {
+            return DEFAULT_MODELS
+        }
     }
 }
